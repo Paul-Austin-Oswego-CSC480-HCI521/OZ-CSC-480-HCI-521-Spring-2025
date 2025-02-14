@@ -1,21 +1,18 @@
-import './App.css'
-import ReactLogo from "./assets/react.svg"
-import Counter from './components/Counter';
+import './App.css';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import LandingPage from './pages/LandingPage';
+import LoginPage from './pages/LoginPage';
+/*import Counter from './pages/Counter'; */
 
 export default function App() {
-
-
   return (
-    <div className="container">
-      <h1 className="d-flex gap-2 align-items-center">
-        <img src={ReactLogo} alt="" />
-        <span>Starter Frontend App</span>
-      </h1>
-      <hr />
-
-      <Counter />
-    </div>
-  )
+    <Router>
+      <div>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<LoginPage />} />
+        </Routes>
+      </div>
+    </Router>
+  );
 }
-
-
