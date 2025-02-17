@@ -1,21 +1,25 @@
-import './App.css'
-import ReactLogo from "./assets/react.svg"
-import Counter from './components/Counter';
+import './App.css';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import LandingPage from './pages/LandingPage';
+import LoginPage from './pages/LoginPage';
+import Layout from './components/Layout';
+/*import Counter from './pages/Counter'; */
 
-export default function App() {
 
+const App = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   return (
-    <div className="container">
-      <h1 className="d-flex gap-2 align-items-center">
-        <img src={ReactLogo} alt="" />
-        <span>Starter Frontend App</span>
-      </h1>
-      <hr />
+    <Router>
+      <Routes>
+      <Route path="/" element={<Layout isLoggedIn={isLoggedIn} />}>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/" element={<LandingPage />} />
+        </Route>
+      </Routes>
+    </Router>
+  );
+};
 
-      <Counter />
-    </div>
-  )
-}
-
-
+export default App;

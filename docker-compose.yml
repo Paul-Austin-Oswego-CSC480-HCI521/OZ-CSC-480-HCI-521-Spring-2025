@@ -1,0 +1,51 @@
+# Run this docker compose file if you want local versions
+# of the database running on your machine using the follwing
+# commands in this directory
+#
+# `docker volume create --name users_db`
+# `docker volume create --name quotes_db`
+# `docker compose up -d` 
+
+name: 480-entire-stack
+
+services:
+  # frontend:
+  #   image: quotes-frontend
+  #   build: ./frontend
+  #   ports:
+  #     - 9080:9080
+
+
+  quotes-service:
+    build: ./_backend/services/quote-service
+    ports:
+      - 9082:9082
+    environment:
+      CONNECTION_STRING: mongodb://user:password@users_database:27017
+  quotes-database:
+    image: mongo
+    volumes:
+      - quotes_db:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: password
+
+  user-service:
+    build: ./_backend/services/user-service
+    ports:
+      - 9081:9081
+    environment:
+      CONNECTION_STRING: mongodb://user:password@users_database:27017
+  users-database:
+    image: mongo
+    volumes:
+      - users_db:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: password
+
+volumes:
+  quotes_db:
+    external: true
+  users_db:
+    external: true
