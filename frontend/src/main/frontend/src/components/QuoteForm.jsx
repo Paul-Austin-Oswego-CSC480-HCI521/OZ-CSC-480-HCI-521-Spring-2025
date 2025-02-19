@@ -1,48 +1,65 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
-export default function QuoteForm(){
+const QuoteForm = () => {
+  const location = useLocation();
+  const { quote } = location.state || {};
 
-    const [quote, setQuote ] = useState();
-    const [author, setAuthor ] = useState();
+  const [quoteText, setQuoteText] = useState(quote ? quote.text : "");
+  const [author, setAuthor] = useState(quote ? quote.author : "");
+  const [tags, setTags] = useState(quote ? quote.tags.join(", ") : "");
 
-    // Quote Submiter Handler:
-    const handleSubmission = (event) => {
-        event.preventDefault();
-        console.log("Quote: \"", quote, "\" - ", author); // For debugging and making sure I'm doing this right. 
+  useEffect(() => {
+    if (quote) {
+      setQuoteText(quote.text);
+      setAuthor(quote.author);
+      setTags(quote.tags.join(", "));
     }
+  }, [quote]);
 
-    return (
-        <div>
-            <h1> Quote Submission Form
-                <form id="QuoteForm" onSubmit={handleSubmission}>
-                    <h3>
-                        <input
-                            style={{marginTop:10}} 
-                            id='Quote' 
-                            type='text' 
-                            placeholder='Quote?'
-                            onChange={ (event) => setQuote(event.target.value)}
-                        />            
-                    </h3>
-                    <h3>
-                        <input 
-                            style={{maringTop:10}} 
-                            id="Author" 
-                            type='text' 
-                            placeholder="Author?"
-                            onChange={ (event) => setAuthor(event.target.value)}
-                        />          
-                    </h3>
-                    <h3>
-                        <button 
-                            type='submit'
-                            style={{marginTop:10, background:'blue', color:'white'}}
-                        >
-                        Submit
-                        </button>
-                    </h3>
-                </form>
-            </h1>
+  const handleSave = () => {
+    alert("Quote saved!");
+    // save functionality incomplete
+  };
+
+  return (
+    <div className="container vh-100 d-flex flex-column justify-content-center align-items-center">
+      <h1>Edit Quote</h1>
+      <form className="w-50">
+        <div className="mb-3">
+          <label htmlFor="quoteText" className="form-label">Quote Text</label>
+          <textarea
+            id="quoteText"
+            className="form-control"
+            value={quoteText}
+            onChange={(e) => setQuoteText(e.target.value)}
+          />
         </div>
-    );
-}
+        <div className="mb-3">
+          <label htmlFor="author" className="form-label">Author</label>
+          <input
+            type="text"
+            id="author"
+            className="form-control"
+            value={author}
+            onChange={(e) => setAuthor(e.target.value)}
+          />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="tags" className="form-label">Tags</label>
+          <input
+            type="text"
+            id="tags"
+            className="form-control"
+            value={tags}
+            onChange={(e) => setTags(e.target.value)}
+            placeholder="Comma separated tags"
+          />
+        </div>
+        <button type="button" className="btn btn-primary" onClick={handleSave}>Save Quote</button>
+      </form>
+    </div>
+  );
+};
+
+export default QuoteForm;

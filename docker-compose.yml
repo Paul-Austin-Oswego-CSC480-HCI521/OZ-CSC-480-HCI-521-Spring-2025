@@ -9,11 +9,10 @@
 name: 480-entire-stack
 
 services:
-  # frontend:
-  #   image: quotes-frontend
-  #   build: ./frontend
-  #   ports:
-  #     - 9080:9080
+  frontend:
+    build: ./frontend/src/main/frontend
+    ports:
+      - 9080:80
 
 
   quotes-service:

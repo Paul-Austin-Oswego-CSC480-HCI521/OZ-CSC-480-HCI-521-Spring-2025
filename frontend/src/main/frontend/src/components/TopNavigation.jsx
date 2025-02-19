@@ -40,5 +40,4 @@ const TopNavigation = ({ isLoggedIn }) => {
     </nav>
   );
 };
-
 export default TopNavigation;

@@ -5,6 +5,8 @@
     <featureManager>
         <feature>jakartaee-10.0</feature>
         <feature>microProfile-6.0</feature>
+        <feature>mongodb-2.0</feature>
+        <feature>mpConfig-3.0</feature>
     </featureManager>
 
     <!-- This template enables security. To get the full use of all the capabilities, a keystore and user registry are required. -->
@@ -28,14 +30,35 @@
 
     <!-- To access this server from a remote client add a host attribute to the following element, e.g. host="*" -->
     <httpEndpoint id="defaultHttpEndpoint"
+                  host="*"
                   httpPort="9082"
                   httpsPort="9443" />
 
     <!-- Automatically expand WAR files and EAR files -->
     <applicationManager autoExpand="true"/>
 
+    <!-- System variables -->
+    <variable name="CONNECTION_STRING" value="${env.CONNECTION_STRING}"/>
+    <variable name="ORIGIN" value="http://localhost:9080"/> <!-- this will be updated to a variable from .env -->
+
+
     <!-- Configures the application on a specified context root -->
-    <webApplication contextRoot="/" location="quote-service.war" />
+    <webApplication contextRoot="/" location="quote-service.war">
+        <appProperties>
+            <property name="CONNECTION_STRING" value="${CONNECTION_STRING}"/>
+            <property name="ORIGIN" value="${ORIGIN}"></property>
+        </appProperties>
+    </webApplication>
+
+    <!-- Enable static content serving -->
+    <httpDispatcher enableWelcomePage="true"/>
+
+    <!-- CORS configuration-->
+    <cors domain="/quotes"
+        allowedOrigins="${ORIGIN}"
+        allowedMethods="GET, POST, PUT, DELETE"
+        allowCredentials="true"/>
+
 
     <!-- Default SSL configuration enables trust for default certificates from the Java runtime -->
     <ssl id="defaultSSLConfig" trustDefaultCerts="true" />

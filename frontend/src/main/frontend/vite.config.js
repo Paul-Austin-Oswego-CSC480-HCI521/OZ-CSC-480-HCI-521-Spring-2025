@@ -11,4 +11,5 @@ export default defineConfig({
     outDir: "out",
     emptyOutDir: true
   },
+  base: "/",
 });
