@@ -3,6 +3,10 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
+
+import NotificationPage from './pages/NotificationPage'
+/*import Counter from './pages/Counter'; */
+
 import Layout from './components/Layout';
 import SavedQuotes from './pages/SavedQuotes';
 import QuoteForm from './components/QuoteForm';
@@ -11,11 +15,16 @@ import { userQuotes, bookmarkedQuotes } from './placeholderdata';
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Layout isLoggedIn={isLoggedIn} />}>
           <Route path="/login" element={<LoginPage />} />
+
+          <Route path="/notifications" element={<NotificationPage />} />
+        </Routes>
+      </div>
           <Route 
             path="/saved-quotes" 
             element={<SavedQuotes userQuotes={userQuotes} bookmarkedQuotes={bookmarkedQuotes} />} 
