@@ -99,6 +99,9 @@
             <plugin>
                 <groupId>io.openliberty.tools</groupId>
                 <artifactId>liberty-maven-plugin</artifactId>
+                <configuration>
+                <serverName>defaultServer</serverName>
+                </configuration>
             </plugin>
         </plugins>
     </build>

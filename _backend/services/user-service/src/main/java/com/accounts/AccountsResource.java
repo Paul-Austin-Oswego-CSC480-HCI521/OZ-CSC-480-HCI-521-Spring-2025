@@ -1,5 +1,6 @@
 package com.accounts;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -35,5 +36,13 @@ public class AccountsResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response update(@PathParam("id") String id, String accountJson) {
         return accountService.updateUser(accountJson, id);
+    }
+
+    @GET
+    @Path("/admin")
+    @Produces(MediaType.TEXT_PLAIN)
+    @RolesAllowed("admin")
+    public Response adminOnly() {
+        return Response.ok("Access granted to admin").build();
     }
 }
