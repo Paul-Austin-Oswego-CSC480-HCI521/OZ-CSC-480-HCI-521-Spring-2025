@@ -56,7 +56,7 @@ const QuoteForm = () => {
             placeholder="Comma separated tags"
           />
         </div>
-        <button type="button" className="btn btn-primary" onClick={handleSave}>Save Quote</button>
+        <button type="button" className="btn btn-primary" onClick={handleSave} style={{background:'black'}}>Save Quote</button>
       </form>
     </div>
   );

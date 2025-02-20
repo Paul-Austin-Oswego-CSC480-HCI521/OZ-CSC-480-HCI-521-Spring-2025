@@ -12,7 +12,7 @@ const QuoteUploadModal = ({ isVisible, onClose, onSubmit, quoteText, setQuoteTex
   };
 
   const handleAuthorChange = (e) => {
-    setAuthor(e.target.value || "Unknown");
+    setAuthor(e.target.value); // the '|| "unknown"' would automatically reset the text field upon deleting the 'U', making it impossible to delete all text in the input. 
   };
 
   const handleTagChange = (e) => {
@@ -101,6 +101,7 @@ const QuoteUploadModal = ({ isVisible, onClose, onSubmit, quoteText, setQuoteTex
                 <button
                   className="btn btn-outline-primary ms-2"
                   onClick={handleAddCustomTag}
+                  style={{color:'black'}}
                 >
                   Add Tag
                 </button>
@@ -109,7 +110,7 @@ const QuoteUploadModal = ({ isVisible, onClose, onSubmit, quoteText, setQuoteTex
           </div>
           <div className="modal-footer">
             <button type="button" className="btn btn-secondary" onClick={onClose}>Close</button>
-            <button type="button" className="btn btn-primary" onClick={handleSubmit}>Submit</button>
+            <button type="button" className="btn btn-primary" onClick={handleSubmit} style={{background:'black'}}>Submit</button>
           </div>
         </div>
       </div>

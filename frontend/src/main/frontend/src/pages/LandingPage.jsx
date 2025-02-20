@@ -53,13 +53,13 @@ const LandingPage = () => {
 
   return (
     <div className="container vh-100 d-flex flex-column">
-      <div className="d-flex flex-column justify-content-center align-items-center" style={{ height: "33vh" }}>
-        <h1 className="mb-3">Quote Web App</h1>
-
+      <div className="d-flex flex-column justify-content-center align-items-center" style={{ height: "33vh", background:'lightGrey' }}>
+        <h1 className="mb-3">Quotable</h1>
+        <p>(name subject to change)</p>
         <input
           type="text"
           className="form-control w-50"
-          placeholder="Enter keyword, author, or tag..."
+          placeholder="Search by keyword, author, or tag..."
           value={searchQuery}
           onChange={handleSearchChange}
         />
@@ -68,6 +68,7 @@ const LandingPage = () => {
           className="form-control w-50"
           placeholder="Enter your own quote and press enter"
           value={quoteText}
+          style={{marginTop:10, marginBottom:10}}
           onChange={(e) => setQuoteText(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
@@ -75,8 +76,7 @@ const LandingPage = () => {
             }
           }}
         />
-
-        <button className="btn btn-primary mt-3" onClick={handleSavedQuotesRedirect}>
+        <button className="btn btn-primary mt-3" onClick={handleSavedQuotesRedirect} style={{background:'black'}}>
           View Saved Quotes
         </button>
       </div>
