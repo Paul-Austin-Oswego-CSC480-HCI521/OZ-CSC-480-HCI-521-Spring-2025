@@ -61,6 +61,7 @@ const LandingPage = () => {
           className="form-control w-50"
           placeholder="Search by keyword, author, or tag..."
           value={searchQuery}
+          style={{marginBottom:10}}
           onChange={handleSearchChange}
         />
         <input
@@ -68,7 +69,6 @@ const LandingPage = () => {
           className="form-control w-50"
           placeholder="Enter your own quote and press enter"
           value={quoteText}
-          style={{marginTop:10, marginBottom:10}}
           onChange={(e) => setQuoteText(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {

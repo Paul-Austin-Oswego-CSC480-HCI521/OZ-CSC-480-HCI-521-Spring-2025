@@ -20,8 +20,10 @@ const SavedQuotes = ({ userQuotes, bookmarkedQuotes }) => {
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
+      <h1>Saved Quotes</h1>
       <Input
         type="text"
+        style={{marginTop:10, marginBottom:10}}
         placeholder="Search by tag, author, or keyword..."
         value={searchTerm}
         onChange={handleSearch}
