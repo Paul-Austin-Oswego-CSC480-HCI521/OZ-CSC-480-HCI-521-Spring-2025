@@ -1,0 +1,5 @@
+target/
+.env
+*.env
+target/*.war
+!target/liberty/wlp/usr/shared/resources/*

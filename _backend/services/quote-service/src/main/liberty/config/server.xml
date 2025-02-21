@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<server description="Quote Server">
+
+    <!-- Enable features -->
+    <featureManager>
+        <feature>jakartaee-10.0</feature>
+        <feature>microProfile-6.0</feature>
+        <feature>mongodb-2.0</feature>
+        <feature>mpConfig-3.0</feature>
+        <feature>servlet-6.0</feature> <!-- Required for handling HTTP requests -->
+    </featureManager>
+
+    <!-- Define server ports -->
+    <variable name="http.port" defaultValue="9082"/>
+    <variable name="frontend.root" defaultValue="http://localhost:9080"/>
+    <variable name="CONNECTION_STRING" value="${env.CONNECTION_STRING}"/>
+
+    <!-- HTTP Endpoint -->
+    <httpEndpoint id="defaultHttpEndpoint"
+                  host="*"
+                  httpPort="${http.port}"
+                  httpsPort="9443"/>
+
+    <!-- Web Application Configuration -->
+    <webApplication contextRoot="/" location="quote-service.war">
+        <appProperties>
+            <property name="CONNECTION_STRING" value="${CONNECTION_STRING}"/>
+            <property name="ORIGIN" value="${frontend.root}"/>
+        </appProperties>
+    </webApplication>
+
+    <!-- Enable static content serving -->
+    <httpDispatcher enableWelcomePage="true"/>
+
+    <!-- CORS Configuration -->
+    <cors domain="/quotes/*"
+          allowedOrigins="${frontend.root}"
+          allowedMethods="GET, POST, PUT, DELETE, OPTIONS"
+          allowedHeaders="Origin, Content-Type, Accept, Authorization"
+          exposeHeaders="Content-Length, Content-Type"
+          allowCredentials="true"/>
+  
+    <cors domain="/quotes/create"
+          allowedOrigins="${frontend.root}"
+          allowedMethods="GET, POST, PUT, DELETE, OPTIONS"
+          allowedHeaders="Origin, Content-Type, Accept, Authorization"
+          exposeHeaders="Content-Length, Content-Type"
+          allowCredentials="true"/>
+    <cors domain="/quotes/search/query"
+          allowedOrigins="${frontend.root}"
+          allowedMethods="GET, POST, PUT, DELETE, OPTIONS"
+          allowedHeaders="Origin, Content-Type, Accept, Authorization"
+          exposeHeaders="Content-Length, Content-Type"
+          allowCredentials="true"/>
+    <cors domain="/quotes/search/id"
+          allowedOrigins="${frontend.root}"
+          allowedMethods="GET, POST, PUT, DELETE, OPTIONS"
+          allowedHeaders="Origin, Content-Type, Accept, Authorization"
+          exposeHeaders="Content-Length, Content-Type"
+          allowCredentials="true"/>
+    <cors domain="/quotes/search/topBookmarked"
+          allowedOrigins="${frontend.root}"
+          allowedMethods="GET, POST, PUT, DELETE, OPTIONS"
+          allowedHeaders="Origin, Content-Type, Accept, Authorization"
+          exposeHeaders="Content-Length, Content-Type"
+          allowCredentials="true"/>
+    <cors domain="/quotes/search/topFlagged"
+          allowedOrigins="${frontend.root}"
+          allowedMethods="GET, POST, PUT, DELETE, OPTIONS"
+          allowedHeaders="Origin, Content-Type, Accept, Authorization"
+          exposeHeaders="Content-Length, Content-Type"
+          allowCredentials="true"/>
+    <cors domain="/quotes/search/topShared"
+          allowedOrigins="${frontend.root}"
+          allowedMethods="GET, POST, PUT, DELETE, OPTIONS"
+          allowedHeaders="Origin, Content-Type, Accept, Authorization"
+          exposeHeaders="Content-Length, Content-Type"
+          allowCredentials="true"/>
+    <cors domain="/quotes/update"
+          allowedOrigins="${frontend.root}"
+          allowedMethods="GET, POST, PUT, DELETE, OPTIONS"
+          allowedHeaders="Origin, Content-Type, Accept, Authorization"
+          exposeHeaders="Content-Length, Content-Type"
+          allowCredentials="true"/>
+    <cors domain="/quotes/delete/"
+          allowedOrigins="${frontend.root}"
+          allowedMethods="GET, POST, PUT, DELETE, OPTIONS"
+          allowedHeaders="Origin, Content-Type, Accept, Authorization"
+          exposeHeaders="Content-Length, Content-Type"
+          allowCredentials="true"/>
+
+    <!-- Handle preflight OPTIONS requests -->
+    <!-- <filter id="CorsFilter" className="com.quoteapp.filters.CorsFilter"/> -->
+
+    <!-- Default SSL configuration -->
+    <ssl id="defaultSSLConfig" trustDefaultCerts="true"/>
+
+</server>

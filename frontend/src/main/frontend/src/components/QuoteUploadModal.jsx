@@ -1,51 +1,66 @@
 import React, { useState } from "react";
+import { createQuote } from "../lib/api"; 
 
 const QuoteUploadModal = ({ isVisible, onClose, onSubmit, quoteText, setQuoteText }) => {
   if (!isVisible) return null;
 
-  const [author, setAuthor] = useState("Unknown");
-  const [tags, setTags] = useState(["inspirational", "motivating"]);
-  const [customTag, setCustomTag] = useState(""); 
+  const [author, setAuthor] = useState("");
+  const [tagsInput, setTagsInput] = useState("example, test");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
-  const handleQuoteTextChange = (e) => {
-    setQuoteText(e.target.value);
-  };
+  const handleQuoteTextChange = (e) => setQuoteText(e.target.value);
+  const handleAuthorChange = (e) => setAuthor(e.target.value);
+  const handleTagsInputChange = (e) => setTagsInput(e.target.value);
 
-  const handleAuthorChange = (e) => {
-    setAuthor(e.target.value || "Unknown");
-  };
+  const handleSubmit = async () => {
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
 
-  const handleTagChange = (e) => {
-    const selectedTags = Array.from(e.target.selectedOptions, (option) => option.value);
-    setTags(selectedTags);
-  };
+    if (!quoteText.trim()) {  
+      setError("Quote text cannot be empty.");
+      setLoading(false);
+      return;
+    }
 
-  const handleCustomTagChange = (e) => {
-    setCustomTag(e.target.value);
-  };
+    const tagsArray = tagsInput
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0);
 
-  const handleAddCustomTag = () => {
-    if (customTag && !tags.includes(customTag)) {
-      setTags([...tags, customTag]);
-      setCustomTag(""); 
+    const quoteData = {
+      quote: quoteText.trim(),
+      author: author.trim() || "Unknown",
+      tags: tagsArray,
+    };
+
+    console.log("Sending Quote Data:", quoteData);
+
+    try {
+      const response = await createQuote(quoteData);
+      console.log("Backend Response:", response); // Log backend response
+      if (!response || response.error) { 
+        throw new Error("Failed to create quote.");
+      }
+
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+      onSubmit(quoteData);
+      setQuoteText("");
+      setAuthor("");
+      setTagsInput("example, test");
+    } catch (err) {
+      console.error("Error submitting quote:", err);
+      setError("Error submitting quote. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSubmit = () => {
-    const quoteData = {
-      text: quoteText,
-      author,
-      tags
-    };
-    onSubmit(quoteData);
-    setQuoteText(""); 
-    setAuthor("Unknown");
-    setTags(["inspirational", "motivating"]);
-    setCustomTag(""); 
-  };
-
   return (
-    <div className="modal show" style={{ display: 'block' }} aria-labelledby="uploadQuoteModal">
+    <div className="modal show" style={{ display: "block" }} aria-labelledby="uploadQuoteModal">
       <div className="modal-dialog">
         <div className="modal-content">
           <div className="modal-header">
@@ -54,6 +69,9 @@ const QuoteUploadModal = ({ isVisible, onClose, onSubmit, quoteText, setQuoteTex
           </div>
           <div className="modal-body">
             <p>Submit your new quote:</p>
+
+            {error && <div className="alert alert-danger">{error}</div>}
+            {success && <div className="alert alert-success">Quote submitted successfully!</div>}
 
             <textarea
               className="form-control"
@@ -76,40 +94,26 @@ const QuoteUploadModal = ({ isVisible, onClose, onSubmit, quoteText, setQuoteTex
             </div>
 
             <div className="mt-3">
-              <label>Tags:</label>
-              <select
-                className="form-select"
-                multiple
-                value={tags}
-                onChange={handleTagChange}
-                style={{ borderRadius: "25px" }}
-              >
-                <option value="inspirational">Inspirational</option>
-                <option value="motivating">Motivating</option>
-                <option value="thoughtful">Thoughtful</option>
-                <option value="life">Life</option>
-              </select>
-
-              <div className="d-flex mt-2">
-                <input
-                  type="text"
-                  className="form-control"
-                  value={customTag}
-                  onChange={handleCustomTagChange}
-                  placeholder="Add your own tag"
-                />
-                <button
-                  className="btn btn-outline-primary ms-2"
-                  onClick={handleAddCustomTag}
-                >
-                  Add Tag
-                </button>
-              </div>
+              <label>Tags (comma-separated):</label>
+              <input
+                type="text"
+                className="form-control"
+                value={tagsInput}
+                onChange={handleTagsInputChange}
+                placeholder="Enter tags separated by commas"
+              />
             </div>
           </div>
           <div className="modal-footer">
             <button type="button" className="btn btn-secondary" onClick={onClose}>Close</button>
-            <button type="button" className="btn btn-primary" onClick={handleSubmit}>Submit</button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleSubmit}
+              disabled={loading}
+            >
+              {loading ? "Submitting..." : "Submit"}
+            </button>
           </div>
         </div>
       </div>
