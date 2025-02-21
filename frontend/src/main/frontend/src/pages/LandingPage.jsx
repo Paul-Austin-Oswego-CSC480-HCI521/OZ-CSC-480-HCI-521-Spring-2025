@@ -52,69 +52,74 @@ const LandingPage = () => {
   });
 
   return (
-    <div className="container vh-100 d-flex flex-column">
-      <div className="d-flex flex-column justify-content-center align-items-center" style={{ height: "33vh" }}>
-        <h1 className="mb-3">Find, Share & Save Quotes Effortlessly</h1>
-        <h2 className="mb-3"> Find insightful quotes from various authors and themes</h2>
+    <div>
+      <div className="bg-light py-5">
+        <div className="d-flex flex-column justify-content-center align-items-center" style={{ height: "33vh" }}>
+          <h1 className="fw-bold">Find, Share & Save Quotes Effortlessly</h1>
+          <h2 className="text-muted fs-5"> Find insightful quotes from various authors and themes</h2>
 
+          <input
+            type="text" 
+            className="form-control w-50 mx-auto shadow-sm"
+            placeholder="Search quotes, authors, or themes..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+          />
+
+          <button className="btn btn-dark mt-3 px-4 shadow-sm" onClick={handleSavedQuotesRedirect}>
+            View Saved Quotes
+          </button>
+        </div>
+      </div>
+      <div className="container my-5">
+        <div className="text-center mb-5">
+          <h2 className="mb-3"> Top Quotes </h2>
+          <QuoteUploadModal
+            isVisible={showModal}
+            onClose={handleCloseModal}
+            onSubmit={handleSubmitQuote}
+            quoteText={quoteText}
+            setQuoteText={setQuoteText}
+          />
+        </div>
+
+        <div className="flex-grow-1 d-flex justify-content-center">
+          <div className="row w-100">
+            {filteredQuotes.length > 0 ? (
+              filteredQuotes.map((quote) => (
+                <QuoteCard key={quote.quoteId} quote={quote} />
+              ))
+            ) : (
+              <p className="text-center w-100">No quotes found.</p>
+            )}
+          </div>
+        </div>
+        <hr className="my-5" />
+        <div className="text-center my-5">
+          <h2 className="mb-3"> Popular Topics </h2>
+          <div className="d-flex justify-content-center gap-3">
+            <span className="badge bg-primary p-2">Live</span>
+            <span className="badge bg-secondary p-2">Laugh</span>
+            <span className="badge bg-success p-2">Love</span>
+          </div>
+        </div>
+        <div className="bg-light py-5">
+          <h2 className="mb-3"> Add a Quote </h2>
         <input
-          type="text" 
-          className="form-control w-50"
-          placeholder="Search quotes, authors, or themes..."
-          value={searchQuery}
-          onChange={handleSearchChange}
-        />
-
-        <button className="btn btn-primary mt-3" onClick={handleSavedQuotesRedirect}>
-          View Saved Quotes
-        </button>
+            type="text"
+            className="form-control w-50 mx-auto shadow-sm"
+            placeholder="Enter your own quote and press enter"
+            value={quoteText}
+            onChange={(e) => setQuoteText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleUploadQuote(); 
+              }
+            }}
+          />
+          </div>
+      
       </div>
-
-      <div className="d-flex flex-column justify-content-center align-items-center" style={{ height: "33vh" }}>
-        <h2 className="mb-3"> Top Quotes </h2>
-        <QuoteUploadModal
-          isVisible={showModal}
-          onClose={handleCloseModal}
-          onSubmit={handleSubmitQuote}
-          quoteText={quoteText}
-          setQuoteText={setQuoteText}
-        />
-      </div>
-
-      <div className="flex-grow-1 d-flex justify-content-center">
-        <div className="row w-100">
-          {filteredQuotes.length > 0 ? (
-            filteredQuotes.map((quote) => (
-              <QuoteCard key={quote.quoteId} quote={quote} />
-            ))
-          ) : (
-            <p className="text-center w-100">No quotes found.</p>
-          )}
-        </div>
-      </div>
-      <div className="d-flex flex-column justify-content-center align-items-center" style={{ height: "33vh" }}>
-        <h2 className="mb-3"> Popular Topics </h2>
-        <p>Live</p>
-        <p>Laugh</p>
-        <p>Love</p>
-      </div>
-
-      <div className="d-flex flex-column justify-content-center align-items-center" style={{ height: "33vh" }}>
-        <h2 className="mb-3"> Add a Quote </h2>
-      <input
-          type="text"
-          className="form-control w-50"
-          placeholder="Enter your own quote and press enter"
-          value={quoteText}
-          onChange={(e) => setQuoteText(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              handleUploadQuote(); 
-            }
-          }}
-        />
-        </div>
-    
     </div>
   );
 };
