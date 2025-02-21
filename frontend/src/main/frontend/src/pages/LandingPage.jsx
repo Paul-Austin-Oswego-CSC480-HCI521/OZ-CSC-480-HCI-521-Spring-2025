@@ -54,26 +54,15 @@ const LandingPage = () => {
   return (
     <div className="container vh-100 d-flex flex-column">
       <div className="d-flex flex-column justify-content-center align-items-center" style={{ height: "33vh" }}>
-        <h1 className="mb-3">Quote Web App</h1>
+        <h1 className="mb-3">Find, Share & Save Quotes Effortlessly</h1>
+        <h2 className="mb-3"> Find insightful quotes from various authors and themes</h2>
 
         <input
-          type="text"
+          type="text" 
           className="form-control w-50"
-          placeholder="Enter keyword, author, or tag..."
+          placeholder="Search quotes, authors, or themes..."
           value={searchQuery}
           onChange={handleSearchChange}
-        />
-        <input
-          type="text"
-          className="form-control w-50"
-          placeholder="Enter your own quote and press enter"
-          value={quoteText}
-          onChange={(e) => setQuoteText(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              handleUploadQuote(); 
-            }
-          }}
         />
 
         <button className="btn btn-primary mt-3" onClick={handleSavedQuotesRedirect}>
@@ -81,13 +70,16 @@ const LandingPage = () => {
         </button>
       </div>
 
-      <QuoteUploadModal
-        isVisible={showModal}
-        onClose={handleCloseModal}
-        onSubmit={handleSubmitQuote}
-        quoteText={quoteText}
-        setQuoteText={setQuoteText}
-      />
+      <div className="d-flex flex-column justify-content-center align-items-center" style={{ height: "33vh" }}>
+        <h2 className="mb-3"> Top Quotes </h2>
+        <QuoteUploadModal
+          isVisible={showModal}
+          onClose={handleCloseModal}
+          onSubmit={handleSubmitQuote}
+          quoteText={quoteText}
+          setQuoteText={setQuoteText}
+        />
+      </div>
 
       <div className="flex-grow-1 d-flex justify-content-center">
         <div className="row w-100">
@@ -100,6 +92,29 @@ const LandingPage = () => {
           )}
         </div>
       </div>
+      <div className="d-flex flex-column justify-content-center align-items-center" style={{ height: "33vh" }}>
+        <h2 className="mb-3"> Popular Topics </h2>
+        <p>Live</p>
+        <p>Laugh</p>
+        <p>Love</p>
+      </div>
+
+      <div className="d-flex flex-column justify-content-center align-items-center" style={{ height: "33vh" }}>
+        <h2 className="mb-3"> Add a Quote </h2>
+      <input
+          type="text"
+          className="form-control w-50"
+          placeholder="Enter your own quote and press enter"
+          value={quoteText}
+          onChange={(e) => setQuoteText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleUploadQuote(); 
+            }
+          }}
+        />
+        </div>
+    
     </div>
   );
 };
