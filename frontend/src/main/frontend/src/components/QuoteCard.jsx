@@ -57,34 +57,55 @@ const QuoteCard = ({ quote, onBookmarkToggle }) => {
 
   return (
     <div className="col-md-4 mb-4" onClick={handleClick}>
-      <div className="card shadow p-3">
+      <div
+          className="card shadow-sm rounded-3 p-3"
+          style={{ minWidth: "280px", cursor: "pointer", transition: "all 0.2s ease-in-out" }}
+          onClick={handleClick}>
+
         <div className="card-body">
-          <p className="card-text">"{quote.quote || "No quote text provided"}"</p>
-          <h6 className="text-muted">- {quote.author || "Unknown"}</h6>
+          <p className="fs-5 fw-semibold text-dark mb-3 text-center">"{quote.quote}"</p>
+
+          <div className="d-flex align-items-center mb-3">
+            <div
+                className="rounded-circle bg-secondary d-flex justify-content-center align-items-center me-2"
+                style={{ width: "32px", height: "32px", color: "white" }}>
+              <i className="bi bi-person"></i>
+            </div>
+            <span className="text-muted fw-medium">{quote.author || "Unknown"}</span>
+          </div>
+
 
           {quote.tags && quote.tags.length > 0 && (
-            <div className="mb-2">
-              <strong>Tags: </strong>
-              {quote.tags.map((tag, index) => (
-                <span key={index} className="badge bg-primary me-1">{tag}</span>
-              ))}
-            </div>
+              <div className="mt-2">
+                {quote.tags.map((tag, index) => (
+                    <span key={index} className="badge bg-light text-dark me-1">
+                  #{tag}
+                </span>
+                ))}
+              </div>
           )}
 
-          <button className="btn btn-link me-2" onClick={handleBookmarkClick}>
-            {isBookmarked ? <FaBookmark /> : <FaRegBookmark />}
-          </button>
-          <span className="me-2">{bookmarkCount}</span>
-          <button className="btn btn-link me-2" onClick={handleClipboardClick}>
-            <FaClipboard />
-          </button>
-          <button className="btn btn-link me-2" onClick={handleShareClick}>
-            <FaShareAlt />
-          </button>
-          <button className="btn btn-link text-danger" onClick={handleFlagClick}>
-            <FaFlag />
+          <div className="d-flex justify-content-between align-items-center mt-3">
+            <div>
+              <button className="btn btn-outline-secondary btn-sm me-2" onClick={handleBookmarkClick}>
+                {isBookmarked ? <FaBookmark /> : <FaRegBookmark />}
+              </button>
+              <span className="text-muted">{bookmarkCount}</span>
+            </div>
+
+            <div>
+              <button className="btn btn-outline-secondary btn-sm me-2" onClick={handleClipboardClick}>
+                <FaClipboard />
+              </button>
+              <button className="btn btn-outline-secondary btn-sm me-2" onClick={handleShareClick}>
+                <FaShareAlt />
+              </button>
+              <button className="btn btn-outline-danger btn-sm" onClick={handleFlagClick}>
+                <FaFlag />
           </button>
         </div>
+      </div>
+    </div>
       </div>
     </div>
   );

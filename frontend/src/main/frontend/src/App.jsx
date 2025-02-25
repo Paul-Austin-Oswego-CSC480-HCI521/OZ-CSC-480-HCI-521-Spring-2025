@@ -9,6 +9,7 @@ import QuoteForm from "./components/QuoteForm";
 import DebugPage from "./pages/DebugPage";
 import { userQuotes, bookmarkedQuotes } from "./placeholderdata";
 
+
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 

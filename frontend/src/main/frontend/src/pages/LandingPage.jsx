@@ -21,12 +21,20 @@ const LandingPage = () => {
   useEffect(() => {
     const loadQuotes = async () => {
       try {
-        console.log("Fetching top bookmarked quotes..."); 
+        console.log("Fetching top bookmarked quotes...");
         const data = await fetchTopBookmarkedQuotes();
         console.log("Fetched Quotes:", data);
         if (!data || data.length === 0) {
-          setError("No quotes yet! Try adding your own");
+          console.warn("No quotes found from API.");
+          // setError("No quotes yet! Try adding your own");
+
+          setTopQuotes([
+            { _id: 1, quote: "This is Quoteable.", author: "Anonymous" },
+            { _id: 2, quote: "This is me.", author: "John Doe" }
+          ]);
+
         } else {
+          // console.log("Using API quotes...");
           setTopQuotes(data);
         }
       } catch (err) {
@@ -38,6 +46,7 @@ const LandingPage = () => {
     };
     loadQuotes();
   }, []);
+
 
   useEffect(() => {
     if (!localStorage.getItem("hasLoggedIn")) {

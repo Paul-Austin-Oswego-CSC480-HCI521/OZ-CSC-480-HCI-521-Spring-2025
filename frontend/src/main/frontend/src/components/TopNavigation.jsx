@@ -1,7 +1,16 @@
 import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
-const TopNavigation = ({ user }) => {
 
+const TopNavigation = ({ user, notifications = [] }) => {
+    useEffect(() => {
+        const dropdownElementList = document.querySelectorAll('.dropdown-toggle');
+        dropdownElementList.forEach((dropdownToggleEl) => {
+            new window.bootstrap.Dropdown(dropdownToggleEl);
+        });
+    }, []);
   const circleStyle = {
     display: 'inline-flex',
     justifyContent: 'center',
@@ -23,6 +32,50 @@ const TopNavigation = ({ user }) => {
       </button>
       <div className="collapse navbar-collapse pr-2" id="navbarNav">
         <ul className="navbar-nav ml-auto">
+
+            {user && (
+                <li className="nav-item dropdown mx-2 position-relative">
+                    <button className="btn btn-light dropdown-toggle position-relative" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i className="bi bi-bell" style={{ fontSize: "24px" }}></i>
+                        {notifications.length > 0 && (
+                            <span className="badge bg-danger position-absolute" style={{ top: "5px", right: "5px", fontSize: "12px" }}>
+                                        {notifications.length}
+                                    </span>
+                        )}
+                    </button>
+                    {/*<ul className="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown">*/}
+                    {/*    {notifications.length > 0 ? (*/}
+                    {/*        notifications.map((notif, index) => (*/}
+                    {/*            <li key={index}>*/}
+                    {/*                <Link className="dropdown-item text-wrap" to={`/notifications/${notif.id}`}>*/}
+                    {/*                    {notif.message}*/}
+                    {/*                </Link>*/}
+                    {/*            </li>*/}
+                    {/*        ))*/}
+                    {/*    ) : (*/}
+                    {/*        <li>*/}
+                    {/*            <span className="dropdown-item text-muted">No new notifications</span>*/}
+                    {/*        </li>*/}
+                    {/*    )}*/}
+                    {/*</ul>*/}
+                    <ul className="dropdown-menu dropdown-menu-end p-2" aria-labelledby="notificationDropdown" style={{ minWidth: "250px" }}>
+                        {notifications.length > 0 ? (
+                            notifications.map((notif, index) => (
+                                <li key={index} className="dropdown-item border-bottom py-2">
+                                    <Link to={`/notifications/${notif.id}`} className="text-decoration-none text-dark d-block">
+                                        <strong>🔔 {notif.message}</strong>
+                                        <p className="mb-0 text-muted" style={{ fontSize: "12px" }}>Click to view</p>
+                                    </Link>
+                                </li>
+                            ))
+                        ) : (
+                            <li className="dropdown-item text-center text-muted">No new notifications</li>
+                        )}
+                    </ul>
+
+                </li>
+            )}
+
           {!user && (
             <li className="nav-item">
               <Link className="nav-link" to="/login">Login</Link>

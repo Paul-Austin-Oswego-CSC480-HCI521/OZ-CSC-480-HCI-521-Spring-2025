@@ -7,7 +7,7 @@ import { fetchMe } from '../lib/api';
 const Layout = () => {
   const [user, setUser] = useState(null);
   const [showLogin, setShowLogin] = useState(null);
-
+  const [notifications, setNotifications] = useState([]);
   const handleCloseLogin = () => {
     setShowLogin(false);
   };
@@ -24,10 +24,19 @@ const Layout = () => {
     (async () => {
       try {
         console.log("Fetching user..."); 
-        const data = await fetchMe();
+        // const data = await fetchMe();
+        // console.log("Fetched user:", data);
+        // if (data == null) throw "No user"
+        const data = { Username: "JohnDoe" };
         console.log("Fetched user:", data);
-        if (data == null) throw "No user"
+
         setUser(data);
+
+        setNotifications([
+          { id: 1, message: "New comment on your quote" },
+          { id: 2, message: "New quote " }
+        ]);
+
       } catch (err) {
         console.error("Error fetching user", err);
 
@@ -41,7 +50,7 @@ const Layout = () => {
 
   return (
     <div className="container">
-      <TopNavigation user={user} />
+      <TopNavigation user={user} notifications={notifications} />
       <main>
       {showLogin && (
         <div className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center" style={{ backgroundColor: "rgba(0, 0, 0, 0.5)", zIndex: 1050 }}>
