@@ -4,9 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
@@ -42,8 +45,15 @@ public class QuoteCreateResource {
                     "\"tags\": [\"example\", \"another example\"]," +
                     "\"creator\": \"Account Object ID\", \"private\": \"boolean value\"}")
     ))
-    public Response createQuote(String rawJson) {
+    public Response createQuote(String rawJson, @Context HttpServletRequest request) {
         try{
+
+            String group = QuotesRetrieveAccount.retrieveGroups(request);
+
+            if (group == null) {
+                return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to create quotes").toJson()).build();
+            }
+
             //map json to Java Object
             ObjectMapper objectMapper = new ObjectMapper();
             QuoteObject quote = objectMapper.readValue(rawJson, QuoteObject.class);

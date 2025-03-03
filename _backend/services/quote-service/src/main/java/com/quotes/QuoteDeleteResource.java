@@ -3,9 +3,12 @@ package com.quotes;
 import jakarta.inject.Inject;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.*;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
@@ -36,8 +39,24 @@ public class QuoteDeleteResource {
             required = true,
             example = "67b61f18daa68e25fbd151e9",
             schema = @Schema(type = SchemaType.STRING)
-    )@PathParam("quoteId") String quoteID) {
+    )@PathParam("quoteId") String quoteID, @Context HttpServletRequest request) {
         try{
+            // get account ID from JWT
+            String accountID = QuotesRetrieveAccount.retrieveAccountID(request);
+
+            // get group from JWT
+            String group = QuotesRetrieveAccount.retrieveGroups(request);
+
+            // check if account has not been logged in
+            if (accountID == null || group == null) {
+                return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to delete quotes").toJson()).build();
+            }
+
+            // user is not owner of quote
+            if (!accountID.equals(quoteID) && !group.equals("admin")) {
+                return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to delete quotes").toJson()).build();
+            }
+
             //check id is in valid form
             if(!SanitizerClass.validObjectId(quoteID)) {
                 return Response.status(Response.Status.BAD_REQUEST).entity("Given ID is not valid ObjectId").build();

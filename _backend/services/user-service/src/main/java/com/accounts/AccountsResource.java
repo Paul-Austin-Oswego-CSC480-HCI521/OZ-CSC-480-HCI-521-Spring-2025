@@ -12,6 +12,8 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.core.Response.Status;
 
+import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.ExampleObject;
@@ -72,7 +74,28 @@ public class AccountsResource {
             @APIResponse(responseCode = "404", description = "Account has not been found in the database.")
     })
     @Operation(summary = "Delete a user account by ID.")
-    public Response delete(@PathParam("id") String id) {
+    public Response delete(@PathParam("id") String id, @Context HttpServletRequest request) {
+
+        Document userDoc = accountService.retrieveUserFromCookie(request);
+
+        if (userDoc == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to delete account").toJson()).build();
+        }
+
+        ObjectId objectId;
+        try {
+            objectId = new ObjectId(id);
+        } catch (Exception e) {
+            return Response
+                    .status(Response.Status.NOT_FOUND)
+                    .entity(new Document("error", "Invalid object id!").toJson())
+                    .build();
+        }
+
+        if (!objectId.equals(userDoc.get("_id")) && userDoc.getInteger("admin") != 1) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to delete account").toJson()).build();
+        }
+
         return accountService.deleteUser(id);
     }
 
@@ -87,7 +110,27 @@ public class AccountsResource {
     })
     @Operation(summary = "Updates a user account. Ensure the request header is `application/json` and provide a JSON body in the specified format.")
     @RequestBody(description = "Example request body endpoint is expecting.", required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON, examples = @ExampleObject(name = "Example", value = "{ " + "\"SharedQuotes\": [\"Success is a journey\"]" + " }")))
-    public Response update(@PathParam("id") String id, String accountJson) {
+    public Response update(@PathParam("id") String id, String accountJson, @Context HttpServletRequest request) {
+        Document userDoc = accountService.retrieveUserFromCookie(request);
+
+        if (userDoc == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to update account").toJson()).build();
+        }
+
+        ObjectId objectId;
+        try {
+            objectId = new ObjectId(id);
+        } catch (Exception e) {
+            return Response
+                    .status(Response.Status.NOT_FOUND)
+                    .entity(new Document("error", "Invalid object id!").toJson())
+                    .build();
+        }
+
+        if (!objectId.equals(userDoc.get("_id")) && userDoc.getInteger("admin") != 1) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to update account").toJson()).build();
+        }
+
         return accountService.updateUser(accountJson, id);
     }
 

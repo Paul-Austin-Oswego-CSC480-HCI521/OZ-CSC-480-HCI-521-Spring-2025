@@ -8,6 +8,8 @@
         <feature>mongodb-2.0</feature>
         <feature>mpConfig-3.0</feature>
         <feature>servlet-6.0</feature> <!-- Required for handling HTTP requests -->
+        <feature>mpJwt-2.1</feature>
+        <feature>appSecurity-5.0</feature>
     </featureManager>
 
     <!-- Define server ports -->
@@ -20,6 +22,15 @@
                   host="*"
                   httpPort="${http.port}"
                   httpsPort="9443"/>
+
+    <variable name="JWT_SECRET" value="secret" />
+
+    <jwtConsumer
+            id="defaultJwtConsumer"
+            issuer="quotable"
+            signatureAlgorithm="HS256"
+            sharedKey="${JWT_SECRET}"
+    />
 
     <!-- Web Application Configuration -->
     <webApplication contextRoot="/" location="quote-service.war">

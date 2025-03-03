@@ -2,6 +2,9 @@ package com.accounts;
 
 import com.auth.AuthResource;
 import com.auth.JwtService;
+import com.ibm.websphere.security.jwt.InvalidConsumerException;
+import com.ibm.websphere.security.jwt.InvalidTokenException;
+import com.ibm.websphere.security.jwt.JwtConsumer;
 import com.ibm.websphere.security.jwt.JwtToken;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -9,6 +12,8 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Projections;
 import com.mongodb.client.result.UpdateResult;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.NewCookie;
 import org.bson.Document;
@@ -18,6 +23,7 @@ import jakarta.ws.rs.core.Response;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -143,6 +149,39 @@ public class AccountService {
                 .ok(doc.toJson())
                 .type(MediaType.APPLICATION_JSON)
                 .build();
+    }
+
+    public Document retrieveUserFromCookie(HttpServletRequest request) {
+        Cookie jwtCookie = null;
+
+        if (request.getCookies() != null) {
+            jwtCookie = Arrays.stream(request.getCookies())
+                    .filter(c -> "jwt".equals(c.getName()))
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        if (jwtCookie == null) {
+            return null;
+        }
+        try {
+            JwtConsumer consumer = JwtConsumer.create("defaultJwtConsumer");
+            JwtToken jwt = consumer.createJwt(jwtCookie.getValue());
+
+            String id = jwt.getClaims().getSubject();
+
+            ObjectId objectId;
+            try {
+                objectId = new ObjectId(id);
+            } catch (Exception e) {
+                return null;
+            }
+
+            return accountCollection.find(eq("_id", objectId)).first();
+        } catch (InvalidConsumerException | InvalidTokenException e) {
+            System.out.println(e);
+            return null;
+        }
     }
 
     public Response deleteUser(String accountID) {
