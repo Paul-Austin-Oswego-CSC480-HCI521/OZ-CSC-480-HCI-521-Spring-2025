@@ -1,0 +1,53 @@
+/* The following code is for the styling of active tabs within TopNav*/
+.nav-item.active .nav-link {
+  font-weight: bold;
+  color: #000;
+  position: relative; /* Ensure positioning for the pseudo-element */
+  text-decoration: none; /* Optional: Remove default underline */
+}
+
+.nav-item.active .nav-link::after {
+  content: ""; /* Required for pseudo-element */
+  position: absolute;
+  bottom: 0; /* Align the line to the bottom of the element */
+  margin-bottom: 6px;
+  left: 0;
+  width: 100%; /* Make the line span the full width of the element */
+  height: 2px; /* Thickness of the line */
+  background-color: #000; /* Line color */
+  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25)); /* Apply shadow to the line */
+}
+
+.navbar-nav .nav-item .nav-link {
+  display: flex;
+  margin: 0 6px 0 6px;
+  padding-left: 16px;
+  padding-right: 16px;
+  align-items: center; /* Align items vertically */
+  height: 100%; /* Make links fill the parent's height */
+  line-height: normal; /* Reset line-height if needed */
+}
+
+.navbar-nav .nav-item {
+  display: flex; /* Flexbox for alignment */
+  align-items: center; /* Center child elements (like the button) vertically */
+}
+
+.navbar-nav .nav-item .btn {
+  margin: 0 6px 0 6px;
+  padding-left: 16px;
+  padding-right: 16px;
+  height: auto; /* Allow the button to keep its natural height */
+  line-height: normal; /* Reset line height if needed */
+}
+
+.nav-link {
+  text-decoration: none; /* For non-active links */
+}
+
+/* For height of navbar*/
+.custom-nav {
+  height: 65px; /* Set the height */
+  line-height: 65px; /* Vertically align the content */
+  padding: 0; /* Ensure no extra padding interferes */
+}

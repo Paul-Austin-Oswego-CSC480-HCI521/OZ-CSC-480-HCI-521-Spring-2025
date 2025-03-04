@@ -28,7 +28,6 @@ const App = () => {
               />
             }
           />
-         {/* <Route path="/quote/:id" element={<QuoteForm />} /> */}
           <Route path="/edit-quote/:id" element={<QuoteForm />} />
           <Route path="/debug" element={<DebugPage />} />
           <Route path="/" element={<LandingPage />} />

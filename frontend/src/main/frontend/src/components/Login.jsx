@@ -9,7 +9,7 @@ const LoginBox = ({ handleGoogleLogin, handleGuestLogin }) => {
         Sign in with Google
       </button>
       <button className="btn btn-secondary w-100" onClick={handleGuestLogin}>
-        Guest Mode
+        Continue without an Account
       </button>
     </div>
   );

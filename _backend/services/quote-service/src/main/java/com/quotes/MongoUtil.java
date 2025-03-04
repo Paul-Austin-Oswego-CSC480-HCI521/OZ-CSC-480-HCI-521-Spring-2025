@@ -36,26 +36,28 @@ public class MongoUtil {
         Document query = new Document("_id", quoteID);
         Document result = collection.find(query).first();
 
-        //return (result != null) ? result.toJson() : null;
         if(result != null) {
             result.put("_id", result.getObjectId("_id").toString()); //gets rid of "$oid" subfield
+            result.put("creator", result.getObjectId("creator").toString());
             return result.toJson();
         }
         return null;
     }
 
-    public String searchQuote(String searchQuery) {
+    public String searchQuote(String searchQuery) { // fuzzy search for quote
         MongoCollection<Document> collection = database.getCollection("Quotes");
 
+        // create query document
         AggregateIterable<Document> results = collection.aggregate(Arrays.asList(
-                new Document("$search", new Document("index", "QuotesAtlasSearch")
-                        .append("text", new Document("query", searchQuery)
-                                .append("path", Arrays.asList("quote", "author"))
+                new Document("$search", new Document("index", "QuotesAtlasSearch") //set to search atlas index
+                        .append("text", new Document("query", searchQuery) //set query string to user query
+                                .append("path", Arrays.asList("quote", "author", "tags")) // fields to search and compare to
                                 .append("fuzzy", new Document("maxEdits", 2))
                         )
                 ),
+                new Document("$match", new Document("private", new Document("$ne", true))), //Exclude private quotes
                 new Document("$sort", new Document("score", -1)), //sort by relevance
-                new Document("$limit", 10)
+                new Document("$limit", 50) //limit to 50 results
         ));
 
         JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
@@ -102,7 +104,7 @@ public class MongoUtil {
             return false;
         }
 
-        quote.PrintQuote();
+        //quote.PrintQuote();
         if(quote.getId() == null) {
             System.out.print("Missing ID");
             return false;
@@ -148,6 +150,10 @@ public class MongoUtil {
                 //same as above, shouldn't change more than 1 per update.
                 newData.append("flags", quote.getFlags());
             }
+            if(quote.getisPrivate() != ogQuote.getisPrivate()) {
+                // can't check for "private" field being null. So only update if value is different
+                newData.append("private", quote.getisPrivate());
+            }
 
 
             //create update operation
@@ -161,12 +167,31 @@ public class MongoUtil {
         }
     }
 
+    public boolean updateAll() { //Adding new privacy and creator fields to all existing documents
+        // not for actual production use
+        try {
+            MongoCollection<Document> collection = database.getCollection("Quotes");
+
+            Document newFields = new Document().append("creator", null); //fields to be added
+            Document updateOperation = new Document("$set", newFields);
+
+            collection.updateMany(new Document(), updateOperation);
+
+            return true;
+        } catch (Exception e) {
+            System.out.print(e);
+            return false;
+        }
+    }
+
     public boolean deleteQuote(ObjectId quoteId) {
         MongoCollection<Document> collection = database.getCollection("Quotes");
         try {
+            //create query document with id
             Document idQuery = new Document();
             idQuery.append("_id", quoteId);
 
+            //delete quote, returns greater than 0 if successful
             long deletedCount = collection.deleteOne(idQuery).getDeletedCount();
             return deletedCount > 0;
         } catch(Exception e) {
@@ -181,43 +206,49 @@ public class MongoUtil {
             //give quote a new id
             quoteData.setId(new ObjectId());
 
-            if(quoteData.getText().isEmpty()) {
+            if(quoteData.getText().isEmpty()) { //make sure quote has text
                 return null;
             }
-
+            //calculate unix time code
+            long unixTime = System.currentTimeMillis() / 1000L;
             //create document to insert
             Document quoteDoc = new Document()
                     .append("_id", quoteData.getId())
                     .append("author", quoteData.getAuthor())
                     .append("quote", quoteData.getText())
-                    .append("bookmarks", 0)
-                    .append("shares", 0)
-                    .append("date", quoteData.getDate())
+                    .append("bookmarks", 0) // default to 0
+                    .append("shares", 0) // default to 0
+                    .append("date", unixTime)
                     .append("tags", quoteData.getTags())
-                    .append("flags", 0);
+                    .append("flags", 0) // default to 0
+                    .append("private", quoteData.getisPrivate())
+                    .append("creator", quoteData.getCreator());
 
-            collection.insertOne(quoteDoc);
-            return quoteData.getId();
+            collection.insertOne(quoteDoc); //insert into database
+            return quoteData.getId(); //return new quote id
         } catch (Exception e) {
             System.out.println("Exception in MongoUtil/createQuote: "+e);
             return null;
         }
     }
 
-    public String getTopBookmarked(){
+    public String getTopBookmarked(){ // get top 100 quotes with the most bookmarks
         MongoCollection<Document> collection = database.getCollection("Quotes");
 
         AggregateIterable<Document> results = collection.aggregate(Arrays.asList(
-                new Document("$sort", new Document("bookmarks", -1)), new Document("$limit", 5)));
+                new Document("$match", new Document("private", new Document("$ne", true))), // exclude private quotes
+                new Document("$sort", new Document("bookmarks", -1)), // sort by bookmark field
+                new Document("$limit", 100))); // limit to 100 results
 
         JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
 
         for(Document doc : results) {
-            doc.put("_id", doc.getObjectId("_id").toString());
+            doc.put("_id", doc.getObjectId("_id").toString()); // gets rid of "$oid" subfield
             JsonObject jsonObject = Json.createReader(new java.io.StringReader(doc.toJson())).readObject();
             jsonArrayBuilder.add(jsonObject);
         }
 
+        //put json array back into string form
         StringWriter stringWriter = new StringWriter();
         try(JsonWriter jsonWriter = Json.createWriter(stringWriter)) {
             jsonWriter.writeArray(jsonArrayBuilder.build());
@@ -225,20 +256,23 @@ public class MongoUtil {
         return stringWriter.toString();
     }
 
-    public String getTopShared() {
+    public String getTopShared() { // get top 100 most shared quotes
         MongoCollection<Document> collection = database.getCollection("Quotes");
 
         AggregateIterable<Document> results = collection.aggregate(Arrays.asList(
-                new Document("$sort", new Document("shares", -1)), new Document("$limit", 5)));
+                new Document("$match", new Document("private", new Document("$ne", true))), // exclude private quotes
+                new Document("$sort", new Document("shares", -1)), // sort by shares in descending order
+                new Document("$limit", 100))); //limit to 100 results
 
         JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
 
         for(Document doc : results) {
-            doc.put("_id", doc.getObjectId("_id").toString());
+            doc.put("_id", doc.getObjectId("_id").toString()); // gets rid of "$oid" subfield
             JsonObject jsonObject = Json.createReader(new java.io.StringReader(doc.toJson())).readObject();
             jsonArrayBuilder.add(jsonObject);
         }
 
+        //put json array back into string form
         StringWriter stringWriter = new StringWriter();
         try (JsonWriter jsonWriter = Json.createWriter(stringWriter)) {
             jsonWriter.writeArray(jsonArrayBuilder.build());
@@ -246,10 +280,35 @@ public class MongoUtil {
         return stringWriter.toString();
     }
 
-    public String getTopFlagged() {
+    public String getMostRecent() { //gets the 100 most recently posted quotes
         MongoCollection<Document> collection = database.getCollection("Quotes");
 
         AggregateIterable<Document> results = collection.aggregate(Arrays.asList(
+                new Document("$match", new Document("private", new Document("$ne", true))), // exclude private quotes
+                new Document("$sort", new Document("date", -1)), // sort by date field in descending order
+                new Document("$limit", 100))); // limit to 100
+
+        JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
+
+        for(Document doc : results) {
+            doc.put("_id", doc.getObjectId("_id").toString());// gets rid of "$oid" subfield
+            JsonObject jsonObject = Json.createReader(new java.io.StringReader(doc.toJson())).readObject();
+            jsonArrayBuilder.add(jsonObject);
+        }
+
+        //put json array back into string form
+        StringWriter stringWriter = new StringWriter();
+        try (JsonWriter jsonWriter = Json.createWriter(stringWriter)) {
+            jsonWriter.writeArray(jsonArrayBuilder.build());
+        }
+        return stringWriter.toString();
+    }
+
+    public String getTopFlagged() { // gets all quotes that meet a flag threshold
+        MongoCollection<Document> collection = database.getCollection("Quotes");
+
+        AggregateIterable<Document> results = collection.aggregate(Arrays.asList(
+                new Document("$match", new Document("private", new Document("$ne", true))), // Should it exclude private quotes?
                 new Document("$match", new Document("flags", new Document("$gt", 2))), //get only quotes where flags >= 2
                 new Document("$sort", new Document("flags", -1)) //sort in decending order
         ));
@@ -257,11 +316,12 @@ public class MongoUtil {
         JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
 
         for(Document doc : results) {
-            doc.put("_id", doc.getObjectId("_id").toString());
+            doc.put("_id", doc.getObjectId("_id").toString());// gets rid of "$oid" subfield
             JsonObject jsonObject = Json.createReader(new java.io.StringReader(doc.toJson())).readObject();
             jsonArrayBuilder.add(jsonObject);
         }
 
+        //put json array back into string form
         StringWriter stringWriter = new StringWriter();
         try (JsonWriter jsonWriter = Json.createWriter(stringWriter)) {
             jsonWriter.writeArray(jsonArrayBuilder.build());

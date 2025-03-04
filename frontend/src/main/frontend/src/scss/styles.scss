@@ -1,2 +1,19 @@
 // Import all of Bootstrap's CSS
-@import "bootstrap/scss/bootstrap"
+@import "bootstrap/scss/bootstrap";
+
+h1 {
+  color: #1E1E1E;
+  text-align: center;
+  font-family: Roboto;
+  font-size: 40px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 48px;
+}
+
+.form-control::placeholder {
+  color: #ADB5BD;
+  font-family: Inter;
+  font-style: normal;
+  font-weight: 400;
+}

@@ -1,19 +1,23 @@
-import React,{useState} from 'react';
+import React,{useState, useEffect} from 'react';
 import LoginBox from '../components/Login';
 
 
 const LoginPage = ({ setIsAuthenticated, setIsGuest }) => {
-  const [jwtToken, setJwtToken] = useState("");
-  const [email, setEmail] = useState("")
+  const [user, setUser] = useState(null)
 
-  // useEffect(() => {
-  //   fetch("localhost://9080")
-  //       .then(
-  //         setJwtToken(sessionStorage.getItem("quotableToken"));
-  //         setIsAuthenticated(true);
-  //       )
-  //       .then()
-  // }, []);
+  useEffect(() => {
+         fetch("http://localhost:9081/users/accounts/whoami")
+             .then(response=> response.json())
+             .then((data)=> {
+               if(data){
+                 setIsAuthenticated(true)
+                 setUser(data)
+               }
+             })
+             .catch(err => {
+               console.log("User not found", err)
+             })
+  }, []);
 
   const handleGoogleLogin = () => {
     window.location.href = 'http://localhost:9081/users/auth/login';

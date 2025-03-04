@@ -95,7 +95,7 @@ public class QuoteSearchResource {
     })
     @Operation(summary = "get quotes with the most bookmarks", description = "No input required. Searches for quotes" +
             " with the most bookmarks and returns json of all the quotes. It is sorted in descending order. Currently it" +
-            " is limited to only 5 results")
+            " is limited to 100 results")
     public Response getTopBookmarks() {
         try{
             String result = mongo.getTopBookmarked();
@@ -113,7 +113,7 @@ public class QuoteSearchResource {
     })
     @Operation(summary = "get quotes with the most shares", description = "No input required. Searches for quotes" +
             " with the most shares and returns json of all the quotes. It is sorted in descending order. Currently it" +
-            " is limited to only 5 results")
+            " is limited to 100 results")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getSharedBookmarked() {
         try{
@@ -136,6 +136,24 @@ public class QuoteSearchResource {
     public Response getTopFlagged() {
         try {
             String result = mongo.getTopFlagged();
+            return Response.ok(result).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.CONFLICT).entity("Exception Occurred: "+e).build();
+        }
+    }
+
+    @GET
+    @Path("/mostRecent")
+    @Produces(MediaType.APPLICATION_JSON)
+    @APIResponses(value = {
+            @APIResponse(responseCode = "200", description = "Successfully found and returned quotes"),
+            @APIResponse(responseCode = "409", description = "Exception occurred during operation")
+    })
+    @Operation(summary = "get quotes with the most bookmarks", description = "No input required. Returns quotes posted most recently" +
+            ". It is sorted in descending order. Currently it is limited to 100 results")
+    public Response getMostRecent() {
+        try{
+            String result = mongo.getMostRecent();
             return Response.ok(result).build();
         } catch (Exception e) {
             return Response.status(Response.Status.CONFLICT).entity("Exception Occurred: "+e).build();

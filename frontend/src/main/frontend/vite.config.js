@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     historyApiFallback: true, 
+    port: 9080,
   },
   build: {
     outDir: "out",

@@ -2,7 +2,6 @@
 # of the database running on your machine using the follwing
 # commands in this directory
 #
-# `docker volume create --name users_db`
 # `docker volume create --name quotes_db`
 # `docker compose up -d` 
 
@@ -20,7 +19,15 @@ services:
     ports:
       - 9082:9082
     environment:
-      CONNECTION_STRING: mongodb://user:password@users_database:27017
+      CONNECTION_STRING: mongodb://user:password@quotes-database:27017
+
+  user-service:
+    build: ./_backend/services/user-service
+    ports:
+      - 9081:9081
+    environment:
+      CONNECTION_STRING: mongodb://user:password@quotes-database:27017
+
   quotes-database:
     image: mongo
     volumes:
@@ -29,22 +36,6 @@ services:
       MONGO_INITDB_ROOT_USERNAME: user
       MONGO_INITDB_ROOT_PASSWORD: password
 
-  user-service:
-    build: ./_backend/services/user-service
-    ports:
-      - 9081:9081
-    environment:
-      CONNECTION_STRING: mongodb://user:password@users_database:27017
-  users-database:
-    image: mongo
-    volumes:
-      - users_db:/data/db
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: user
-      MONGO_INITDB_ROOT_PASSWORD: password
-
 volumes:
   quotes_db:
-    external: true
-  users_db:
     external: true

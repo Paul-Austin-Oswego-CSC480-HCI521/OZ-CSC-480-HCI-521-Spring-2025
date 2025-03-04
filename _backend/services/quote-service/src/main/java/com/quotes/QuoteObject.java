@@ -44,6 +44,14 @@ public class QuoteObject {
     @BsonProperty("flags")
     private int flags = -1;
 
+    @JsonProperty("private")
+    @BsonProperty("private")
+    private boolean isPrivate;
+
+    @JsonProperty("creator")
+    @BsonProperty("creator")
+    private ObjectId creator;
+
     //getters
     public ObjectId getId() {return id;}
     public String getAuthor() {return author;}
@@ -53,6 +61,8 @@ public class QuoteObject {
     public int getDate() {return date;}
     public ArrayList<String> getTags() {return tags;}
     public int getFlags() {return flags;}
+    public boolean getisPrivate() {return isPrivate;}
+    public ObjectId getCreator() {return creator;}
 
     //setters
     public void setId(ObjectId id) {this.id = id;}
@@ -63,6 +73,8 @@ public class QuoteObject {
     public void setDate(int date) {this.date = date;}
     public void setTags(ArrayList<String> tags) {this.tags = tags;}
     public void setFlags(int flags) {this.flags = flags;}
+    public void setPrivate(boolean privacy) {this.isPrivate = privacy;}
+    public void setCreator(ObjectId creator) {this.creator = creator;}
 
     //printers
     public void PrintQuote(){

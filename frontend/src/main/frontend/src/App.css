@@ -1,7 +1,30 @@
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  src: url("/fonts/Inter-VariableFont_opsz,wght.ttf");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  src: url("/fonts/Inter-Italic-VariableFont_opsz,wght.ttf");
+}
+
+@font-face {
+  font-family: "Roboto";
+  font-style: normal;
+  src: url("/fonts/Roboto-VariableFont_wdth,wght.ttf");
+}
+
+@font-face {
+  font-family: "Roboto";
+  font-style: italic;
+  src: url("/fonts/Roboto-Italic-VariableFont_wdth,wght.ttf");
+}
+
 #root {
-  max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
-  padding-top:0;
+  font-family: "Roboto", "sans-serif";
   text-align: center;
 }
+

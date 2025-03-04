@@ -35,7 +35,9 @@ public class Account {
 
     public List<String> MyTags;
 
-    public String Description;
+    public String Profession;
+
+    public String PersonalQuote;
 
 
     public Account(String email, String username, int ad, String at, String rt, Long ea,
@@ -53,13 +55,14 @@ public class Account {
         FavoriteQuote = new HashMap<>();
         SharedQuotes = new ArrayList<>();
         MyTags = new ArrayList<>();
-        Description = "";
+        Profession = "";
+        PersonalQuote = "";
     }
 
     public Account(String email, String username, int ad, String at, String rt, Long ea,
                    List<String> sc, String tt, List<String> notifications, List<String>myQuotes,
                    Map<String, List<String>> favoriteQuotes, List<String> sharedQuotes,
-                   List<String> myTags, String description) {
+                   List<String> myTags, String profession, String personalQuote) {
         Email = email;
         Username = username;
         admin = ad;
@@ -73,7 +76,8 @@ public class Account {
         FavoriteQuote = favoriteQuotes;
         SharedQuotes = sharedQuotes;
         MyTags = myTags;
-        Description = description;
+        Profession = profession;
+        PersonalQuote = personalQuote;
     }
 
     public Account updateOauthProperties(GoogleTokenResponse tokenResponse) {

@@ -4,9 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
@@ -34,16 +37,23 @@ public class QuoteCreateResource {
             @APIResponse(responseCode = "400", description = "Error when adding quote to database, returned quote ID was null"),
     })
     @Operation(summary = "Adds a new quote to the mongo database and will return the id of the newly created quote")
-    @RequestBody(description = "Example request body endpoint is expecting. \"_id\" field is NOT REQUIRED, the server will generate an id. Any supplied value will be overwritten" +
-            " bookmarks, shares, and flags are also not required as they will be automatically set to 0",
+    @RequestBody(description = "Example request body endpoint is expecting. The only fields required are \"author\", \"quote\", \"tags\", \"creator\", and \"private\"",
             required = true, content = @Content(
             mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = QuoteObject.class),
-            examples = @ExampleObject(name = "Example", value = "{\"_id\": \"NOT REQUIRED\", \"author\": \"Example Author\", " +
-                    "\"quote\": \"Example quote text\", \"date\": 1739988322," +
-                    "\"tags\": [\"example\", \"another example\"]}")
+            examples = @ExampleObject(name = "Example", value = "{\"author\": \"Example Author\", " +
+                    "\"quote\": \"Example quote text\"," +
+                    "\"tags\": [\"example\", \"another example\"]," +
+                    "\"creator\": \"Account Object ID\", \"private\": \"boolean value\"}")
     ))
-    public Response createQuote(String rawJson) {
+    public Response createQuote(String rawJson, @Context HttpServletRequest request) {
         try{
+
+            String group = QuotesRetrieveAccount.retrieveGroups(request);
+
+            if (group == null) {
+                return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to create quotes").toJson()).build();
+            }
+
             //map json to Java Object
             ObjectMapper objectMapper = new ObjectMapper();
             QuoteObject quote = objectMapper.readValue(rawJson, QuoteObject.class);

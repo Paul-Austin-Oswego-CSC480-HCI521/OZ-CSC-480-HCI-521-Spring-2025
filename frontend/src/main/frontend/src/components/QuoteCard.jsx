@@ -10,16 +10,18 @@ const QuoteCard = ({ quote, onBookmarkToggle }) => {
 
   const handleClick = () => {
     navigate(`/edit-quote/${quote._id}`, {
-      state: { quote: { 
-        _id: quote._id,
-        text: quote.quote, // ✅ Ensure quote text is passed
-        author: quote.author,
-        tags: quote.tags || [],
-        bookmarks: quote.bookmarks,
-        shares: quote.shares,
-        flags: quote.flags,
-        date: quote.date
-      }}
+      state: {
+        quote: {
+          _id: quote._id,
+          text: quote.quote, 
+          author: quote.author,
+          tags: quote.tags || [],
+          bookmarks: quote.bookmarks,
+          shares: quote.shares,
+          flags: quote.flags,
+          date: quote.date
+        }
+      }
     });
   };
 

@@ -1,9 +1,10 @@
 const QUOTE_SERVICE_URL =
-  import.meta.env.VITE_QUOTE_SERVICE_URL || "http://localhost:9082";
+  import.meta.env.VITE_QUOTE_SERVICE_URL || "http://localhost:9082"; //set the quote service URL, using an environment variable if available
 const USER_SERVICE_URL =
-  import.meta.env.VITE_USER_SERVICE_URL || "http://localhost:9081";
+  import.meta.env.VITE_USER_SERVICE_URL || "http://localhost:9081"; //set the user service URL, using an environment variable if available
 
 export const createQuote = async ({ quote, author, tags }) => {
+  //send a request to create a new quote, including author, text, tags, and a timestamp
   try {
     const quoteData = {
       quote,
@@ -28,12 +29,12 @@ export const createQuote = async ({ quote, author, tags }) => {
     return await response.json();
   } catch (error) {
     console.error("Error creating quote:", error);
-    // Re-throw or return a fallback value
     throw error;
   }
 };
 
 export const deleteQuote = async (quoteId) => {
+  //send a request to delete a quote by its ID
   try {
     const response = await fetch(
       `${QUOTE_SERVICE_URL}/quotes/delete/${quoteId}`,
@@ -46,20 +47,20 @@ export const deleteQuote = async (quoteId) => {
     if (contentType && contentType.includes("application/json")) {
       return await response.json();
     }
-    return { message: "Quote deleted successfully" }; // Fallback for non-JSON response
+    return { message: "Quote deleted successfully" }; //fallback for non-JSON response
   } catch (error) {
     console.error("Error deleting quote:", error);
-    throw error; // Re-throw to handle in UI
+    throw error;
   }
 };
 
 export const reportQuote = async (reportData) => {
+  //send a request to report a quote by ID
   try {
     const response = await fetch(`${QUOTE_SERVICE_URL}/quotes/report/id`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ quoteID: reportData.quoteID }),
-      dy,
     });
     if (!response.ok) throw new Error("Failed to report quote");
     return await response.json();
@@ -69,10 +70,11 @@ export const reportQuote = async (reportData) => {
 };
 
 export const searchQuotes = async (query, isQuoteID = false) => {
+  //search for quotes by text or by a specific quote ID
   try {
     const endpoint = isQuoteID
       ? `${QUOTE_SERVICE_URL}/quotes/search/id/${query}`
-      : `${QUOTE_SERVICE_URL}/quotes/search/query/${query}`; //Search by text
+      : `${QUOTE_SERVICE_URL}/quotes/search/query/${query}`; //search by text
 
     const response = await fetch(endpoint);
     if (!response.ok) throw new Error("Failed to search quotes");
@@ -83,6 +85,7 @@ export const searchQuotes = async (query, isQuoteID = false) => {
 };
 
 export const updateQuote = async (quoteData) => {
+  //send a request to update an existing quote with new data
   try {
     console.log("Sending update request:", JSON.stringify(quoteData));
 
@@ -112,8 +115,8 @@ export const updateQuote = async (quoteData) => {
   }
 };
 
-
 export const fetchTopBookmarkedQuotes = async () => {
+  //retrieve the most bookmarked quotes from the API
   try {
     const response = await fetch(
       `${QUOTE_SERVICE_URL}/quotes/search/topBookmarked`
@@ -130,12 +133,12 @@ export const fetchTopBookmarkedQuotes = async () => {
     return data;
   } catch (error) {
     console.error("Error fetching top bookmarked quotes:", error);
-    return []; //return an empty array in case of an error
+    return [];
   }
 };
 
-//user profile (From User Service)
 export const fetchUserProfile = async (userId) => {
+  //fetch user profile data using the user ID
   try {
     const response = await fetch(
       `${USER_SERVICE_URL}/users/search/id/${userId}`
@@ -148,6 +151,7 @@ export const fetchUserProfile = async (userId) => {
 };
 
 export const fetchTopSharedQuotes = async () => {
+  //retrieve the most shared quotes from the API
   try {
     const response = await fetch(
       `${QUOTE_SERVICE_URL}/quotes/search/topShared`
@@ -155,9 +159,28 @@ export const fetchTopSharedQuotes = async () => {
     if (!response.ok) throw new Error("Failed to fetch top shared quotes");
 
     const data = await response.json();
-    return data.length ? data : []; // empty array if no data
+    return data.length ? data : []; //empty array if no data
   } catch (error) {
     console.error("Error fetching top shared quotes:", error);
     return [];
+  }
+};
+
+export const fetchMe = async () => {
+  //fetch the currently logged-in user's data
+  try {
+    const response = await fetch(
+      `${USER_SERVICE_URL}/users/accounts/whoami`,
+      {
+        credentials: "include"
+      }
+    );
+    if (!response.ok) throw new Error("Failed to fetch user");
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    return null;
   }
 };
