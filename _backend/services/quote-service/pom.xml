@@ -13,6 +13,9 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <liberty.var.http.port>9082</liberty.var.http.port>
+        <liberty.var.https.port>9443</liberty.var.https.port>
+        <var.app.context.root>/</var.app.context.root>
     </properties>
 
     <dependencies>
@@ -59,6 +62,13 @@
         <version>5.9.2</version>
         <scope>test</scope>
     </dependency>
+
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers</artifactId>
+                <version>1.20.5</version>
+                <scope>compile</scope>
+            </dependency>
     <!-- Rest Assured for testing API endpoints -->
     <dependency>
         <groupId>io.rest-assured</groupId>
@@ -66,6 +76,30 @@
         <version>5.3.0</version>
         <scope>test</scope>
     </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-client</artifactId>
+            <version>6.2.11.Final</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-json-binding-provider</artifactId>
+            <version>6.2.11.Final</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>jakarta.json</artifactId>
+            <version>2.0.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.9.1</version>
+            <scope>test</scope>
+        </dependency>
 
     <dependency>
         <groupId>com.ibm.websphere.appserver.api</groupId>
@@ -98,6 +132,22 @@
                 <artifactId>liberty-maven-plugin</artifactId>
                  <configuration>
                  <serverName>defaultServer</serverName>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.2</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>3.5.2</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <app.http.port>${liberty.var.http.port}</app.http.port>
+                        <app.context.root>${var.app.context.root}</app.context.root>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
         </plugins>

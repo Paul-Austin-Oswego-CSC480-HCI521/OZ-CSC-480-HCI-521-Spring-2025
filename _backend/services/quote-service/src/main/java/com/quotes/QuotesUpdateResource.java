@@ -20,6 +20,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Objects;
 
 @Path("/update")
@@ -53,11 +54,17 @@ public class QuotesUpdateResource {
             ObjectMapper objectMapper = new ObjectMapper();
             QuoteObject quote = objectMapper.readValue(rawJson, QuoteObject.class);
 
+            Map<String, String> jwtMap= QuotesRetrieveAccount.retrieveJWTData(request);
+
+            if (jwtMap == null) {
+                return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to update quotes").toJson()).build();
+            }
+
             // get account ID from JWT
-            String accountID = QuotesRetrieveAccount.retrieveAccountID(request);
+            String accountID = jwtMap.get("subject");
 
             // get group from JWT
-            String group = QuotesRetrieveAccount.retrieveGroups(request);
+            String group = jwtMap.get("group");
 
             // check if account has not been logged in
             if (accountID == null || group == null) {

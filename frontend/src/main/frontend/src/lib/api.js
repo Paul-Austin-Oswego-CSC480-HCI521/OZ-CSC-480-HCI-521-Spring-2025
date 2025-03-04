@@ -19,6 +19,7 @@ export const createQuote = async ({ quote, author, tags }) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(quoteData),
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -40,6 +41,7 @@ export const deleteQuote = async (quoteId) => {
       `${QUOTE_SERVICE_URL}/quotes/delete/${quoteId}`,
       {
         method: "DELETE",
+        credentials: "include",
       }
     );
 
@@ -93,6 +95,7 @@ export const updateQuote = async (quoteData) => {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(quoteData),
+      credentials: "include",
     });
 
     const text = await response.text(); 

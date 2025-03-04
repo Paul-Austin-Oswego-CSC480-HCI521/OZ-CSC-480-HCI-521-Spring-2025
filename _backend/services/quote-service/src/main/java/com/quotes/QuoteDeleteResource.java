@@ -17,6 +17,8 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 
+import java.util.Map;
+
 
 @Path("/delete")
 public class QuoteDeleteResource {
@@ -41,11 +43,17 @@ public class QuoteDeleteResource {
             schema = @Schema(type = SchemaType.STRING)
     )@PathParam("quoteId") String quoteID, @Context HttpServletRequest request) {
         try{
+            Map<String, String> jwtMap= QuotesRetrieveAccount.retrieveJWTData(request);
+
+            if (jwtMap == null) {
+                return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to delete quotes").toJson()).build();
+            }
+
             // get account ID from JWT
-            String accountID = QuotesRetrieveAccount.retrieveAccountID(request);
+            String accountID = jwtMap.get("subject");
 
             // get group from JWT
-            String group = QuotesRetrieveAccount.retrieveGroups(request);
+            String group = jwtMap.get("group");
 
             // check if account has not been logged in
             if (accountID == null || group == null) {

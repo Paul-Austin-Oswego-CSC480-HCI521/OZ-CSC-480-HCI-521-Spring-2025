@@ -20,6 +20,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 
 import java.io.IOException;
+import java.util.Map;
 
 @Path("/create")
 public class QuoteCreateResource {
@@ -48,15 +49,38 @@ public class QuoteCreateResource {
     public Response createQuote(String rawJson, @Context HttpServletRequest request) {
         try{
 
-            String group = QuotesRetrieveAccount.retrieveGroups(request);
+            Map<String, String> jwtMap= QuotesRetrieveAccount.retrieveJWTData(request);
 
-            if (group == null) {
+            if (jwtMap == null) {
                 return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to create quotes").toJson()).build();
+            }
+
+            // get account ID from JWT
+            String accountID = jwtMap.get("subject");
+
+            // get group from JWT
+            String group = jwtMap.get("group");
+
+            if (group == null || accountID == null) {
+                return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to create quotes").toJson()).build();
+            }
+
+            ObjectId accountObjectId;
+
+            try {
+                accountObjectId = new ObjectId(accountID);
+            } catch (Exception e) {
+                return Response
+                        .status(Response.Status.NOT_FOUND)
+                        .entity(new Document("error", "Invalid object id!").toJson())
+                        .build();
             }
 
             //map json to Java Object
             ObjectMapper objectMapper = new ObjectMapper();
             QuoteObject quote = objectMapper.readValue(rawJson, QuoteObject.class);
+
+            quote.setCreator(accountObjectId);
 
             quote = SanitizerClass.sanitizeQuote(quote);
             if(quote == null) {

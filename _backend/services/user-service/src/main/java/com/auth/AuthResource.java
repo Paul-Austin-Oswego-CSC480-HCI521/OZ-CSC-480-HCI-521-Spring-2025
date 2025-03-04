@@ -10,9 +10,10 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -82,40 +83,6 @@ public class AuthResource {
                 tokenResponse.getTokenType());
 
         return accountService.newUserWithCookie(account);
-    }
-
-    @GET
-    @Path("/jwt")
-    @Produces(MediaType.TEXT_PLAIN)
-    @Operation(summary = "Ignore me I am a test!")
-    public Response getJwt(@HeaderParam("Session-Id") String sessionId) {
-        if (sessionId == null) {
-            return Response.status(Response.Status.UNAUTHORIZED).entity("[\"Missing Session Id!\"]").build();
-        }
-
-        ObjectId objectId;
-
-        try {
-            objectId = new ObjectId(sessionId);
-        } catch (Exception e) {
-            return Response
-                    .status(Response.Status.NOT_FOUND)
-                    .entity("[\"Invalid session id!\"]")
-                    .build();
-        }
-
-        AccountService accountService = new AccountService();
-        Document user = accountService.accountCollection.find(eq("_id", objectId)).first();
-
-        if (user == null) {
-            return Response.status(Response.Status.UNAUTHORIZED).entity("[\"Invalid Session Id!\"]").build();
-        }
-
-        String email = user.getString("email");
-
-        String jwt = JwtService.buildJwt(email);
-
-        return Response.ok(jwt).build();
     }
 
     public String RefreshAccessToken(String refreshToken) throws IOException {
