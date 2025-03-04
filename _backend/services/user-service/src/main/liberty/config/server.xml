@@ -21,6 +21,12 @@
         location="${server.output.dir}/resources/security/defaultKeyStore.jks" 
         password="abcdefg"/>  -->
    
+    <basicRegistry id="basic">
+        <user name="testUser" password="testPassword" />
+        <group name="users">
+            <member name="testUser" />
+        </group>
+    </basicRegistry>
 
     <!--For a user registry configuration, configure your user registry. For example, configure a basic user registry using the
         basicRegistry element. Specify your own user name below in the name attribute of the user element. For the password,
