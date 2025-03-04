@@ -67,6 +67,18 @@ public class AccountsResource {
         return accountService.retrieveUser(id, true);
     }
 
+    @GET
+    @Path("/search/email/{email}")
+    @APIResponses(value = {
+            @APIResponse(responseCode = "200", description = "Account has been found. Will return the account as json.", content = @Content(mediaType = "application/json")),
+            @APIResponse(responseCode = "404", description = "Account has not been found in the database.")
+    })
+    @Operation(summary = "Search a user account by email address.")
+    public Response searchByEmail(@PathParam("email") String email) {
+        AccountService accountService = new AccountService();
+        return accountService.retrieveUserByEmail(email, true);
+    }    
+
     @DELETE
     @Path("/delete/{id}")
     @APIResponses(value = {
