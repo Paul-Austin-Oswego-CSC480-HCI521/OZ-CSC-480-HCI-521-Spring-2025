@@ -151,6 +151,32 @@ public class AccountService {
                 .build();
     }
 
+    public Response retrieveUserByEmail(String email, boolean includePrivateData) { // retrieves ID of user by email
+        try {
+            Document user = accountCollection.find(eq("Email", email)).first();
+            
+            if (user == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(new Document("error", "User with email " + email + " not found").toJson())
+                        .build();
+            }
+            
+            if (!includePrivateData) {
+                user.remove("access_token");
+                user.remove("refresh_token");
+                user.remove("expires_at");
+                user.remove("scope");
+                user.remove("token_type");
+            }
+            
+            return Response.status(Response.Status.OK).entity(user.toJson()).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new Document("error", "Error retrieving user: " + e.getMessage()).toJson())
+                    .build();
+        }
+    }
+
     public Document retrieveUserFromCookie(HttpServletRequest request) {
         Cookie jwtCookie = null;
 

@@ -13,8 +13,6 @@ const TopNavigation = ({ user }) => {
   // Helper function to determine if the path is active
   const isActive = (path) => location.pathname === path;
 
-  
-
   return (
     <>
       <nav className="navbar navbar-expand-lg navbar-light bg-light sticky-top custom-nav">
@@ -28,28 +26,29 @@ const TopNavigation = ({ user }) => {
               <Link className="nav-link" to="/">Home</Link>
             </li>
             <li className={`nav-item ${isActive("/add-quote") ? "active" : ""}`}>
-                  <span 
-                    className="nav-link" 
-                    style={{ cursor: "pointer" }} 
-                    onClick={() => setIsModalOpen(true)}
-                  >
-                    Add Quote
-                  </span>
-                </li>
-                <li className={`nav-item ${isActive("/saved-quotes") ? "active" : ""}`}>
-                  <Link className="nav-link" to="/saved-quotes">My Collection</Link>
-                </li>
+              <span 
+                className="nav-link" 
+                style={{ cursor: "pointer" }} 
+                onClick={() => setIsModalOpen(true)}
+              >
+                Add Quote
+              </span>
+            </li>
+            <li className={`nav-item ${isActive("/saved-quotes") ? "active" : ""}`}>
+              <Link className="nav-link" to="/saved-quotes">My Collection</Link>
+            </li>
             {!user ? (
               <li className="nav-item">
                 <button className="btn btn-dark" onClick={() => navigate("/login")}>Sign in</button>
               </li>
             ) : (
-              <>
-              </>
+              <></>
             )}
             <li className="nav-item ml-3 mr-3" title={user?.Username || "Click sign in to sign in"}>
-                  <BsPersonCircle size={40} />
-                </li>
+              <Link to="/account">
+                <BsPersonCircle size={40} style={{ color: "black" }} />
+              </Link>
+            </li>
           </ul>
         </div>
       </nav>

@@ -16,3 +16,5 @@ buildNumber.properties
 _backend/services/user-service/src/main/liberty/config/server.env
 _backend/services/quote-service/src/main/liberty/config/server.env
 _backend/services/user-service/src/main/liberty/config/resources/security/defaultKeyStore.jks
+.env
+docker-compose.yml

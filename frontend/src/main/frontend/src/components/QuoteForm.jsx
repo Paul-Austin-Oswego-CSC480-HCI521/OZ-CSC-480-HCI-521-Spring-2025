@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Switch from "react-switch";
 import { useLocation, useNavigate } from "react-router-dom";
 import { updateQuote, deleteQuote } from "../lib/api";
 
@@ -11,6 +12,7 @@ const QuoteForm = () => {
   const [updateText, setUpdateText] = useState("");
   const [updateAuthor, setUpdateAuthor] = useState("");
   const [updateTagsInput, setUpdateTagsInput] = useState("");
+  const [updateIsPrivate, setUpdateIsPrivate] = useState(quote?.private ?? false ); // For setting Public/Private.
 
   useEffect(() => {
     //populate form fields with existing quote data when the component loads
@@ -19,6 +21,7 @@ const QuoteForm = () => {
       setUpdateText(quote.text || "");
       setUpdateAuthor(quote.author || "Unknown");
       setUpdateTagsInput(quote.tags ? quote.tags.join(", ") : "");
+      setUpdateIsPrivate(quote.private)
     }
   }, [quote]);
 
@@ -37,6 +40,7 @@ const QuoteForm = () => {
       author: updateAuthor || "Unknown",
       quote: updateText || "",
       tags: tagsArray.length ? tagsArray : [],
+      ["private"]: updateIsPrivate || false,
     };
 
     try {
@@ -68,6 +72,7 @@ const QuoteForm = () => {
     <div className="container vh-100 d-flex flex-column justify-content-center align-items-center">
       <h1>Edit Quote</h1>
       <form className="w-50" onSubmit={handleUpdateQuote}>
+        
         <div className="mb-3">
           <label htmlFor="quoteText" className="form-label">Quote Text</label>
           <textarea
@@ -77,6 +82,7 @@ const QuoteForm = () => {
             onChange={(e) => setUpdateText(e.target.value)} //update text state when user types
           />
         </div>
+        
         <div className="mb-3">
           <label htmlFor="author" className="form-label">Author</label>
           <input
@@ -87,6 +93,7 @@ const QuoteForm = () => {
             onChange={(e) => setUpdateAuthor(e.target.value)} //update author state when user types
           />
         </div>
+        
         <div className="mb-3">
           <label htmlFor="tags" className="form-label">Tags</label>
           <input
@@ -98,6 +105,17 @@ const QuoteForm = () => {
             placeholder="Comma separated tags"
           />
         </div>
+
+        <div className="mb-3">
+            <label htmlFor="ownership" className="form-label">Set Private</label>
+            <Switch
+              id="privateStatus"
+              className="react-switch"
+              checked={updateIsPrivate}
+              onChange={ (checked) => setUpdateIsPrivate(checked)}
+            />
+        </div>
+        
         <button type="submit" className="btn btn-primary">Update Quote</button>
       </form>
 

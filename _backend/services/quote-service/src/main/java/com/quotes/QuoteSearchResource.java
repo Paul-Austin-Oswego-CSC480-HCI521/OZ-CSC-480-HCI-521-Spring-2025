@@ -1,12 +1,5 @@
 package com.quotes;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import org.bson.types.ObjectId;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
@@ -14,6 +7,14 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+
+import jakarta.inject.Inject;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 @Path("/search")
 public class QuoteSearchResource {
@@ -159,4 +160,35 @@ public class QuoteSearchResource {
             return Response.status(Response.Status.CONFLICT).entity("Exception Occurred: "+e).build();
         }
     }
+    @GET
+    @Path("/user/{userId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @APIResponses(value = {
+            @APIResponse(responseCode = "200", description = "Successfully found and returned user's quotes"),
+            @APIResponse(responseCode = "400", description = "Given ID is not a valid ObjectId"),
+            @APIResponse(responseCode = "409", description = "Exception occurred during operation")
+    })
+    @Operation(summary = "Get all quotes uploaded by a specific user", description = "Returns JSON of all quotes uploaded by the user")
+    public Response getQuotesByUser(@Parameter(
+            description = "ID of the user whose quotes you want to get",
+            required = true,
+            example = "67b61f18daa68e25fbd151e9",
+            schema = @Schema(type = SchemaType.STRING)
+    ) @PathParam("userId") String userId) {
+        try {
+            // Check if ID is valid form
+            if (!SanitizerClass.validObjectId(userId)) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("Given ID is not valid ObjectId").build();
+            }
+
+            ObjectId objectId = new ObjectId(userId);
+            String jsonQuotes = mongo.getQuotesByUser(objectId);
+
+            return Response.ok(jsonQuotes).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.CONFLICT).entity("Exception Occurred: " + e).build();
+        }
+    }
 }
+
+

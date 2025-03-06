@@ -1,5 +1,6 @@
 package com.quotes;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
@@ -16,6 +17,9 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+
+import java.io.IOException;
+import java.util.Map;
 
 
 @Path("/delete")
@@ -41,19 +45,37 @@ public class QuoteDeleteResource {
             schema = @Schema(type = SchemaType.STRING)
     )@PathParam("quoteId") String quoteID, @Context HttpServletRequest request) {
         try{
+            Map<String, String> jwtMap= QuotesRetrieveAccount.retrieveJWTData(request);
+
+            if (jwtMap == null) {
+                return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to delete quotes").toJson()).build();
+            }
+
             // get account ID from JWT
-            String accountID = QuotesRetrieveAccount.retrieveAccountID(request);
+            String accountID = jwtMap.get("subject");
 
             // get group from JWT
-            String group = QuotesRetrieveAccount.retrieveGroups(request);
+            String group = jwtMap.get("group");
 
             // check if account has not been logged in
             if (accountID == null || group == null) {
                 return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to delete quotes").toJson()).build();
             }
 
+            ObjectId objectId = new ObjectId(quoteID);
+            String jsonQuote = mongo.getQuote(objectId);
+            QuoteObject quote;
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                quote = objectMapper.readValue(jsonQuote, QuoteObject.class);
+            } catch (IOException e) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("IOException: "+e).build();
+            }
+
+            ObjectId accountObjectID = new ObjectId(accountID);
+
             // user is not owner of quote
-            if (!accountID.equals(quoteID) && !group.equals("admin")) {
+            if (!accountObjectID.equals(quote.getCreator()) && !group.equals("admin")) {
                 return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to delete quotes").toJson()).build();
             }
 
@@ -62,7 +84,6 @@ public class QuoteDeleteResource {
                 return Response.status(Response.Status.BAD_REQUEST).entity("Given ID is not valid ObjectId").build();
             }
 
-            ObjectId objectId = new ObjectId(quoteID);
             boolean result = mongo.deleteQuote(objectId);
             if(result) {
                 JsonObject jsonResponse = Json.createObjectBuilder()

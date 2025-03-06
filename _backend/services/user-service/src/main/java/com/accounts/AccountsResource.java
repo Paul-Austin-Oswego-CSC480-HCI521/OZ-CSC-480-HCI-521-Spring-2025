@@ -67,6 +67,17 @@ public class AccountsResource {
         return accountService.retrieveUser(id, true);
     }
 
+    @GET
+    @Path("/search/email/{email}")
+    @APIResponses(value = {
+            @APIResponse(responseCode = "200", description = "Account has been found. Will return the account as json.", content = @Content(mediaType = "application/json")),
+            @APIResponse(responseCode = "404", description = "Account has not been found in the database.")
+    })
+    @Operation(summary = "Search a user account by email address.")
+    public Response searchByEmail(@PathParam("email") String email) {
+        return accountService.retrieveUserByEmail(email, true);
+    }    
+
     @DELETE
     @Path("/delete/{id}")
     @APIResponses(value = {
@@ -135,15 +146,6 @@ public class AccountsResource {
     }
 
     @GET
-    @Path("/admin")
-    @Produces(MediaType.TEXT_PLAIN)
-    @RolesAllowed("admin")
-    @Operation(summary = "Ignore me I am a test!")
-    public Response adminOnly() {
-        return Response.ok("Access granted to admin").build();
-    }
-
-    @GET
     @Path("/whoami")
     @Produces(MediaType.APPLICATION_JSON)
     public Response whoAmI(@Context HttpServletRequest request) {
@@ -178,26 +180,6 @@ public class AccountsResource {
                     .entity("{\"error\": \"Invalid JWT\" }")
                     .build();
         }
-    }
-
-    @GET
-    @Path("/debug")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Ignore me I am a test!")
-    public Response debugJwt(@Context SecurityContext securityContext) {
-        Principal user = securityContext.getUserPrincipal();
-        JsonObjectBuilder json = Json.createObjectBuilder();
-
-        if (user != null) {
-            json.add("user", user.getName());
-            json.add("rolesDetected", securityContext.isUserInRole("admin") ? "admin" : "none");
-            json.add("test", securityContext.getUserPrincipal().toString());
-            json.add("email", securityContext.getUserPrincipal().getName());
-        } else {
-            json.add("error", "JWT not recognized");
-        }
-
-        return Response.ok(json.build()).build();
     }
 
 }

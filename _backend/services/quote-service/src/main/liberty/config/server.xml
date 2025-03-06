@@ -99,7 +99,12 @@
           allowedHeaders="Origin, Content-Type, Accept, Authorization"
           exposeHeaders="Content-Length, Content-Type"
           allowCredentials="true"/>
-
+    <cors domain="/quotes/search/user/"
+          allowedOrigins="${frontend.root}"
+          allowedMethods="GET, POST, PUT, DELETE, OPTIONS"
+          allowedHeaders="Origin, Content-Type, Accept, Authorization"
+          exposeHeaders="Content-Length, Content-Type"
+          allowCredentials="true"/>
     <!-- Handle preflight OPTIONS requests -->
     <!-- <filter id="CorsFilter" className="com.quoteapp.filters.CorsFilter"/> -->
 

@@ -3,16 +3,17 @@ import React, { useState } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
+import AccountPage from "./pages/AccountPage";
 import Layout from "./components/Layout";
 import SavedQuotes from "./pages/SavedQuotes";
 import QuoteForm from "./components/QuoteForm";
 import DebugPage from "./pages/DebugPage";
 import { userQuotes, bookmarkedQuotes } from "./placeholderdata";
+import SearchPage from './pages/SearchPage';
+import AccountSetup from './pages/AccountSetup';
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-
 
   return (
     <Router>
@@ -31,6 +32,9 @@ const App = () => {
           <Route path="/edit-quote/:id" element={<QuoteForm />} />
           <Route path="/debug" element={<DebugPage />} />
           <Route path="/" element={<LandingPage />} />
+          <Route path="/account" element={<AccountPage />} />
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="/setup" element={<AccountSetup />} />
         </Route>
       </Routes>
     </Router>

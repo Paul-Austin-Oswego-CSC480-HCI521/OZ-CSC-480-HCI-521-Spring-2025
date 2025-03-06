@@ -8,10 +8,12 @@
 name: 480-entire-stack
 
 services:
+
+  # For GUI, comment this section out when building and run npm run dev in /frontend/src/main/frontend to debug changes. 
   frontend:
-    build: ./frontend/src/main/frontend
-    ports:
-      - 9080:80
+   build: ./frontend/src/main/frontend
+   ports:
+     - 9080:80
 
 
   quotes-service:

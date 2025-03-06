@@ -10,7 +10,7 @@ import { FetchTopQuotes } from "../lib/FetchTopQuotes"
 const LandingPage = () => {
   const [alert, setAlert] = useState(null);
   const [quoteText, setQuoteText] = useState(""); 
-  const [isLoggedIn, setIsLoggedIn] = useState(true); 
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
 

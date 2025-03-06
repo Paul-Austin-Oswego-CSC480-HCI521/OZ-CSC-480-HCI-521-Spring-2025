@@ -138,9 +138,19 @@
         allowedMethods="GET, POST, PUT, DELETE, OPTIONS"
         allowedHeaders="Content-Type, Authorization, Accept"
         allowCredentials="true"/>
+    <cors domain="/users/bookmarks"
+        allowedOrigins="${ORIGIN}"
+        allowedMethods="GET, POST, PUT, DELETE, OPTIONS"
+        allowedHeaders="Content-Type, Authorization, Accept"
+        allowCredentials="true"/>
 
+    <cors domain="/users/bookmarks/delete"
+        allowedOrigins="${ORIGIN}"
+        allowedMethods="GET, POST, PUT, DELETE, OPTIONS"
+        allowedHeaders="Content-Type, Authorization, Accept"
+        allowCredentials="true"/>
 
-        <!-- Enable static content serving -->
+    <!-- Enable static content serving -->
     <httpDispatcher enableWelcomePage="true"/>
 
     <!-- Default SSL configuration enables trust for default certificates from the Java runtime -->

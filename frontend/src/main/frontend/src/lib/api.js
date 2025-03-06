@@ -3,7 +3,7 @@ const QUOTE_SERVICE_URL =
 const USER_SERVICE_URL =
   import.meta.env.VITE_USER_SERVICE_URL || "http://localhost:9081"; //set the user service URL, using an environment variable if available
 
-export const createQuote = async ({ quote, author, tags }) => {
+export const createQuote = async ({ quote, author, tags, private: isPrivate }) => {
   //send a request to create a new quote, including author, text, tags, and a timestamp
   try {
     const quoteData = {
@@ -11,6 +11,7 @@ export const createQuote = async ({ quote, author, tags }) => {
       author: author || "Unknown",
       date: Math.floor(new Date().getTime() / 1000), //convert to Unix timestamp for int
       tags: tags || [],
+      ["private"]: isPrivate || false,
     };
 
     console.log("Sending API Payload:", JSON.stringify(quoteData));
@@ -19,6 +20,7 @@ export const createQuote = async ({ quote, author, tags }) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(quoteData),
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -40,6 +42,7 @@ export const deleteQuote = async (quoteId) => {
       `${QUOTE_SERVICE_URL}/quotes/delete/${quoteId}`,
       {
         method: "DELETE",
+        credentials: "include",
       }
     );
 
@@ -93,6 +96,7 @@ export const updateQuote = async (quoteData) => {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(quoteData),
+      credentials: "include",
     });
 
     const text = await response.text(); 
@@ -178,9 +182,106 @@ export const fetchMe = async () => {
     if (!response.ok) throw new Error("Failed to fetch user");
 
     const data = await response.json();
+    console.log("Fetched user:", data); // Debugging
     return data;
   } catch (error) {
     console.error("Error fetching user data:", error);
     return null;
+  }
+};
+
+export const bookmarkQuote = async (quoteId) => {
+  //send a request to bookmark a quote by its ID
+  try {
+    console.log("Sending bookmark request for quote ID:", quoteId);
+
+    const response = await fetch(`${USER_SERVICE_URL}/users/bookmarks/${quoteId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      const errorMessage = await response.text();
+      console.error("Backend returned an error:", errorMessage);
+      throw new Error(`Failed to bookmark quote: ${errorMessage}`);
+    }
+
+    const responseData = await response.json();
+    console.log("Raw API Response:", responseData);
+    return responseData;
+  } catch (error) {
+    console.error("Error bookmarking quote:", error);
+    throw error;
+  }
+};
+
+export const deleteBookmark = async (quoteId) => {
+  //send a request to delete a bookmark by its ID
+  try {
+    console.log("Sending delete bookmark request for quote ID:", quoteId);
+
+    const response = await fetch(`${USER_SERVICE_URL}/users/bookmarks/delete/${quoteId}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      const errorMessage = await response.text();
+      console.error("Backend returned an error:", errorMessage);
+      throw new Error(`Failed to delete bookmark: ${errorMessage}`);
+    }
+
+    const responseData = await response.json();
+    console.log("Raw API Response:", responseData);
+    return responseData;
+  } catch (error) {
+    console.error("Error deleting bookmark:", error);
+    throw error;
+  }
+};
+
+export const updateMe = async (updatedData) => {
+  try {
+    const user = await fetchMe();
+    console.log("User fetched for update:", user);
+
+    const userId = user._id?.$oid; 
+    if (!userId) {
+      throw new Error("User ID not found or invalid");
+    }
+
+    const response = await fetch(`${USER_SERVICE_URL}/users/accounts/update/${userId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedData),
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      const errorMessage = await response.text();
+      console.error("Backend returned an error:", errorMessage);
+      throw new Error(`Failed to update user: ${errorMessage}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error updating user:", error);
+    throw error;
+  }
+};
+
+export const fetchUserQuotes = async (userId) => {
+  //fetch quotes created by a specific user
+  try {
+    const response = await fetch(`${QUOTE_SERVICE_URL}/quotes/search/user/${userId}`);
+    if (!response.ok) throw new Error("Failed to fetch user quotes");
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching user quotes:", error);
+    return [];
   }
 };
