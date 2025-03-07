@@ -44,6 +44,12 @@ public class AccountService {
 
     }
 
+    public AccountService(String connectionString, String dbName, String collectionName) {
+        client = MongoClients.create(connectionString);
+        accountDB = client.getDatabase(dbName);
+        accountCollection = accountDB.getCollection(collectionName);
+    }
+
     public Response newUser(String accountJson) {
         Document accountDocument;
         try {
@@ -224,6 +230,16 @@ public class AccountService {
 
         MongoCollection<Document> users = accountDB.getCollection("Users");
         Bson query = eq("_id", objectId);
+        users.deleteOne(query);
+
+        return Response
+                .status(Response.Status.OK)
+                .build();
+    }
+
+    public Response deleteUserByEmail(String email) {
+        MongoCollection<Document> users = accountDB.getCollection("Users");
+        Bson query = eq("Email", email);
         users.deleteOne(query);
 
         return Response
