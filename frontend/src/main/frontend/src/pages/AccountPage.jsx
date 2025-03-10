@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { fetchMe, updateMe } from "../lib/api";
+import { BsCheckSquare, BsPencilSquare } from "react-icons/bs"; // Import icons
+import { useNavigate } from "react-router-dom";
 
 const AccountPage = () => {
   const [user, setUser] = useState(null);
@@ -10,6 +12,7 @@ const AccountPage = () => {
   const [isEditingPersonalQuote, setIsEditingPersonalQuote] = useState(false);
   const [updatedProfession, setUpdatedProfession] = useState("");
   const [updatedPersonalQuote, setUpdatedPersonalQuote] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch("http://localhost:9081/users/accounts/whoami", { credentials: "include" })
@@ -35,21 +38,21 @@ const AccountPage = () => {
 
   const handleSaveProfession = () => {
     if (!user) return;
-  
+
     updateMe({ Profession: updatedProfession })
-      .then(() => fetchMe())  // Re-fetch user after update
+      .then(() => fetchMe()) 
       .then((updatedUser) => {
         setUser(updatedUser);
         setIsEditingProfession(false);
       })
       .catch((error) => console.error("Failed to update profession:", error));
   };
-  
+
   const handleSavePersonalQuote = () => {
     if (!user) return;
-  
+
     updateMe({ PersonalQuote: updatedPersonalQuote })
-      .then(() => fetchMe())  // Re-fetch user after update
+      .then(() => fetchMe())  
       .then((updatedUser) => {
         setUser(updatedUser);
         setIsEditingPersonalQuote(false);
@@ -61,85 +64,110 @@ const AccountPage = () => {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="container mt-5">
-      <h1>Hello There!</h1>
-      {user ? (
-        <div className="card">
-          <div className="card-body">
-            <h5 className="card-title">User Information</h5>
-            <img
-              src={user.profilePicture}
-              alt="Profile"
-              className="img-fluid rounded-circle mb-3"
-              style={{ width: "150px", height: "150px" }}
-            />
-            <p className="card-text"><strong>Name:</strong> {user.Username}</p>
-            <p className="card-text"><strong>Email:</strong> {user.Email}</p>
+    <div className="container mt-4">
+      <h2 className="text-start">Hello there!</h2>
 
-            {/* Profession Field */}
-            <p className="card-text">
-              <strong>Profession:</strong>
-              {isEditingProfession ? (
-                <>
-                  <input
-                    type="text"
-                    value={updatedProfession}
-                    onChange={(e) => setUpdatedProfession(e.target.value)}
-                    className="form-control"
-                  />
-                  <button onClick={handleSaveProfession} className="btn btn-primary mt-2">Save</button>
-                </>
-              ) : (
-                <>
-                  {user.Profession || "Not Set"}
-                  <button onClick={() => setIsEditingProfession(true)} className="btn btn-link">Edit</button>
-                </>
-              )}
-            </p>
+      {user && (
+        <div className="mt-4">
+          {/* Profile Section */}
+          <div className="d-flex align-items-center mb-3">
+            <div
+              className="rounded-circle d-flex align-items-center justify-content-center"
+              style={{
+                width: "60px",
+                height: "60px",
+                border: "2px solid black",
+                fontSize: "24px",
+                fontWeight: "bold",
+              }}
+            >
+              {user.Username ? user.Username[0].toUpperCase() : "U"}
+            </div>
+            <div className="ms-3 text-start">
+              <h5 className="fw-bold">{user.Username}</h5>
+              
+              {/* Editable Profession */}
+              <p className="m-0">
+                {isEditingProfession ? (
+                  <>
+                    <input
+                      type="text"
+                      value={updatedProfession}
+                      onChange={(e) => setUpdatedProfession(e.target.value)}
+                      className="form-control d-inline-block"
+                      style={{ width: "400px" }}
+                    />
+                    <BsCheckSquare
+                      onClick={handleSaveProfession}
+                      className="ms-2"
+                      style={{ cursor: "pointer", fontSize: "20px" }}
+                    />
+                  </>
+                ) : (
+                  <>
+                    {user.Profession || "Not Set"}
+                    <BsPencilSquare
+                      className="ms-2 text-muted"
+                      style={{ cursor: "pointer", fontSize: "18px" }}
+                      onClick={() => setIsEditingProfession(true)}
+                    />
+                  </>
+                )}
+              </p>
 
-            {/* Personal Quote Field */}
-            <p className="card-text">
-              <strong>Personal Quote:</strong>
-              {isEditingPersonalQuote ? (
-                <>
-                  <input
-                    type="text"
-                    value={updatedPersonalQuote}
-                    onChange={(e) => setUpdatedPersonalQuote(e.target.value)}
-                    className="form-control"
-                  />
-                  <button onClick={handleSavePersonalQuote} className="btn btn-primary mt-2">Save</button>
-                </>
-              ) : (
-                <>
-                  {user.PersonalQuote || "Not Set"}
-                  <button onClick={() => setIsEditingPersonalQuote(true)} className="btn btn-link">Edit</button>
-                </>
-              )}
-            </p>
-
-          </div>
-          {/* Preferences and Settings Card */}
-          <div className="card mb-4">
-            <div className="card-body">
-              <h5 className="card-title">Preferences and Settings</h5>
-              <button className="btn btn-link">Privacy Settings</button>
-              <button className="btn btn-link">Quote Visibility Settings</button>
-              <button className="btn btn-link">Theme Preferences</button>
+              {/* Editable Personal Quote */}
+              <p className="m-0">
+                {isEditingPersonalQuote ? (
+                  <>
+                    <input
+                      type="text"
+                      value={updatedPersonalQuote}
+                      onChange={(e) => setUpdatedPersonalQuote(e.target.value)}
+                      className="form-control d-inline-block"
+                      style={{ width: "400px" }}
+                    />
+                    <BsCheckSquare
+                      onClick={handleSavePersonalQuote}
+                      className="ms-2"
+                      style={{ cursor: "pointer", fontSize: "20px" }}
+                    />
+                  </>
+                ) : (
+                  <>
+                    {user.PersonalQuote || "Not Set"}
+                    <BsPencilSquare
+                      className="ms-2 text-muted"
+                      style={{ cursor: "pointer", fontSize: "18px" }}
+                      onClick={() => setIsEditingPersonalQuote(true)}
+                    />
+                  </>
+                )}
+              </p>
             </div>
           </div>
 
-          {/* Quotes & Collection Card */}
-          <div className="card mb-4">
-            <div className="card-body">
-              <h5 className="card-title">Quotes & Collection</h5>
-              <button className="btn btn-link">Saved Quotes</button>
-              <button className="btn btn-link">Uploaded Quotes (PR/PB)</button>
-            </div>
+
+          <hr />
+
+          {/* Quotes & Collection Section */}
+          <div className="mt-4">
+            <h6 className="fw-bold mb-3 text-start">Quotes & Collection</h6>
+            <button 
+              className="btn w-100 text-start text-black fw-normal" 
+              style={{ background: "none", border: "none" }}
+              onClick={() => navigate("/saved-quotes")}
+            >
+              Saved Quotes
+            </button>
+            <button 
+              className="btn w-100 text-start text-black fw-normal" 
+              style={{ background: "none", border: "none" }}
+              onClick={() => navigate("/saved-quotes")}
+            >
+              Uploaded Quotes (PR/PB)
+            </button>
           </div>
         </div>
-      ) : (
-        <div>No user information available.</div>
       )}
     </div>
   );

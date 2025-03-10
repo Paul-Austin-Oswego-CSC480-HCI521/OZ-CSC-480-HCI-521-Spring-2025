@@ -10,6 +10,7 @@ import QuoteForm from "./components/QuoteForm";
 import DebugPage from "./pages/DebugPage";
 import { userQuotes, bookmarkedQuotes } from "./placeholderdata";
 import SearchPage from './pages/SearchPage';
+import AccountSetup from './pages/AccountSetup';
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -33,6 +34,7 @@ const App = () => {
           <Route path="/" element={<LandingPage />} />
           <Route path="/account" element={<AccountPage />} />
           <Route path="/search" element={<SearchPage />} />
+          <Route path="/setup" element={<AccountSetup />} />
         </Route>
       </Routes>
     </Router>

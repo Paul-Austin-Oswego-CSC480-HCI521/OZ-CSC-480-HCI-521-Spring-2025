@@ -65,16 +65,7 @@ public class QuoteCreateResource {
                 return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to create quotes").toJson()).build();
             }
 
-            ObjectId accountObjectId;
-
-            try {
-                accountObjectId = new ObjectId(accountID);
-            } catch (Exception e) {
-                return Response
-                        .status(Response.Status.NOT_FOUND)
-                        .entity(new Document("error", "Invalid object id!").toJson())
-                        .build();
-            }
+            ObjectId accountObjectId = new ObjectId(accountID);
 
             //map json to Java Object
             ObjectMapper objectMapper = new ObjectMapper();

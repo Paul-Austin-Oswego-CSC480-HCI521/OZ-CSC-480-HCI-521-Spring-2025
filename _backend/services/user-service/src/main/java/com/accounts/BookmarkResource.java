@@ -78,7 +78,7 @@ public class BookmarkResource {
             int currentBookmarks = quoteSearchDoc.getInteger("bookmarks", 0);
             quoteSearchDoc.put("bookmarks", currentBookmarks + 1);
             quoteSearchDoc.remove("creator");
-            Response quoteUpdateRes = quoteClient.updateQuote(jwtCookie,quoteSearchDoc.toJson());
+            Response quoteUpdateRes = quoteClient.updateQuote(quoteSearchDoc.toJson());
             if(quoteUpdateRes.getStatus()!=Response.Status.OK.getStatusCode()){
             return quoteUpdateRes;
          }
@@ -180,7 +180,7 @@ public class BookmarkResource {
             quoteSearchDoc.remove("creator");
             int currentBookmarks = quoteSearchDoc.getInteger("bookmarks", 0);
             quoteSearchDoc.put("bookmarks", currentBookmarks - 1);
-            Response quoteUpdateRes = quoteClient.updateQuote(jwtCookie,quoteSearchDoc.toJson());
+            Response quoteUpdateRes = quoteClient.updateQuote(quoteSearchDoc.toJson());
             if(quoteUpdateRes.getStatus()!=Response.Status.OK.getStatusCode()){
             return Response
             .status(Response.Status.BAD_GATEWAY)

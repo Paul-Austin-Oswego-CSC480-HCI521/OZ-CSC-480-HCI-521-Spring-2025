@@ -1,0 +1,69 @@
+/* Thin */
+@font-face {
+  font-family: 'Lato';
+  font-style: italic;
+  font-weight: 100;
+  src: url(/fonts/lato/Lato-ThinItalic.ttf);
+}
+
+@font-face {
+  font-family: 'Lato';
+  font-weight: 100;
+  src: url(/fonts/lato/Lato-Thin.ttf);
+}
+
+/* Light */
+@font-face {
+  font-family: 'Lato';
+  font-style: italic;
+  font-weight: 300;
+  src: url(/fonts/lato/Lato-LightItalic.ttf);
+}
+
+@font-face {
+  font-family: 'Lato';
+  font-weight: 300;
+  src: url(/fonts/lato/Lato-Light.ttf);
+}
+
+/* Regular */
+@font-face {
+  font-family: 'Lato';
+  font-style: italic;
+  font-weight: 400;
+  src: url(/fonts/lato/Lato-Italic.ttf);
+}
+
+@font-face {
+  font-family: 'Lato';
+  font-weight: 400;
+  src: url(/fonts/lato/Lato-Regular.ttf);
+}
+
+/* Bold */
+@font-face {
+  font-family: 'Lato';
+  font-style: italic;
+  font-weight: 600;
+  src: url(/fonts/lato/Lato-BoldItalic.ttf);
+}
+
+@font-face {
+  font-family: 'Lato';
+  font-weight: 600;
+  src: url(/fonts/lato/Lato-Bold.ttf);
+}
+
+/* Black */
+@font-face {
+  font-family: 'Lato';
+  font-style: italic;
+  font-weight: 800;
+  src: url(/fonts/lato/Lato-BlackItalic.ttf);
+}
+
+@font-face {
+  font-family: 'Lato';
+  font-weight: 800;
+  src: url(/fonts/lato/Lato-Black.ttf);
+}

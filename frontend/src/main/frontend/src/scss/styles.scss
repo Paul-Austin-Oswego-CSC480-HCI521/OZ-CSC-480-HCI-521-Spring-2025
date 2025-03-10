@@ -2,13 +2,16 @@
 @import "bootstrap/scss/bootstrap";
 
 h1 {
-  color: #1E1E1E;
-  text-align: center;
-  font-family: Roboto;
-  font-size: 40px;
+  color: #000;
+  font-family: Inter;
+  font-size: 24px;
   font-style: normal;
-  font-weight: 700;
-  line-height: 48px;
+  font-weight: 500;
+  line-height: normal;
+}
+
+body {
+  background-color: #f8fdf1;
 }
 
 .form-control::placeholder {

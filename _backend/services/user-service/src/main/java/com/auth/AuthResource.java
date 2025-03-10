@@ -29,7 +29,7 @@ import static com.mongodb.client.model.Filters.eq;
 public class AuthResource {
 
     public static AccountService accountService = new AccountService();
-    public static String HOME_URL = "http://localhost:9080";
+    public static String HOME_URL = "http://localhost:9080/setup";
 
     @GET
     @Produces(MediaType.APPLICATION_FORM_URLENCODED)

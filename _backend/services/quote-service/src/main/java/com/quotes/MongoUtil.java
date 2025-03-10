@@ -9,7 +9,9 @@ import org.bson.types.ObjectId;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @ApplicationScoped
 public class MongoUtil {
@@ -329,6 +331,26 @@ public class MongoUtil {
         return stringWriter.toString();
     }
 
+    public String getQuotesByUser(ObjectId userId) {
+        MongoCollection<Document> collection = database.getCollection("Quotes");
+
+        List<Document> quotes = collection.find(new Document("creator", userId)).into(new ArrayList<>());
+
+        JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
+
+        for (Document doc : quotes) {
+            doc.put("_id", doc.getObjectId("_id").toString()); // gets rid of "$oid" subfield
+            JsonObject jsonObject = Json.createReader(new java.io.StringReader(doc.toJson())).readObject();
+            jsonArrayBuilder.add(jsonObject);
+        }
+
+        //put json array back into string form
+        StringWriter stringWriter = new StringWriter();
+        try (JsonWriter jsonWriter = Json.createWriter(stringWriter)) {
+            jsonWriter.writeArray(jsonArrayBuilder.build());
+        }
+        return stringWriter.toString();
+    }
 
     public static void close() {
         if(mongoClient != null) {

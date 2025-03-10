@@ -23,8 +23,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 
-@Path("/update")
-public class QuotesUpdateResource {
+@Path("/update/bookmark")
+public class QuotesUpdateBookmark {
 
     @Inject
     MongoUtil mongo;
@@ -57,31 +57,6 @@ public class QuotesUpdateResource {
             ObjectId objectId = new ObjectId(quote.getId().toString());
             String jsonQuote = mongo.getQuote(objectId);
             QuoteObject oldQuote = objectMapper.readValue(jsonQuote, QuoteObject.class);
-
-            Map<String, String> jwtMap= QuotesRetrieveAccount.retrieveJWTData(request);
-
-            if (jwtMap == null) {
-                return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to update quotes").toJson()).build();
-            }
-
-            // get account ID from JWT
-            String accountID = jwtMap.get("subject");
-
-            // get group from JWT
-            String group = jwtMap.get("group");
-
-            // check if account has not been logged in
-            if (accountID == null || group == null) {
-                return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to update quotes").toJson()).build();
-            }
-
-            // string to ObjectId
-            ObjectId accountObjectID = new ObjectId(accountID);
-
-            // user is not owner of quote
-            if (!accountObjectID.equals(oldQuote.getCreator()) && !group.equals("admin")) {
-                return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to update quotes").toJson()).build();
-            }
 
             quote = SanitizerClass.sanitizeQuote(quote);
             if(quote == null) {
