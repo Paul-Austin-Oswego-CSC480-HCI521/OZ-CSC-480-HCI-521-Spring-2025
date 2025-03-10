@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Switch from "react-switch";
 import { useLocation, useNavigate } from "react-router-dom";
 import { updateQuote, deleteQuote } from "../lib/api";
+import Tag from "../components/Tag";
 
 const QuoteForm = () => {
   const location = useLocation();
@@ -12,7 +13,7 @@ const QuoteForm = () => {
   const [updateText, setUpdateText] = useState("");
   const [updateAuthor, setUpdateAuthor] = useState("");
   const [updateTagsInput, setUpdateTagsInput] = useState("");
-  const [updateIsPrivate, setUpdateIsPrivate] = useState(quote?.private ?? false ); // For setting Public/Private.
+  const [updateIsPrivate, setUpdateIsPrivate] = useState(quote?.private ?? false); // For setting Public/Private.
 
   useEffect(() => {
     //populate form fields with existing quote data when the component loads
@@ -21,7 +22,7 @@ const QuoteForm = () => {
       setUpdateText(quote.text || "");
       setUpdateAuthor(quote.author || "Unknown");
       setUpdateTagsInput(quote.tags ? quote.tags.join(", ") : "");
-      setUpdateIsPrivate(quote.private)
+      setUpdateIsPrivate(quote.private);
     }
   }, [quote]);
 
@@ -65,13 +66,13 @@ const QuoteForm = () => {
     } finally {
       localStorage.setItem("alertMessage", "Quote deleted successfully!");
       navigate("/"); //redirect back to home after deletion
-    } 
+    }
   };
 
   return (
     <div className="container vh-100 d-flex flex-column justify-content-center align-items-center">
       <h1>Edit Quote</h1>
-      <form className="w-50" onSubmit={handleUpdateQuote}>
+      <form className="w-50" onSubmit={handleUpdateQuote} style={{ background: "#f8fdf1", padding: "20px", borderRadius: "10px", boxShadow: "0 2px 5px rgba(0,0,0,0.1)" }}>
         
         <div className="mb-3">
           <label htmlFor="quoteText" className="form-label">Quote Text</label>
@@ -80,6 +81,7 @@ const QuoteForm = () => {
             className="form-control"
             value={updateText}
             onChange={(e) => setUpdateText(e.target.value)} //update text state when user types
+            style={{ fontFamily: "Inter", fontSize: "16px", lineHeight: "24px" }}
           />
         </div>
         
@@ -91,6 +93,7 @@ const QuoteForm = () => {
             className="form-control"
             value={updateAuthor}
             onChange={(e) => setUpdateAuthor(e.target.value)} //update author state when user types
+            style={{ fontFamily: "Inter", fontSize: "16px", lineHeight: "24px" }}
           />
         </div>
         
@@ -103,7 +106,13 @@ const QuoteForm = () => {
             value={updateTagsInput}
             onChange={(e) => setUpdateTagsInput(e.target.value)} //update tags state when user types
             placeholder="Comma separated tags"
+            style={{ fontFamily: "Inter", fontSize: "16px", lineHeight: "24px" }}
           />
+          <div className="mt-2">
+            {updateTagsInput.split(",").map((tag, index) => (
+              <Tag text={tag.trim()} key={index} />
+            ))}
+          </div>
         </div>
 
         <div className="mb-3">
@@ -112,7 +121,7 @@ const QuoteForm = () => {
               id="privateStatus"
               className="react-switch"
               checked={updateIsPrivate}
-              onChange={ (checked) => setUpdateIsPrivate(checked)}
+              onChange={(checked) => setUpdateIsPrivate(checked)}
             />
         </div>
         

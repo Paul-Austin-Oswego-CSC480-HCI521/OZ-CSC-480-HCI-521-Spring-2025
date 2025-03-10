@@ -182,7 +182,6 @@ export const fetchMe = async () => {
     if (!response.ok) throw new Error("Failed to fetch user");
 
     const data = await response.json();
-    console.log("Fetched user:", data); // Debugging
     return data;
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -283,5 +282,19 @@ export const fetchUserQuotes = async (userId) => {
   } catch (error) {
     console.error("Error fetching user quotes:", error);
     return [];
+  }
+};
+
+export const fetchQuoteById = async (quoteId) => {
+  //fetch a quote by its ID
+  try {
+    const response = await fetch(`${QUOTE_SERVICE_URL}/quotes/search/id/${quoteId}`);
+    if (!response.ok) throw new Error("Failed to fetch quote");
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching quote:", error);
+    return null;
   }
 };

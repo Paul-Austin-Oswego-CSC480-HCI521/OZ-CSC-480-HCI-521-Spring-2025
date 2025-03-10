@@ -1,5 +1,6 @@
 package com.accounts;
 
+
 import com.auth.AuthResource;
 import com.auth.JwtService;
 import com.ibm.websphere.security.jwt.InvalidConsumerException;
@@ -21,28 +22,36 @@ import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import jakarta.ws.rs.core.Response;
 
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+
 import static com.mongodb.client.model.Filters.eq;
 
+
 public class AccountService {
+
 
     public static MongoClient client;
     public static MongoDatabase accountDB;
     public static MongoCollection<Document> accountCollection;
 
+
     public AccountService() {
         String connectionString = System.getenv("CONNECTION_STRING");
+
 
         client = MongoClients.create(connectionString);
         accountDB = client.getDatabase("Accounts");
         accountCollection = accountDB.getCollection("Users");
 
+
     }
+
 
     public Response newUser(String accountJson) {
         Document accountDocument;
@@ -55,6 +64,7 @@ public class AccountService {
                     .build();
         }
 
+
         if (accountCollection.find(eq("email", accountDocument.getString("email"))).first() != null) {
             return Response
                     .status(Response.Status.CONFLICT)
@@ -62,20 +72,26 @@ public class AccountService {
                     .build();
         }
 
+
         accountCollection.insertOne(accountDocument);
+
 
         return Response
                 .status(Response.Status.OK)
                 .entity(accountDocument.toJson())
                 .build();
 
+
     }
+
 
     public Response newUserWithCookie(Account account) {
         Document accountDocument = Document.parse(account.toJson());
         Document oldAccountDocument = accountCollection.find(eq("Email", accountDocument.getString("Email"))).first();
 
+
         String id;
+
 
         if (oldAccountDocument != null) {
             Document updateFields = new Document();
@@ -84,6 +100,7 @@ public class AccountService {
             updateFields.append("scope", account.scope);
             updateFields.append("token_type", account.token_type);
 
+
             id = oldAccountDocument.getObjectId("_id").toString();
             accountCollection.updateOne(oldAccountDocument,
                     new Document("$set", updateFields));
@@ -91,7 +108,9 @@ public class AccountService {
             id = accountCollection.insertOne(accountDocument).getInsertedId().asObjectId().getValue().toString();
         }
 
+
         System.out.println(id);
+
 
         NewCookie cookie = new NewCookie.Builder("jwt")
                 .value(JwtService.buildJwt(id))
@@ -102,18 +121,22 @@ public class AccountService {
                 .sameSite(NewCookie.SameSite.NONE)
                 .build();
 
+
         return Response
                 .status(Response.Status.FOUND)
                 .cookie(cookie)
                 .location(URI.create(AuthResource.HOME_URL))
                 .build();
 
+
     }
+
 
     public Response retrieveUser(String accountID, Boolean includeOauth) {
         ArrayList<String> fieldsList = new ArrayList<String>(
                 List.of("Email", "Username", "admin", "Notifications", "MyQuotes",
                         "FavoriteQuote", "SharedQuotes", "MyTags", "Profession", "PersonalQuote"));
+
 
         if (includeOauth) {
             List<String> oauthList = List.of("access_token", "refresh_token", "expires_at", "scope",
@@ -121,7 +144,9 @@ public class AccountService {
             fieldsList.addAll(oauthList);
         }
 
+
         ObjectId objectId;
+
 
         try {
             objectId = new ObjectId(accountID);
@@ -132,11 +157,13 @@ public class AccountService {
                     .build();
         }
 
+
         Bson projectionFields = Projections.fields(
                 Projections.include(fieldsList));
         Document doc = accountCollection.find(eq("_id", objectId))
                 .projection(projectionFields)
                 .first();
+
 
         if (doc == null) {
             return Response
@@ -145,22 +172,24 @@ public class AccountService {
                     .build();
         }
 
+
         return Response
                 .ok(doc.toJson())
                 .type(MediaType.APPLICATION_JSON)
                 .build();
     }
 
+
     public Response retrieveUserByEmail(String email, boolean includePrivateData) { // retrieves ID of user by email
         try {
             Document user = accountCollection.find(eq("Email", email)).first();
-            
+           
             if (user == null) {
                 return Response.status(Response.Status.NOT_FOUND)
                         .entity(new Document("error", "User with email " + email + " not found").toJson())
                         .build();
             }
-            
+           
             if (!includePrivateData) {
                 user.remove("access_token");
                 user.remove("refresh_token");
@@ -168,7 +197,7 @@ public class AccountService {
                 user.remove("scope");
                 user.remove("token_type");
             }
-            
+           
             return Response.status(Response.Status.OK).entity(user.toJson()).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -177,8 +206,10 @@ public class AccountService {
         }
     }
 
+
     public Document retrieveUserFromCookie(HttpServletRequest request) {
         Cookie jwtCookie = null;
+
 
         if (request.getCookies() != null) {
             jwtCookie = Arrays.stream(request.getCookies())
@@ -187,6 +218,7 @@ public class AccountService {
                     .orElse(null);
         }
 
+
         if (jwtCookie == null) {
             return null;
         }
@@ -194,7 +226,9 @@ public class AccountService {
             JwtConsumer consumer = JwtConsumer.create("defaultJwtConsumer");
             JwtToken jwt = consumer.createJwt(jwtCookie.getValue());
 
+
             String id = jwt.getClaims().getSubject();
+
 
             ObjectId objectId;
             try {
@@ -203,6 +237,7 @@ public class AccountService {
                 return null;
             }
 
+
             return accountCollection.find(eq("_id", objectId)).first();
         } catch (InvalidConsumerException | InvalidTokenException e) {
             System.out.println(e);
@@ -210,8 +245,10 @@ public class AccountService {
         }
     }
 
+
     public Response deleteUser(String accountID) {
         ObjectId objectId;
+
 
         try {
             objectId = new ObjectId(accountID);
@@ -222,17 +259,21 @@ public class AccountService {
                     .build();
         }
 
+
         MongoCollection<Document> users = accountDB.getCollection("Users");
         Bson query = eq("_id", objectId);
         users.deleteOne(query);
+
 
         return Response
                 .status(Response.Status.OK)
                 .build();
     }
 
+
     public Response updateUser(String updatedAccountJson, String id) {
         ObjectId objectId;
+
 
         try {
             objectId = new ObjectId(id);
@@ -242,6 +283,7 @@ public class AccountService {
                     .entity(new Document("error", "Invalid object id!").toJson())
                     .build();
         }
+
 
         Document updatedAccountDocument;
         try {
@@ -253,10 +295,12 @@ public class AccountService {
                     .build();
         }
 
+
         UpdateResult updateResult = accountCollection.updateOne(
                 eq("_id", objectId),
                 new Document("$set", updatedAccountDocument)
         );
+
 
         if (updateResult.getModifiedCount() == 1) {
             try {
@@ -278,6 +322,7 @@ public class AccountService {
         }
     }
 
+
     public Account document_to_account(Document document) {
         String email = document.getString("Email");
         String username = document.getString("Username");
@@ -295,11 +340,14 @@ public class AccountService {
         String profession = document.getString("Profession");
         String personalQuote = document.getString("PersonalQuote");
 
+
         Account account = new Account(email, username, admin, accessToken, refreshToken, expiresAt, scope, tokenType,
                 notifications, myQuotes, favoriteQuotes, sharedQuotes, myTags, profession, personalQuote);
 
+
         return account;
     }
+
 
     public Document account_to_document(Account account) {
         Document document = new Document("Email", account.Email)
@@ -318,19 +366,24 @@ public class AccountService {
                 .append("Profession", account.Profession)
                 .append("PersonalQuote", account.PersonalQuote);
 
+
         return document;
     }
+
 
     public String getAccountIdByEmail(String email) {
         Document doc = accountCollection.find(eq("Email", email))
                 .projection(Projections.include("_id"))
                 .first();
 
+
         if (doc == null) {
             return null;
         }
 
+
         return doc.getObjectId("_id").toHexString();
     }
+
 
 }

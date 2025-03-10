@@ -160,7 +160,7 @@ public class QuoteSearchResource {
             return Response.status(Response.Status.CONFLICT).entity("Exception Occurred: "+e).build();
         }
     }
-    @GET
+     @GET
     @Path("/user/{userId}")
     @Produces(MediaType.APPLICATION_JSON)
     @APIResponses(value = {
