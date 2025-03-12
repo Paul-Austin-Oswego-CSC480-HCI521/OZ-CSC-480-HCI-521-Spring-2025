@@ -1,36 +1,41 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaBookmark, FaRegBookmark, FaShareAlt, FaFlag, FaClipboard } from 'react-icons/fa';
-import { bookmarkQuote, deleteBookmark } from "../lib/api";
+import { bookmarkQuote, deleteBookmark, fetchMe } from "../lib/api";
 import Tag from "./Tag";
 
 const QuoteCard = ({ quote, onBookmarkToggle }) => {
   const navigate = useNavigate();
   const [isBookmarked, setIsBookmarked] = useState(quote.isBookmarked || false);
   const [bookmarkCount, setBookmarkCount] = useState(quote.bookmarks || 0);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleBookmarkClick = async (e) => {
     e.stopPropagation();
-
-    if (isBookmarked) {
-      console.log("Quote is already bookmarked by the user.");
-      return; // Prevent bookmarking the quote twice
-    }
-
-    const newBookmarkState = !isBookmarked;
-    setIsBookmarked(newBookmarkState);
-    setBookmarkCount((prevCount) => newBookmarkState ? prevCount + 1 : prevCount - 1);
-
-    try {
-      let updatedQuote;
-      if (newBookmarkState) {
-        updatedQuote = await bookmarkQuote(quote._id);
-      } else {
-        await deleteBookmark(quote._id);
+    checkForUser();
+    if (isLoggedIn){
+      if (isBookmarked) {
+        console.log("Quote is already bookmarked by the user.");
+        return; // Prevent bookmarking the quote twice
       }
-      onBookmarkToggle(updatedQuote || quote, newBookmarkState);
-    } catch (error) {
-      console.error("Error updating bookmark:", error);
+
+      const newBookmarkState = !isBookmarked;
+      setIsBookmarked(newBookmarkState);
+      setBookmarkCount((prevCount) => newBookmarkState ? prevCount + 1 : prevCount - 1);
+
+      try {
+        let updatedQuote;
+        if (newBookmarkState) {
+          updatedQuote = await bookmarkQuote(quote._id);
+        } else {
+          await deleteBookmark(quote._id);
+        }
+        onBookmarkToggle(updatedQuote || quote, newBookmarkState);
+      } catch (error) {
+        console.error("Error updating bookmark:", error);
+      }
+    } else {
+      navigate('/login');
     }
   };
 
@@ -57,21 +62,37 @@ const QuoteCard = ({ quote, onBookmarkToggle }) => {
   };
 
   const handleClick = () => {
-    navigate(`/edit-quote/${quote._id}`, {
-      state: {
-        quote: {
-          _id: quote._id,
-          text: quote.quote,
-          author: quote.author,
-          tags: quote.tags || [],
-          bookmarks: quote.bookmarks,
-          shares: quote.shares,
-          flags: quote.flags,
-          date: quote.date
+    checkForUser();
+    if (isLoggedIn){
+      // If user is logged in, head over to quote editing page.
+      navigate(`/edit-quote/${quote._id}`, {
+        state: {
+          quote: {
+            _id: quote._id,
+            text: quote.quote,
+            author: quote.author,
+            tags: quote.tags || [],
+            bookmarks: quote.bookmarks,
+            shares: quote.shares,
+            flags: quote.flags,
+            date: quote.date
+          }
         }
-      }
-    });
+      });
+    } else {
+      // Else, go to login page. 
+      navigate('/login');
+    }
   };
+
+  const checkForUser = () => {
+    // check to see if User is a guest or is a registered user. 
+    const data = fetchMe();
+    if ( data == null ){
+      setIsLoggedIn(false);
+    }
+    setIsLoggedIn(true);
+  }
 
     const quoteTextStyle = {
       color: "#1E1E1E",

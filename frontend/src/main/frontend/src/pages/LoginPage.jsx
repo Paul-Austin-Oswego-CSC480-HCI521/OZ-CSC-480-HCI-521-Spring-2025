@@ -1,9 +1,11 @@
 import React,{useState, useEffect} from 'react';
 import LoginBox from '../components/Login';
+import { useNavigate } from "react-router-dom";
 
 
 const LoginPage = ({ setIsAuthenticated, setIsGuest }) => {
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
          fetch("http://localhost:9081/users/accounts/whoami")
@@ -24,7 +26,8 @@ const LoginPage = ({ setIsAuthenticated, setIsGuest }) => {
   };
 
   const handleGuestLogin = () => {
-    setIsGuest(true);
+    //setIsGuest(true);
+    navigate('/');
   };
 
   return (

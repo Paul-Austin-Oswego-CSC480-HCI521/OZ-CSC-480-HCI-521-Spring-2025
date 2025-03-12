@@ -22,7 +22,7 @@ const Layout = () => {
     //fetch user data when the component loads
     (async () => {
       try {
-        console.log("Fetching user..."); 
+        //console.log("Fetching user..."); 
         const data = await fetchMe();
         console.log("Fetched user:", data);
         if (data == null) throw "No user";
