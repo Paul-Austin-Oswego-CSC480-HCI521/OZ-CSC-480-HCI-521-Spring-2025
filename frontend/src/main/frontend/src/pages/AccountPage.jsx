@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { fetchMe, updateMe } from "../lib/api";
+import { updateMe } from "../lib/api";
 import { BsCheckSquare, BsPencilSquare } from "react-icons/bs"; // Import icons
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "../lib/Contexts";
 
 const AccountPage = () => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useContext(UserContext);
   const [error, setError] = useState(null);
   const [isEditingProfession, setIsEditingProfession] = useState(false);
   const [isEditingPersonalQuote, setIsEditingPersonalQuote] = useState(false);
@@ -15,32 +15,20 @@ const AccountPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:9081/users/accounts/whoami", { credentials: "include" })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to fetch user data");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        if (data) {
-          setUser(data);
-          setUpdatedProfession(data.Profession || "");
-          setUpdatedPersonalQuote(data.PersonalQuote || "");
-        }
-      })
-      .catch((err) => {
-        console.error("Error fetching user:", err);
-        setError(err.message);
-      })
-      .finally(() => setLoading(false));
-  }, []);
+    if (!user) {
+      setError("No user");
+      return;
+    }
+
+    setUpdatedPersonalQuote(user.PersonalQuote || "")
+    setUpdatedProfession(user.Profession || "")
+    setError(null);
+  }, [user]);
 
   const handleSaveProfession = () => {
     if (!user) return;
 
     updateMe({ Profession: updatedProfession })
-      .then(() => fetchMe()) 
       .then((updatedUser) => {
         setUser(updatedUser);
         setIsEditingProfession(false);
@@ -52,7 +40,6 @@ const AccountPage = () => {
     if (!user) return;
 
     updateMe({ PersonalQuote: updatedPersonalQuote })
-      .then(() => fetchMe())  
       .then((updatedUser) => {
         setUser(updatedUser);
         setIsEditingPersonalQuote(false);
@@ -60,7 +47,6 @@ const AccountPage = () => {
       .catch((error) => console.error("Failed to update personal quote:", error));
   };
 
-  if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (

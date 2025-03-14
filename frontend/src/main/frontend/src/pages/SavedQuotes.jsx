@@ -1,19 +1,18 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import QuoteCard from "../components/QuoteCard";
 import Input from "../components/Input";
-import { fetchMe, fetchUserQuotes } from "../lib/api";
+import { fetchUserQuotes } from "../lib/api";
+import { UserContext } from "../lib/Contexts";
 
 const SavedQuotes = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [quotes, setQuotes] = useState([]); //store all quotes for saved (uploaded and bookmarked)
-  const [userId, setUserId] = useState(null); //store the current user's ID
+  const [user] = useContext(UserContext);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const user = await fetchMe();
         const userIdString = user._id.$oid || user._id;
-        setUserId(userIdString);
         const userQuotes = await fetchUserQuotes(userIdString);
         setQuotes(userQuotes); 
       } catch (error) {
@@ -21,10 +20,10 @@ const SavedQuotes = () => {
       }
     };
 
-    if (!userId) {
+    if (!user) {
       fetchData();
     }
-  }, [userId]);
+  }, [user]);
 
   const handleSearch = (event) => {
     //update search term when user types in the input field

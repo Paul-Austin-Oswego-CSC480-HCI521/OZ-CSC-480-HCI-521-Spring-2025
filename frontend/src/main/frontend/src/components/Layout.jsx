@@ -1,11 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import TopNavigation from './TopNavigation';
 import LoginBox from './Login';
-import { fetchMe } from '../lib/api';
 
 const Layout = () => {
-  const [user, setUser] = useState(null); //store user data after authentication
   const [showLogin, setShowLogin] = useState(null); //track whether to show the login modal
 
   const handleGoogleLogin = () => {
@@ -18,29 +16,9 @@ const Layout = () => {
     setShowLogin(false);
   };
 
-  useEffect(() => {
-    //fetch user data when the component loads
-    (async () => {
-      try {
-        console.log("Fetching user..."); 
-        const data = await fetchMe();
-        console.log("Fetched user:", data);
-        if (data == null) throw "No user";
-        setUser(data);
-      } catch (err) {
-        console.error("Error fetching user", err);
-
-        const timer = setTimeout(() => {
-          setShowLogin(true); //show login modal after 3 seconds if no user is found
-        }, 3000);
-        return () => clearTimeout(timer); //clear the timer when the component unmounts
-      } 
-    })();
-  }, []);
-
   return (
     <div className="container">
-      <TopNavigation user={user} /> {/* display the top navigation bar with user data */}
+      <TopNavigation /> {/* display the top navigation bar with user data */}
       <main>
         {showLogin && (
           //display the login modal if user needs to log in

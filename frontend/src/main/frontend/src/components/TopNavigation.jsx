@@ -1,14 +1,16 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import QuoteUploadModal from "./QuoteUploadModal";
 import { BsPersonCircle } from "react-icons/bs";
 import '../TopNav.css';
+import { UserContext } from "../lib/Contexts";
 
-const TopNavigation = ({ user }) => {
+const TopNavigation = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [quoteText, setQuoteText] = useState(""); // State to manage quote input
   const navigate = useNavigate();
   const location = useLocation();
+  const [user] = useContext(UserContext);
 
   // Helper function to determine if the path is active
   const isActive = (path) => location.pathname === path;
