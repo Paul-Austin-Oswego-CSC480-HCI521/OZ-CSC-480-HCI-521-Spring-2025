@@ -6,10 +6,7 @@ import com.ibm.websphere.security.jwt.InvalidConsumerException;
 import com.ibm.websphere.security.jwt.InvalidTokenException;
 import com.ibm.websphere.security.jwt.JwtConsumer;
 import com.ibm.websphere.security.jwt.JwtToken;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.*;
 import com.mongodb.client.model.Projections;
 import com.mongodb.client.result.UpdateResult;
 import jakarta.servlet.http.Cookie;
@@ -44,6 +41,12 @@ public class AccountService {
 
     }
 
+    public AccountService(String connectionString, String dbName, String collectionName) {
+        client = MongoClients.create(connectionString);
+        accountDB = client.getDatabase(dbName);
+        accountCollection = accountDB.getCollection(collectionName);
+    }
+
     public Response newUser(String accountJson) {
         Document accountDocument;
         try {
@@ -55,7 +58,9 @@ public class AccountService {
                     .build();
         }
 
-        if (accountCollection.find(eq("email", accountDocument.getString("email"))).first() != null) {
+        FindIterable<Document> result = accountCollection.find(eq("email", accountDocument.getString("email")));
+
+        if (result != null && result.first() != null) {
             return Response
                     .status(Response.Status.CONFLICT)
                     .entity(new Document("error", "Email already exists!").toJson())
@@ -113,7 +118,7 @@ public class AccountService {
     public Response retrieveUser(String accountID, Boolean includeOauth) {
         ArrayList<String> fieldsList = new ArrayList<String>(
                 List.of("Email", "Username", "admin", "Notifications", "MyQuotes",
-                        "FavoriteQuote", "SharedQuotes", "MyTags", "Profession", "PersonalQuote"));
+                        "BookmarkedQuotes", "SharedQuotes", "MyTags", "Profession", "PersonalQuote"));
 
         if (includeOauth) {
             List<String> oauthList = List.of("access_token", "refresh_token", "expires_at", "scope",
@@ -231,6 +236,16 @@ public class AccountService {
                 .build();
     }
 
+    public Response deleteUserByEmail(String email) {
+        MongoCollection<Document> users = accountDB.getCollection("Users");
+        Bson query = eq("Email", email);
+        users.deleteOne(query);
+
+        return Response
+                .status(Response.Status.OK)
+                .build();
+    }
+
     public Response updateUser(String updatedAccountJson, String id) {
         ObjectId objectId;
 
@@ -289,14 +304,14 @@ public class AccountService {
         String tokenType = document.getString("token_type");
         List<String> notifications = document.getList("Notifications", String.class);
         List<String> myQuotes = document.getList("MyQuotes", String.class);
-        Map<String, List<String>> favoriteQuotes = (Map<String, List<String>>) document.get("FavoriteQuote");
+        Map<String, List<String>> bookmarkedQuotes = (Map<String, List<String>>) document.get("BookmarkedQuotes");
         List<String> sharedQuotes = document.getList("SharedQuotes", String.class);
         List<String> myTags = document.getList("MyTags", String.class);
         String profession = document.getString("Profession");
         String personalQuote = document.getString("PersonalQuote");
 
         Account account = new Account(email, username, admin, accessToken, refreshToken, expiresAt, scope, tokenType,
-                notifications, myQuotes, favoriteQuotes, sharedQuotes, myTags, profession, personalQuote);
+                notifications, myQuotes, bookmarkedQuotes, sharedQuotes, myTags, profession, personalQuote);
 
         return account;
     }
@@ -312,7 +327,7 @@ public class AccountService {
                 .append("token_type", account.token_type)
                 .append("Notifications", account.Notifications)
                 .append("MyQuotes", account.MyQuotes)
-                .append("FavoriteQuote", account.FavoriteQuote)
+                .append("BookmarkedQuotes", account.BookmarkedQuotes)
                 .append("SharedQuotes", account.SharedQuotes)
                 .append("MyTags", account.MyTags)
                 .append("Profession", account.Profession)

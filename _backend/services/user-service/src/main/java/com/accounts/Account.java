@@ -26,10 +26,9 @@ public class Account {
 
     public List<String> Notifications;  //???
 
-
     public List<String> MyQuotes;
 
-    public Map<String, List<String>> FavoriteQuote;
+    public Map<String, List<String>> BookmarkedQuotes;
 
     public List<String> SharedQuotes;
 
@@ -52,7 +51,7 @@ public class Account {
         token_type = tt;
         Notifications = new ArrayList<>();
         MyQuotes = new ArrayList<>();
-        FavoriteQuote = new HashMap<>();
+        BookmarkedQuotes = new HashMap<>();
         SharedQuotes = new ArrayList<>();
         MyTags = new ArrayList<>();
         Profession = "";
@@ -61,7 +60,7 @@ public class Account {
 
     public Account(String email, String username, int ad, String at, String rt, Long ea,
                    List<String> sc, String tt, List<String> notifications, List<String>myQuotes,
-                   Map<String, List<String>> favoriteQuotes, List<String> sharedQuotes,
+                   Map<String, List<String>> bookmarkedQuotes, List<String> sharedQuotes,
                    List<String> myTags, String profession, String personalQuote) {
         Email = email;
         Username = username;
@@ -73,7 +72,7 @@ public class Account {
         token_type = tt;
         Notifications = notifications;
         MyQuotes = myQuotes;
-        FavoriteQuote = favoriteQuotes;
+        BookmarkedQuotes = bookmarkedQuotes;
         SharedQuotes = sharedQuotes;
         MyTags = myTags;
         Profession = profession;

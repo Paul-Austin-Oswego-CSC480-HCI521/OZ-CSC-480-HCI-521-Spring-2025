@@ -79,6 +79,8 @@ public class QuotesRetrieveAccount {
 
     public static Map<String, String> retrieveJWTData(HttpServletRequest request) {
         System.out.println(request.getCookies());
+
+        System.out.println("request Session: " + request.getSession().toString());
         Cookie jwtCookie = null;
 
         if (request.getCookies() != null) {

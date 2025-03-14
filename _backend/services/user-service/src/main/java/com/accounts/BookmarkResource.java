@@ -69,7 +69,7 @@ public class BookmarkResource {
             }
             String userId = accountService.getAccountIdByEmail(acc.Email);
             List<String> personalTags = new ArrayList<>();
-            acc.FavoriteQuote.put(quoteId, personalTags);
+            acc.BookmarkedQuotes.put(quoteId, personalTags);
             json = acc.toJson();
             Response quoteSearchRes = quoteClient.idSearch(quoteId);
             if(quoteSearchRes.getStatus()==Response.Status.OK.getStatusCode()){
@@ -105,7 +105,7 @@ public class BookmarkResource {
             doc.remove("expires_at");
             Account acc = accountService.document_to_account(doc);
             List<JsonObject> jsonList = new ArrayList<>();
-            for(String objectId: acc.FavoriteQuote.keySet()){
+            for(String objectId: acc.BookmarkedQuotes.keySet()){
             Response quoteSearchRes = quoteClient.idSearch(objectId);
             if(quoteSearchRes.getStatus()==Response.Status.OK.getStatusCode()){
             JsonObject quoteSearchJson = quoteSearchRes.readEntity(JsonObject.class);
@@ -163,13 +163,13 @@ public class BookmarkResource {
             doc.remove("expires_at");
             Account acc = accountService.document_to_account(doc);
             String userId = accountService.getAccountIdByEmail(acc.Email);        
-            if(!acc.FavoriteQuote.containsKey(quoteId)){
+            if(!acc.BookmarkedQuotes.containsKey(quoteId)){
                 return Response
                 .status(Response.Status.BAD_REQUEST)
                 .entity("You don't have this bookmarked")
                 .build();
             }
-            acc.FavoriteQuote.remove(quoteId);
+            acc.BookmarkedQuotes.remove(quoteId);
             json = acc.toJson();
             Response quoteSearchRes = quoteClient.idSearch(quoteId);
             if(quoteSearchRes.getStatus()!=Response.Status.OK.getStatusCode()){
@@ -214,21 +214,21 @@ public class BookmarkResource {
             if(doc!=null){
             doc.remove("expires_at");
             Account acc = accountService.document_to_account(doc);
-            if(!acc.FavoriteQuote.containsKey(quoteId)){
+            if(!acc.BookmarkedQuotes.containsKey(quoteId)){
                 return Response
                 .status(Response.Status.BAD_REQUEST)
                 .entity("You don't have this bookmarked")
                 .build();
             }
             userId = accountService.getAccountIdByEmail(acc.Email);
-            acc.FavoriteQuote.get(quoteId).add(bookmarkTag);
+            acc.BookmarkedQuotes.get(quoteId).add(bookmarkTag);
             json = acc.toJson();
             }
          return accountService.updateUser(json, userId);
     }
 
     @DELETE
-    @Path("/tag/{quoteId}/{tagIndex}")
+    @Path("/tag/{quoteId}/{bookmarkTag}")
     @Produces(MediaType.APPLICATION_JSON)
     @APIResponses(value = {
             @APIResponse(responseCode = "200", description = "Bookmark tag deleted"),
@@ -249,7 +249,7 @@ public class BookmarkResource {
              
             Account acc = accountService.document_to_account(doc);
             userId = accountService.getAccountIdByEmail(acc.Email);
-            acc.FavoriteQuote.get(quoteId).remove(tagIndex);
+            acc.BookmarkedQuotes.get(quoteId).remove(tagIndex);
             json = acc.toJson();
             }
          return accountService.updateUser(json, userId);
