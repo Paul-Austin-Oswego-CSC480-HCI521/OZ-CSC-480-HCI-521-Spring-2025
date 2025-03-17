@@ -38,7 +38,6 @@ public class AccountService {
         client = MongoClients.create(connectionString);
         accountDB = client.getDatabase("Accounts");
         accountCollection = accountDB.getCollection("Users");
-
     }
 
     public AccountService(String connectionString, String dbName, String collectionName) {
@@ -73,7 +72,6 @@ public class AccountService {
                 .status(Response.Status.OK)
                 .entity(accountDocument.toJson())
                 .build();
-
     }
 
     public Response newUserWithCookie(Account account) {
@@ -112,7 +110,6 @@ public class AccountService {
                 .cookie(cookie)
                 .location(URI.create(AuthResource.HOME_URL))
                 .build();
-
     }
 
     public Response retrieveUser(String accountID, Boolean includeOauth) {
@@ -156,16 +153,16 @@ public class AccountService {
                 .build();
     }
 
-    public Response retrieveUserByEmail(String email, boolean includePrivateData) { // retrieves ID of user by email
+    public Response retrieveUserByEmail(String email, boolean includePrivateData) { 
         try {
             Document user = accountCollection.find(eq("Email", email)).first();
-            
+           
             if (user == null) {
                 return Response.status(Response.Status.NOT_FOUND)
                         .entity(new Document("error", "User with email " + email + " not found").toJson())
                         .build();
             }
-            
+           
             if (!includePrivateData) {
                 user.remove("access_token");
                 user.remove("refresh_token");
@@ -173,7 +170,7 @@ public class AccountService {
                 user.remove("scope");
                 user.remove("token_type");
             }
-            
+           
             return Response.status(Response.Status.OK).entity(user.toJson()).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -347,5 +344,4 @@ public class AccountService {
 
         return doc.getObjectId("_id").toHexString();
     }
-
 }

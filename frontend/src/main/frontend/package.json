@@ -16,6 +16,7 @@
     "bootstrap-icons": "^1.11.3",
     "lucide-react": "^0.474.0",
     "react": "^19.0.0",
+    "react-bootstrap-icons": "^1.11.5",
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.1.5",

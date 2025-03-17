@@ -1,5 +1,6 @@
 package com.auth;
 
+
 import com.accounts.Account;
 import com.accounts.AccountService;
 import com.google.api.client.auth.oauth2.TokenResponseException;
@@ -19,17 +20,22 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 
+
 import java.io.*;
 import java.net.URI;
 import java.util.*;
 
+
 import static com.mongodb.client.model.Filters.eq;
+
 
 @Path("/auth")
 public class AuthResource {
 
+
     public static AccountService accountService = new AccountService();
     public static String HOME_URL = "http://localhost:9080/setup";
+
 
     @GET
     @Produces(MediaType.APPLICATION_FORM_URLENCODED)
@@ -46,6 +52,7 @@ public class AuthResource {
         String authorizationUrl = flow.newAuthorizationUrl().setRedirectUri(REDIRECT_URI).setScopes(scopes).build();
         return Response.status(Response.Status.FOUND).location(URI.create(authorizationUrl)).build();
     }
+
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -65,6 +72,7 @@ public class AuthResource {
         System.out.println(tokenResponse);
         // got token where should we store next?
 
+
         // get user info
         HttpRequestFactory requestFactory = httpTransport.createRequestFactory();
         HttpRequest request = requestFactory
@@ -73,17 +81,21 @@ public class AuthResource {
         HttpResponse response = request.execute();
         GoogleIdToken.Payload payload = new Gson().fromJson(response.parseAsString(), GoogleIdToken.Payload.class);
 
+
         Gson gson = new Gson();
         String jsonObject = gson.toJson(payload);
         JsonObject convertedObject = new Gson().fromJson(jsonObject, JsonObject.class);
+
 
         Account account = new Account(payload.getEmail(), convertedObject.get("name").getAsString(), 0,
                 tokenResponse.getAccessToken(), tokenResponse.getRefreshToken(),
                 tokenResponse.getExpiresInSeconds(), Arrays.asList(tokenResponse.getScope().split(" ")),
                 tokenResponse.getTokenType());
 
+
         return accountService.newUserWithCookie(account);
     }
+
 
     public String RefreshAccessToken(String refreshToken) throws IOException {
         String clientId = System.getenv("CLIENT_ID");
