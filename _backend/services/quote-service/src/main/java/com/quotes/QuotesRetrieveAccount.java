@@ -79,26 +79,24 @@ public class QuotesRetrieveAccount {
 
     public static Map<String, String> retrieveJWTData(HttpServletRequest request) {
         System.out.println(request.getCookies());
+
+        System.out.println("request Session: " + request.getSession().toString());
         Cookie jwtCookie = null;
-   
-        String jwtToken = null;
-        jwtToken = request.getHeader("X-JWT-Token");
 
-
-        if (request.getCookies() != null&&jwtToken ==null) {
+        if (request.getCookies() != null) {
             jwtCookie = Arrays.stream(request.getCookies())
                     .filter(c -> "jwt".equals(c.getName()))
                     .findFirst()
                     .orElse(null);
         }
 
-        if (jwtCookie == null&&jwtToken==null) {
+        if (jwtCookie == null) {
             return null;
         }
 
         try {
             JwtConsumer consumer = JwtConsumer.create("defaultJwtConsumer");
-            JwtToken jwt = consumer.createJwt(jwtToken != null ? jwtToken : jwtCookie.getValue());
+            JwtToken jwt = consumer.createJwt(jwtCookie.getValue());
 
             ArrayList<String> groups = (ArrayList<String>) jwt.getClaims().get("groups");
 

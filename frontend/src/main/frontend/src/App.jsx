@@ -1,5 +1,4 @@
 import "./App.css";
-import React, { useState } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
@@ -11,33 +10,35 @@ import DebugPage from "./pages/DebugPage";
 import { userQuotes, bookmarkedQuotes } from "./placeholderdata";
 import SearchPage from './pages/SearchPage';
 import AccountSetup from './pages/AccountSetup';
+import { UserProvider } from "./lib/Contexts";
 
 const App = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Layout isLoggedIn={isLoggedIn} />}>
-          <Route path="/login" element={<LoginPage />} />
-          <Route
-            path="/saved-quotes"
-            element={
-              <SavedQuotes
-                userQuotes={userQuotes}
-                bookmarkedQuotes={bookmarkedQuotes}
-              />
-            }
-          />
-          <Route path="/edit-quote/:id" element={<QuoteForm />} />
-          <Route path="/debug" element={<DebugPage />} />
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/account" element={<AccountPage />} />
-          <Route path="/search" element={<SearchPage />} />
-          <Route path="/setup" element={<AccountSetup />} />
-        </Route>
-      </Routes>
-    </Router>
+    <UserProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route path="/login" element={<LoginPage />} />
+            <Route
+              path="/saved-quotes"
+              element={
+                <SavedQuotes
+                  userQuotes={userQuotes}
+                  bookmarkedQuotes={bookmarkedQuotes}
+                />
+              }
+            />
+            <Route path="/edit-quote/:id" element={<QuoteForm />} />
+            <Route path="/debug" element={<DebugPage />} />
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/account" element={<AccountPage />} />
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="/setup" element={<AccountSetup />} />
+          </Route>
+        </Routes>
+      </Router>
+    </UserProvider>
   );
 };
 

@@ -1,5 +1,6 @@
 package com.accounts;
 
+import com.mongodb.client.model.Updates;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.json.Json;
 import jakarta.json.JsonObjectBuilder;
@@ -49,7 +50,7 @@ public class AccountsResource {
             + "\"refresh_token\": \"sample_refresh_token\", " + "\"expires_at\": 1700000000, "
             + "\"scope\": [\"read\", \"write\"], " + "\"token_type\": \"Bearer\", "
             + "\"Notifications\": [\"Welcome message\"], " + "\"MyQuotes\": [\"Life is beautiful\"], "
-            + "\"FavoriteQuote\": {\"Motivation\": [\"Keep going!\"]}, "
+            + "\"BookmarkedQuotes\": {\"Motivation\": [\"Keep going!\"]}, "
             + "\"SharedQuotes\": [\"Success is a journey\"], "
             + "\"MyTags\": [\"Inspiration\", \"Wisdom\"], " + "\"Profession\": \"NFL Head Coach\"," + "\"PersonalQuote\": \"67abf469b0d20a5237456444\"" + "}")))
     public Response create(String json) {

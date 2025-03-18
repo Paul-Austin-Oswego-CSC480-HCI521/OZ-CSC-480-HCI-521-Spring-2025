@@ -9,9 +9,9 @@ import jakarta.ws.rs.core.Response;
 public interface QuoteClient{
    
     @PUT
-    @Path("/quotes/update")
+    @Path("/quotes/update/bookmark")
     @Consumes(MediaType.APPLICATION_JSON)
-    Response updateQuote( @HeaderParam("X-JWT-Token") String jwtToken, String rawJson);
+    Response updateQuote(String rawJson);
 
     @GET
     @Path("/quotes/search/id/{quoteID}")

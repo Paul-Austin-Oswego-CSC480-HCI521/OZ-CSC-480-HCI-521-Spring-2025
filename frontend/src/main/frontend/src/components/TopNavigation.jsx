@@ -1,21 +1,23 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import QuoteUploadModal from "./QuoteUploadModal";
 import { BsPersonCircle } from "react-icons/bs";
 import '../TopNav.css';
+import { UserContext } from "../lib/Contexts";
 
-const TopNavigation = ({ user }) => {
+const TopNavigation = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [quoteText, setQuoteText] = useState(""); // State to manage quote input
   const navigate = useNavigate();
   const location = useLocation();
+  const [user] = useContext(UserContext);
 
   // Helper function to determine if the path is active
   const isActive = (path) => location.pathname === path;
 
   return (
     <>
-      <nav className="navbar navbar-expand-lg navbar-light bg-light sticky-top custom-nav">
+      <nav className="navbar navbar-expand-lg navbar-light sticky-top custom-nav">
         <Link className="navbar-brand pl-2" to="/">Logo</Link>
         <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
           <span className="navbar-toggler-icon"></span>
@@ -43,10 +45,11 @@ const TopNavigation = ({ user }) => {
               </li>
             ) : (
               <></>
+
             )}
             <li className="nav-item ml-3 mr-3" title={user?.Username || "Click sign in to sign in"}>
               <Link to="/account">
-                <BsPersonCircle size={40} style={{ color: "black" }} />
+                <BsPersonCircle size={40} style={{ color: "#146C43" }} />
               </Link>
             </li>
           </ul>

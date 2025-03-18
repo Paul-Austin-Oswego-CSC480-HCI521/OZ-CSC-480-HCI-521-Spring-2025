@@ -1,5 +1,7 @@
 import { useState } from "react"; //import useState to manage component state
 import { useNavigate } from "react-router-dom"; //import useNavigate to navigate between pages
+import searchSvg from "../assets/search.svg"
+import Tag from "./Tag";
 
 export default function Splash() {
 
@@ -19,12 +21,13 @@ export default function Splash() {
   const splashStyle = {
     //styling for the main splash section
     display: "flex",
-    padding: "80px 120px",
+    padding: "24px 0px",
     justifyContent: "center",
     alignItems: "center",
     gap: "60px",
     alignSelf: "stretch",
-    background: "rgba(217, 217, 217, 0.80)"
+    borderRadius: "22px",
+    background: "linear-gradient(276deg, rgba(253, 247, 205, 0.90) 11.16%, rgba(90, 212, 120, 0.90) 148.05%)",
   }
 
   const splashContainerStyle = {
@@ -34,7 +37,7 @@ export default function Splash() {
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    gap: "24px",
+    gap: "20px",
     flex: "1 0 0",
   }
 
@@ -43,42 +46,91 @@ export default function Splash() {
     color: "#1E1E1E",
     textAlign: "center",
     fontFamily: "Inter",
-    fontSize: "48px",
+    fontSize: "40px",
     fontStyle: "normal",
-    fontWeight: "800",
+    fontWeight: "700",
     lineHeight: "48px",
   }
   
   const splashH2Style = {
     //styling for the subheading
-    color: "#1E1E1E",
+    color: "rgba(30, 30, 30, 0.45)",
+    textAlign: "center",
+    fontFamily: "Inter",
+    maxWidth: "600px",
+    fontSize: "20px",
+    fontStyle: "normal",
+    fontWeight: "500",
+    lineHeight: "normal",
+  }
+
+  const splashH3Style = {
+    color: "#000",
     textAlign: "center",
     fontFamily: "Inter",
     fontSize: "20px",
     fontStyle: "normal",
-    fontWeight: "400",
-    lineHeight: "24px",
+    fontWeight: "300",
+    lineHeight: "22px", /* 110% */
+  }
+
+
+  const searchText = {
+    color: "#FFF",
+    fontFamily: "Roboto",
+    fontSize: "20px",
+    fontStyle: "normal",
+    fontWeight: "500",
+    lineHeight: "24px", /* 120% */
+  }
+
+  const searchButton = {
+    display: "flex",
+    width: "240px",
+    padding: "12px",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: "8px",
+    background: "#146C43"
   }
 
   return (
-      <div style={splashStyle}>
-        <div style={splashContainerStyle}>
+    <div style={splashStyle}>
+      <div style={splashContainerStyle}>
 
-        <h1 style={splashH1Style}>Find, Share & Save Quotes Effortlessly</h1>
-        <h2 style={splashH2Style}>Find insightful quotes from various authors and themes</h2>
-
+      <h1 style={splashH1Style}>Find, Share & Save Quotes <span style={{color: "#146C43"}}>Effortlessly</span></h1>
+      <h2 style={splashH2Style}>Find insightful quotes from various authors and themes. Copy and paste with just one click</h2>
+      <div style={{width: "100%", position: "relative", maxWidth: "600px"}}>
+        <img src={searchSvg} style={{position: "absolute", top: "0", left: "0", padding: "10px", aspectRatio: "1", height: "100%"}} alt="" />
         <input
-          type="text" 
-          className="form-control"
-          style={{ fontFamily: "Inter", fontSize: "16px", fontWeight: "400", lineHeight:"20px", width: "708px", padding: "14px 16px" }}
-          placeholder="Search quotes, authors, or themes..."
-          onChange={handleSearchChange} //update the searchQuery state when input changes
-        />
+            type="text"
+            className="form-control"
+            style={{
+                fontFamily: "Inter",
+                fontSize: "16px",
+                fontWeight: "400",
+                lineHeight: "20px",
+                padding: "12px 20px 12px 40px",
 
-        <button className="btn btn-dark" style={{ width: "240px", padding: "12px"}} onClick={handleSearchRedirect}>
-          Search
-        </button>
-        </div>
+            }}
+            placeholder="Search quotes, authors, or themes..."
+            onChange={handleSearchChange} //update the searchQuery state when input changes
+        />
       </div>
+
+
+      <button className="btn" style={searchButton} onClick={handleSearchRedirect}>
+        <span style={searchText}>Search</span>
+      </button>
+
+      <h3 style={splashH3Style}>Explore the following popular tags to get started:</h3>
+
+      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+        {["Inspiration", "Love"].map((tag, i) => <Tag text={tag} key={i} />)}
+      </div>
+
+      </div>
+    </div>
   )
 }
