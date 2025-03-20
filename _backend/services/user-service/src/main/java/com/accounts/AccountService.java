@@ -118,7 +118,7 @@ public class AccountService {
     public Response retrieveUser(String accountID, Boolean includeOauth) {
         ArrayList<String> fieldsList = new ArrayList<String>(
                 List.of("Email", "Username", "admin", "Notifications", "MyQuotes",
-                        "BookmarkedQuotes", "SharedQuotes", "MyTags", "Profession", "PersonalQuote"));
+                        "BookmarkedQuotes", "SharedQuotes", "MyTags", "Profession", "PersonalQuote","UsedQuotes"));
 
         if (includeOauth) {
             List<String> oauthList = List.of("access_token", "refresh_token", "expires_at", "scope",
@@ -155,6 +155,7 @@ public class AccountService {
                 .type(MediaType.APPLICATION_JSON)
                 .build();
     }
+
 
     public Response retrieveUserByEmail(String email, boolean includePrivateData) { // retrieves ID of user by email
         try {
@@ -304,14 +305,16 @@ public class AccountService {
         String tokenType = document.getString("token_type");
         List<String> notifications = document.getList("Notifications", String.class);
         List<String> myQuotes = document.getList("MyQuotes", String.class);
-        Map<String, List<String>> bookmarkedQuotes = (Map<String, List<String>>) document.get("BookmarkedQuotes");
+        List<String> bookmarkedQuotes = document.getList("BookmarkedQuotes", String.class);
         List<String> sharedQuotes = document.getList("SharedQuotes", String.class);
         List<String> myTags = document.getList("MyTags", String.class);
         String profession = document.getString("Profession");
         String personalQuote = document.getString("PersonalQuote");
+        Map<String, String> usedQuotes = (Map<String, String>) document.get("UsedQuotes"); 
 
+      
         Account account = new Account(email, username, admin, accessToken, refreshToken, expiresAt, scope, tokenType,
-                notifications, myQuotes, bookmarkedQuotes, sharedQuotes, myTags, profession, personalQuote);
+                notifications, myQuotes, bookmarkedQuotes, sharedQuotes, myTags, profession, personalQuote,usedQuotes);
 
         return account;
     }
@@ -331,7 +334,8 @@ public class AccountService {
                 .append("SharedQuotes", account.SharedQuotes)
                 .append("MyTags", account.MyTags)
                 .append("Profession", account.Profession)
-                .append("PersonalQuote", account.PersonalQuote);
+                .append("PersonalQuote", account.PersonalQuote)
+                .append("UsedQuotes", account.UsedQuotes);
 
         return document;
     }

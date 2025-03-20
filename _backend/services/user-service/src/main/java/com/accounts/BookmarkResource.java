@@ -67,9 +67,14 @@ public class BookmarkResource {
             .entity("That's your quote")
             .build();
             }
+            if(acc.BookmarkedQuotes.contains(quoteId)){
+                return Response
+            .status(Response.Status.BAD_REQUEST)
+            .entity("You already bookmarked that")
+            .build();
+            }
             String userId = accountService.getAccountIdByEmail(acc.Email);
-            List<String> personalTags = new ArrayList<>();
-            acc.BookmarkedQuotes.put(quoteId, personalTags);
+            acc.BookmarkedQuotes.add(quoteId);
             json = acc.toJson();
             Response quoteSearchRes = quoteClient.idSearch(quoteId);
             if(quoteSearchRes.getStatus()==Response.Status.OK.getStatusCode()){
@@ -105,7 +110,7 @@ public class BookmarkResource {
             doc.remove("expires_at");
             Account acc = accountService.document_to_account(doc);
             List<JsonObject> jsonList = new ArrayList<>();
-            for(String objectId: acc.BookmarkedQuotes.keySet()){
+            for(String objectId: acc.BookmarkedQuotes){
             Response quoteSearchRes = quoteClient.idSearch(objectId);
             if(quoteSearchRes.getStatus()==Response.Status.OK.getStatusCode()){
             JsonObject quoteSearchJson = quoteSearchRes.readEntity(JsonObject.class);
@@ -163,7 +168,7 @@ public class BookmarkResource {
             doc.remove("expires_at");
             Account acc = accountService.document_to_account(doc);
             String userId = accountService.getAccountIdByEmail(acc.Email);        
-            if(!acc.BookmarkedQuotes.containsKey(quoteId)){
+            if(!acc.BookmarkedQuotes.contains(quoteId)){
                 return Response
                 .status(Response.Status.BAD_REQUEST)
                 .entity("You don't have this bookmarked")
@@ -190,68 +195,6 @@ public class BookmarkResource {
            
 
          
-         return accountService.updateUser(json, userId);
-    }
-
-    @POST
-    @Path("/tag/{quoteId}/{bookmarkTag}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @APIResponses(value = {
-            @APIResponse(responseCode = "200", description = "Bookmark tag added"),
-            @APIResponse(responseCode = "400", description = "Invalid request"),
-            @APIResponse(responseCode = "500", description = "Internal server error"),
-    })
-    @Operation(summary = "Allow users to add a custom tag to a bookmarked quote", description = "This endpoint allows to add a custom tag to a boomarked tag.")
-    public Response addBookmarkTag(
-        @PathParam("quoteId") String quoteId,
-        @PathParam("bookmarkTag") String bookmarkTag,
-        @Context HttpServletRequest request) {
-       
-        String json = null;
-         
-        String userId = null;
-            Document doc = accountService.retrieveUserFromCookie(request);
-            if(doc!=null){
-            doc.remove("expires_at");
-            Account acc = accountService.document_to_account(doc);
-            if(!acc.BookmarkedQuotes.containsKey(quoteId)){
-                return Response
-                .status(Response.Status.BAD_REQUEST)
-                .entity("You don't have this bookmarked")
-                .build();
-            }
-            userId = accountService.getAccountIdByEmail(acc.Email);
-            acc.BookmarkedQuotes.get(quoteId).add(bookmarkTag);
-            json = acc.toJson();
-            }
-         return accountService.updateUser(json, userId);
-    }
-
-    @DELETE
-    @Path("/tag/{quoteId}/{bookmarkTag}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @APIResponses(value = {
-            @APIResponse(responseCode = "200", description = "Bookmark tag deleted"),
-            @APIResponse(responseCode = "400", description = "Invalid request"),
-            @APIResponse(responseCode = "500", description = "Internal server error"),
-    })
-    @Operation(summary = "Allow users to delete a custom tag of a bookmarked quote", description = "This endpoint allows delete their custom tag from a quote.")
-    public Response deleteBookmarkTag(
-        @PathParam("quoteId") String quoteId,
-        @PathParam("bookmarkTag") int tagIndex,
-        @Context HttpServletRequest request) {
-
-        String json = null;
-            String userId = null;
-            Document doc = accountService.retrieveUserFromCookie(request);
-            doc.remove("expires_at");
-            if(doc!=null){
-             
-            Account acc = accountService.document_to_account(doc);
-            userId = accountService.getAccountIdByEmail(acc.Email);
-            acc.BookmarkedQuotes.get(quoteId).remove(tagIndex);
-            json = acc.toJson();
-            }
          return accountService.updateUser(json, userId);
     }
 
