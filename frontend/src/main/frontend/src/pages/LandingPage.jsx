@@ -30,9 +30,11 @@ const LandingPage = () => {
   useEffect(() => {
     //check if there's a saved alert message in local storage and display it
     const message = localStorage.getItem("alertMessage");
+    const messageType = localStorage.getItem("alertType") || "success";
     if (message) {
-      setAlert({ type: "success", message });
+      setAlert({ type: messageType, message });
       localStorage.removeItem("alertMessage");
+      localStorage.removeItem("alertType");
     }
   }, []);
 

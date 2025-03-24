@@ -1,6 +1,13 @@
+import { useState } from "react";
 import QuoteCard from "../components/QuoteCard";
+import QuoteViewModal from "./QuoteViewModal";
 
 const QuoteList = ({ topQuotes, loading, error }) => {
+
+  const [viewedQuote, setViewedQuote] = useState(null);
+
+  const closeView = () => setViewedQuote(null);
+  const viewQuote = (quote) => setViewedQuote(quote)
 
   const buttonStyle = {
     display: "flex",
@@ -21,6 +28,8 @@ const QuoteList = ({ topQuotes, loading, error }) => {
   }
 
   return (
+    <>
+    {viewedQuote ? <QuoteViewModal quote={viewedQuote} close={closeView} /> : (<></>)}
     <div style={{ padding: "40px", display: "flex", flexDirection: "column", gap: "24px", justifyContent: "center", alignItems: "center", width: "100%" }}>
       <div style={{display: "flex", justifyContent: "space-between", width: "100%"}}>
         <h1>Top Quotes</h1>
@@ -32,12 +41,13 @@ const QuoteList = ({ topQuotes, loading, error }) => {
         ) : error ? (
           <p className="text-center w-100">{error}</p>
         ) : topQuotes.length > 0 ? (
-          topQuotes.map((quote) => <QuoteCard key={quote._id} quote={quote} />)
+          topQuotes.map((quote) => <QuoteCard key={quote._id} quote={quote} showViewModal={viewQuote} />)
         ) : (
           <p className="text-center w-100">No quotes found.</p>
         )}
       </div>
     </div>
+    </>
   );
 };
 

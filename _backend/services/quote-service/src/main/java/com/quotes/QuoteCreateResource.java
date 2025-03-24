@@ -21,12 +21,16 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.List;
 
 @Path("/create")
 public class QuoteCreateResource {
 
     @Inject
     MongoUtil mongo;
+
+    @Inject 
+    private UserClient userClient;
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -79,7 +83,17 @@ public class QuoteCreateResource {
             }
 
             ObjectId newQuoteId = mongo.createQuote(quote); //add to mongo database
-
+            Response findAccount = userClient.search(accountID);
+            if (findAccount.getStatus() == Response.Status.OK.getStatusCode()) {
+                String accSearchString = findAccount.readEntity(String.class);
+                Document accDoc = Document.parse(accSearchString);
+                List<String> MyQuotes = accDoc.getList("MyQuotes", String.class);
+                MyQuotes.add(newQuoteId.toString());
+                accDoc.put("MyQuotes",MyQuotes);
+                Response updateUser = userClient.updateMyQuotes(accountID,accDoc.toJson());
+                
+            }
+            
             if(newQuoteId != null) {
                 JsonObject jsonResponse = Json.createObjectBuilder()
                         .add("_id", newQuoteId.toHexString())

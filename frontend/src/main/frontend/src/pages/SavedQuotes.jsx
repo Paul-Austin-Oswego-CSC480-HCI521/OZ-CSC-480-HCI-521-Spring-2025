@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import QuoteCard from "../components/QuoteCard";
 import Input from "../components/Input";
-import { fetchUserQuotes } from "../lib/api";
+import { fetchMe, fetchUserQuotes, fetchQuoteById } from "../lib/api";
 import { UserContext } from "../lib/Contexts";
 
 const SavedQuotes = () => {
@@ -13,16 +13,22 @@ const SavedQuotes = () => {
     const fetchData = async () => {
       try {
         const userIdString = user._id.$oid || user._id;
+        setUserId(userIdString);
+
         const userQuotes = await fetchUserQuotes(userIdString);
-        setQuotes(userQuotes); 
+        const bookmarkedQuoteIds = Object.keys(user.FavoriteQuote || {});
+
+        const bookmarkedQuotes = await Promise.all(
+          bookmarkedQuoteIds.map((id) => fetchQuoteById(id))
+        );
+
+        setQuotes([...userQuotes, ...bookmarkedQuotes]);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
 
-    if (!user) {
-      fetchData();
-    }
+    fetchData();
   }, [user]);
 
   const handleSearch = (event) => {
@@ -40,6 +46,14 @@ const SavedQuotes = () => {
     });
   };
 
+  const filteredQuotes = quotes.filter(({ author, quote, tags, uploadedBy }) => {
+    //filter quotes based on search term matching author, text, or tags
+    return (
+      author.toLowerCase().includes(searchTerm) ||
+      quote.toLowerCase().includes(searchTerm) ||
+      tags.some((tag) => tag.toLowerCase().includes(searchTerm))
+    );
+  });
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
@@ -64,4 +78,4 @@ const SavedQuotes = () => {
   );
 };
 
-export default SavedQuotes; 
+export default SavedQuotes;
