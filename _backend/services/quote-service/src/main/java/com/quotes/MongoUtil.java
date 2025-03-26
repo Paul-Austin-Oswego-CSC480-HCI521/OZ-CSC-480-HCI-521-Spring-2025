@@ -3,10 +3,13 @@ package com.quotes;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mongodb.client.*;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.json.*;
+import jakarta.ws.rs.core.Response;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -15,6 +18,10 @@ import java.util.List;
 
 @ApplicationScoped
 public class MongoUtil {
+
+    @Inject
+    @RestClient
+    private UserClient userClient;
 
     private static final String DATABASE_NAME = "Data";
     private static MongoClient mongoClient;
@@ -46,7 +53,7 @@ public class MongoUtil {
         return null;
     }
 
-    public String searchQuote(String searchQuery) { // fuzzy search for quote
+    public String searchQuote(String searchQuery, boolean filterUsed) throws JsonProcessingException { // fuzzy search for quote
         MongoCollection<Document> collection = database.getCollection("Quotes");
 
         // create query document
@@ -63,9 +70,24 @@ public class MongoUtil {
         ));
 
         JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
+        List<String> quoteids = new ArrayList<>();
+        if(filterUsed) {
+            Response usedQuotesResult = userClient.getUsedQuotes();
+            ObjectMapper objMapper = new ObjectMapper();
+            try{
+                quoteids = objMapper.readValue(usedQuotesResult.toString(), List.class);
+            } catch (JsonProcessingException e) {
+                return null;
+            }
+
+        }
 
         for(Document doc : results) {
             JsonObject jsonObject = Json.createReader(new java.io.StringReader(doc.toJson())).readObject();
+            if(filterUsed && quoteids.contains(jsonObject.getString("_id"))){
+                //ignore quote
+                break;
+            }
             jsonArrayBuilder.add(jsonObject);
         }
 

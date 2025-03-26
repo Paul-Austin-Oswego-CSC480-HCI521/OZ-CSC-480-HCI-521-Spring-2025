@@ -45,7 +45,6 @@ public class UsedQuoteService {
             System.out.println("Exception in MongoUtil/createUsedQuote: "+e);
             return null;
         }
-
     }
 
    

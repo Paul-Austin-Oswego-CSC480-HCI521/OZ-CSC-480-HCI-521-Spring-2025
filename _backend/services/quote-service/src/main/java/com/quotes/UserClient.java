@@ -20,5 +20,10 @@ public interface UserClient{
     @Path("/users/accounts/search/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     Response search(@PathParam("id") String id);
+
+    @GET
+    @Path("/bookmarks/UsedQuotesIds")
+    @Produces(MediaType.APPLICATION_JSON)
+    Response getUsedQuotes();
     
 }

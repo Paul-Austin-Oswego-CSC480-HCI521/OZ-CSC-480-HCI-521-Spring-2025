@@ -73,14 +73,24 @@ public class QuoteSearchResource {
             required = true,
             example = "I am famous test quote",
             schema = @Schema(type = SchemaType.STRING)
-    )@PathParam("query") String query) {
+    )@PathParam("filter") String filter, @PathParam("query") String query) {
         try{
+            boolean filterUsed;
+            if(filter.equals("true")) {
+                filterUsed = true;
+            } else if(filter.equals("false")) {
+                filterUsed = false;
+            } else { filterUsed = false; }
+
             query = SanitizerClass.sanitize(query); //removes special characters
             if(query == null) {
                 return Response.status(Response.Status.BAD_REQUEST).entity("Error cleaning string, returned null").build();
             }
 
-            String result = mongo.searchQuote(query);
+            String result = mongo.searchQuote(query, filterUsed);
+            if(result == null) {
+                return Response.status(Response.Status.CONFLICT).entity("JsonProcessingException occured").build();
+            }
             return Response.ok(result).build();
         } catch (Exception e) {
             return Response.status(Response.Status.CONFLICT).entity("Exception Occured: "+e).build();
