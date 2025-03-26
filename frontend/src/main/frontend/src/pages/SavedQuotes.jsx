@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import QuoteCard from "../components/QuoteCard";
 import Input from "../components/Input";
-import { fetchMe, fetchUserQuotes, fetchQuoteById } from "../lib/api";
+import { fetchQuoteById, fetchUserQuotes } from "../lib/api";
 import { UserContext } from "../lib/Contexts";
 
 const SavedQuotes = () => {
@@ -12,17 +12,14 @@ const SavedQuotes = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const userIdString = user._id.$oid || user._id;
-        setUserId(userIdString);
+        if (!user) return;
 
-        const userQuotes = await fetchUserQuotes(userIdString);
-        const bookmarkedQuoteIds = Object.keys(user.FavoriteQuote || {});
-
+        const userQuotes = await fetchUserQuotes(user._id.$oid);
         const bookmarkedQuotes = await Promise.all(
-          bookmarkedQuoteIds.map((id) => fetchQuoteById(id))
+          user.BookmarkedQuotes.map((id) => fetchQuoteById(id))
         );
 
-        setQuotes([...userQuotes, ...bookmarkedQuotes]);
+        setQuotes([...bookmarkedQuotes, ...userQuotes]);
       } catch (error) {
         console.error("Error fetching data:", error);
       }

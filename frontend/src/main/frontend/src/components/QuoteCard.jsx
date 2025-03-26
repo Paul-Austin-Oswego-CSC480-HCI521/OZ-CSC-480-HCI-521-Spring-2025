@@ -18,7 +18,7 @@ const QuoteCard = ({ quote, onBookmarkToggle, showViewModal }) => {
       return;
     }
 
-    if (user.MyQuotes.includes(quote._id) ?? user.admin) {
+    if (user.MyQuotes.includes(quote._id) || user.admin) {
       setEditable(true);
     }
 
@@ -49,7 +49,9 @@ const QuoteCard = ({ quote, onBookmarkToggle, showViewModal }) => {
       } else {
         await deleteBookmark(quote._id);
       }
-      onBookmarkToggle(updatedQuote || quote, newBookmarkState);
+      if (typeof onBookmarkToggle === "function") {
+        onBookmarkToggle(updatedQuote || quote, newBookmarkState);
+      }
     } catch (error) {
       console.error("Error updating bookmark:", error);
     }
@@ -63,15 +65,24 @@ const QuoteCard = ({ quote, onBookmarkToggle, showViewModal }) => {
 
   const handleShareClick = (e) => {
     e.stopPropagation();
+    if (user === null) {
+      // Go to login page.
+      navigate("/login");
+      return;
+    }
     const otherUser = prompt("Enter the email to share this quote with:");
     if (otherUser) {
-      setShareUser(otherUser);
       alert(`Quote shared with ${otherUser}!`);
     }
   };
 
   const handleFlagClick = (e) => {
     e.stopPropagation();
+    if (user === null) {
+      // Go to login page.
+      navigate("/login");
+      return;
+    }
     alert("Quote has been reported. Our team will review it shortly.");
   };
 
