@@ -29,3 +29,11 @@
   font-family: "Roboto", "sans-serif";
   text-align: center;
 }
+
+.visually-hidden-radio {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  height: 0;
+  width: 0;
+}
