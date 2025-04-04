@@ -4,7 +4,7 @@ import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import AccountPage from "./pages/AccountPage";
 import Layout from "./components/Layout";
-import SavedQuotes from "./pages/SavedQuotes";
+import MyCollection from "./pages/MyCollection";
 import QuoteForm from "./components/QuoteForm";
 import DebugPage from "./pages/DebugPage";
 import { userQuotes, bookmarkedQuotes } from "./placeholderdata";
@@ -21,9 +21,9 @@ const App = () => {
           <Route path="/" element={<Layout />}>
             <Route path="/login" element={<LoginPage />} />
             <Route
-              path="/saved-quotes"
+              path="/my-collection"
               element={
-                <SavedQuotes
+                <MyCollection 
                   userQuotes={userQuotes}
                   bookmarkedQuotes={bookmarkedQuotes}
                 />

@@ -38,8 +38,8 @@ const TopNavigation = () => {
                 Add Quote
               </span>
             </li>
-            <li className={`nav-item ${isActive("/saved-quotes") ? "active" : ""}`}>
-              <Link className="nav-link" to="/saved-quotes">My Collection</Link>
+            <li className={`nav-item ${isActive("/my-collection") ? "active" : ""}`}>
+              <Link className="nav-link" to="/my-collection">My Collection</Link> {/* Updated path */}
             </li>
             {!user ? (
               <li className="nav-item">
