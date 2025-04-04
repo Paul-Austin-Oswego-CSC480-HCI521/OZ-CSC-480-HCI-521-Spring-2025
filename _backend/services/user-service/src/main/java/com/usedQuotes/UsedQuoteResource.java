@@ -44,7 +44,7 @@ public class UsedQuoteResource {
         Document userDoc = accountService.retrieveUserFromJWT(jwtString);
         
         if (userDoc == null) {
-            return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to delete account").toJson()).build();
+            return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to use quote").toJson()).build();
         }
         Account requestUser = accountService.document_to_account(userDoc);
         String accountId = accountService.getAccountIdByEmail(requestUser.Email);

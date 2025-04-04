@@ -20,6 +20,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 
@@ -28,6 +29,9 @@ public class QuoteDeleteResource {
 
     @Inject
     MongoUtil mongo;
+
+    @Inject 
+    private UserClient userClient;
 
     @DELETE
     @Path("/{quoteId}")
@@ -94,9 +98,17 @@ public class QuoteDeleteResource {
             if(!SanitizerClass.validObjectId(quoteID)) {
                 return Response.status(Response.Status.BAD_REQUEST).entity("Given ID is not valid ObjectId").build();
             }
-
             boolean result = mongo.deleteQuote(objectId);
             if(result) {
+                Response findAccount = userClient.search(accountID);
+            if (findAccount.getStatus() == Response.Status.OK.getStatusCode()) {
+                String accSearchString = findAccount.readEntity(String.class);
+                Document accDoc = Document.parse(accSearchString);
+                List<String> MyQuotes = accDoc.getList("MyQuotes", String.class);
+                MyQuotes.remove(quoteID);
+                accDoc.put("MyQuotes",MyQuotes);
+                Response updateUser = userClient.updateMyQuotes(accountID,accDoc.toJson());   
+            }
                 JsonObject jsonResponse = Json.createObjectBuilder()
                         .add("Response", "200")
                         .build();
