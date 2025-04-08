@@ -58,6 +58,7 @@ const LoginBox = ({ setShowLogin }) => {
             border: 'none',
             cursor: 'pointer'
           }}
+          aria-label="Close button"
         >
           <FaTimes size={20} color="#1E1E1E" />
         </button>
@@ -83,6 +84,7 @@ const LoginBox = ({ setShowLogin }) => {
             fontSize: '20px',
             lineHeight: '24.2px'
           }}
+          aria-label="Login with a Google Account button"
         >
           <span 
             className="d-flex align-items-center justify-content-center" 
@@ -110,6 +112,7 @@ const LoginBox = ({ setShowLogin }) => {
             fontSize: '20px',
             lineHeight: '24.2px'
           }}
+          aria-label="Continue as Guest button"
         >
           <FaUser size={20} className="me-1" />
          <div style={{paddingLeft: '14px'}}>Continue as Guest</div>
