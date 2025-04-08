@@ -39,6 +39,7 @@ const QuoteUseButton = ({ quote, setAlert, setShowLogin, onQuoteUsed }) => {
         fontWeight: "bold",
         padding: "1px 5px",
       }}
+      aria-label="Use button"
       onClick={handleUsedClick}
     >
       {used ? "✔Used" : "Use"}

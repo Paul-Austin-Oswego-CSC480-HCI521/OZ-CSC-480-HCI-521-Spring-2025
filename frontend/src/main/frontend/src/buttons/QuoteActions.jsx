@@ -84,6 +84,7 @@ const QuoteActions = ({ quote, onBookmarkToggle, setAlert, setShowLogin }) => {
       }}
     >
       <button
+        aria-label="Clipboard button"
         onClick={handleClipboardClick}
         style={{ background: "none", border: "none", cursor: "pointer" }}
       >
@@ -103,6 +104,7 @@ const QuoteActions = ({ quote, onBookmarkToggle, setAlert, setShowLogin }) => {
       </button>
 
       <button
+        aria-label="Bookmark button"
         onClick={handleBookmarkClick}
         style={{
           background: "none",
@@ -123,6 +125,7 @@ const QuoteActions = ({ quote, onBookmarkToggle, setAlert, setShowLogin }) => {
       </button>
 
       <button
+        aria-label="Share button"
         onClick={handleShareClick}
         style={{ background: "none", border: "none", cursor: "pointer" }}
       >
@@ -130,6 +133,7 @@ const QuoteActions = ({ quote, onBookmarkToggle, setAlert, setShowLogin }) => {
       </button>
 
       <button
+        aria-label="Report button"
         onClick={handleFlagClick}
         style={{
           background: "none",
