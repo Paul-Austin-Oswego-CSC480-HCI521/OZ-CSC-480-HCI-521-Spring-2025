@@ -43,7 +43,7 @@ public class SharedQuotesResource {
     public static AccountService accountService = new AccountService();
 
     @POST
-    @Path("/share/{userId}/{quoteId}")
+    @Path("/share/{email}/{quoteId}")
     @Produces(MediaType.APPLICATION_JSON)
     @APIResponses(value = {
             @APIResponse(responseCode = "200", description = "Quote successfully shared"),
@@ -54,7 +54,7 @@ public class SharedQuotesResource {
     @Operation(summary = "Share a quote with a user", description = "This endpoint allows a user to share quotes.")
     public Response shareQuote(
     @PathParam("quoteId") String quoteId,
-    @PathParam("userId") String userId,
+    @PathParam("email") String email,
     @Context HttpHeaders headers) {
 
         String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
@@ -67,10 +67,10 @@ public class SharedQuotesResource {
 
         String jwtString = authHeader.replaceFirst("(?i)^Bearer\\s+", "");
      
-      Response searchUserTo = accountService.retrieveUser(userId, false);
+      Response searchUserTo = accountService.retrieveUserByEmail(email, false);
       if(searchUserTo.getStatus()!=Response.Status.OK.getStatusCode()){
         return Response.status(Response.Status.NOT_FOUND)
-                    .entity(new Document("error", "No user found with that id").toJson())
+                    .entity(new Document("error", "No user found with that email").toJson())
                     .build();
       }
       String userToString = searchUserTo.readEntity(String.class);
@@ -80,8 +80,9 @@ public class SharedQuotesResource {
             Document docFrom = accountService.retrieveUserFromJWT(jwtString);
             docFrom.remove("expires_at");
             Account accFrom = accountService.document_to_account(docFrom);
+            String ToId = accountService.getAccountIdByEmail(email);
             String fromId = accountService.getAccountIdByEmail(accFrom.Email);
-            if(fromId.equals(userId)){
+            if(fromId.equals(ToId)){
                 return Response.status(Response.Status.BAD_REQUEST)
                             .entity(new Document("error", "From and to must be distinct").toJson())
                             .build();
@@ -107,7 +108,7 @@ public class SharedQuotesResource {
             }
         
             SharedQuote shared = new SharedQuote();
-            shared.setTo(userId);
+            shared.setTo(ToId);
             shared.setFrom(fromId);
             shared.setQuoteId(quoteId);
             JsonObject json = Json.createObjectBuilder()
@@ -118,7 +119,7 @@ public class SharedQuotesResource {
             .build();
             Client notifClient = ClientBuilder.newClient();
             WebTarget target = notifClient.target("http://user-service:9081/users/notifications/create");
-            Invocation.Builder notifReq = target.request();
+            Invocation.Builder notifReq = target.request().header(HttpHeaders.AUTHORIZATION, authHeader);
             Response notifRes = notifReq.post(Entity.json(json.toString()));
             notifClient.close();
             if(notifRes.getStatus()!=Response.Status.CREATED.getStatusCode()){
@@ -131,7 +132,7 @@ public class SharedQuotesResource {
             accTo.Notifications.add(notResDoc.getString("notification_id"));
             String toJson = accTo.toJson();
             String fromJson = accFrom.toJson();
-            Response updateTo = accountService.updateUser(toJson, userId);
+            Response updateTo = accountService.updateUser(toJson, ToId);
             Response updateFrom = accountService.updateUser(fromJson, fromId);
             if(updateTo.getStatus()!=Response.Status.OK.getStatusCode()){
                 return updateTo;
