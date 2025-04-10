@@ -26,7 +26,7 @@ const LoginOverlay = ({ setShowLogin, setIsLoggedIn }) => {
         onClick={handleOverlayClick}
       >
         <div onClick={(e) => e.stopPropagation()}>
-          <LoginBox handleGoogleLogin={handleGoogleLogin} handleGuestLogin={handleGuestLogin} setShowLogin={setShowLogin} />
+          <LoginBox handleGoogleLogin={handleGoogleLogin} handleGuestLogin={handleGuestLogin} setShowLogin={setShowLogin}  setIsLoggedIn={setIsLoggedIn}/>
         </div>
       </div>
     </FocusTrap>

@@ -1,13 +1,11 @@
 import React from 'react';
 import { FaTimes, FaUser } from 'react-icons/fa'; 
-import { useNavigate } from 'react-router-dom';
-import { FocusTrap } from 'focus-trap-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-const LoginBox = ({ showLogin }) => {
+const LoginBox = ({ setShowLogin, setIsLoggedIn }) => {
   const navigate = useNavigate(); 
 
   const handleClose = () => {
-    showLogin = false;
     navigate('/');
   };
 
@@ -16,8 +14,9 @@ const LoginBox = ({ showLogin }) => {
   };
 
   const handleGuestLogin = () => {
-    showLogin = false;
-    navigate('/'); 
+    setIsLoggedIn(false);
+    setShowLogin(false);
+    navigate('/');
   };
 
   return (
@@ -40,6 +39,7 @@ const LoginBox = ({ showLogin }) => {
       >
         <h2 
           className="mb-0"
+          aria-label="Welcome!"
           style={{
             fontFamily: 'Inter',
             fontWeight: 600,
