@@ -67,7 +67,7 @@ const LandingPage = () => {
 
   return (
     <>
-      {showLogin && <LoginOverlay setShowLogin={setShowLogin} setIsLoggedIn={setIsLoggedIn} />}
+      {showLogin && <LoginOverlay aria-label="Login Overlay" aria-live="assertive" showLogin={showLogin} isLoggedIn={isLoggedIn}/>}
       
       {alert && (
         <div className="position-fixed top-0 start-50 translate-middle-x mt-3 px-4" style={{ zIndex: 1050 }}>

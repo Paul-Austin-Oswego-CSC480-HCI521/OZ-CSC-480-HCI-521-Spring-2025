@@ -1,12 +1,13 @@
 import React from 'react';
 import { FaTimes, FaUser } from 'react-icons/fa'; 
 import { useNavigate } from 'react-router-dom';
+import { FocusTrap } from 'focus-trap-react';
 
-const LoginBox = ({ setShowLogin }) => {
+const LoginBox = ({ showLogin }) => {
   const navigate = useNavigate(); 
 
   const handleClose = () => {
-    setShowLogin(false);
+    showLogin = false;
     navigate('/');
   };
 
@@ -15,7 +16,7 @@ const LoginBox = ({ setShowLogin }) => {
   };
 
   const handleGuestLogin = () => {
-    setShowLogin(false);
+    showLogin = false;
     navigate('/'); 
   };
 
@@ -43,11 +44,9 @@ const LoginBox = ({ setShowLogin }) => {
             fontFamily: 'Inter',
             fontWeight: 600,
             fontSize: '24px',
-            lineHeight: '48px',
-            textAlign: 'center',
+            lineHeight: '24px',
+            textAlign: 'left',
             color: '#1E1E1E',
-            width: '115px',
-            height: '48px'
           }}
         >
           Welcome!
@@ -55,14 +54,14 @@ const LoginBox = ({ setShowLogin }) => {
         <button 
           onClick={handleClose} 
           className="btn"
+          aria-label="Exit login"
           style={{ 
-            width: '25px',
-            height: '25px',
+            width: '50px',
+            height: '40px',
             background: 'none',
             border: 'none',
             cursor: 'pointer'
           }}
-          aria-label="Exit login box"
         >
           <FaTimes size={20} color="#1E1E1E" />
         </button>

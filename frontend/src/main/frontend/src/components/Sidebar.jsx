@@ -53,6 +53,7 @@ const Sidebar = ({ userQuotes, bookmarkedQuotes, onFilterChange }) => {
         left: isOpen ? "0px" : "-200px",
         height: "90vh",
         backgroundColor: "#FDF7CD", /* Dark Green: 146C43, Light Green: D6F0C2, Very Soft Yellow: FDF7CD */
+        zIndex:"9999"
       }}
       
     >
