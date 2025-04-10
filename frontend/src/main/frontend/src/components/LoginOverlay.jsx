@@ -1,4 +1,5 @@
 import LoginBox from "../components/Login";
+import { FocusTrap } from "focus-trap-react";
 
 const LoginOverlay = ({ setShowLogin, setIsLoggedIn }) => {
   const handleGoogleLogin = () => {
@@ -18,15 +19,17 @@ const LoginOverlay = ({ setShowLogin, setIsLoggedIn }) => {
   };
 
   return (
-    <div
-      className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
-      style={{ backgroundColor: "rgba(0, 0, 0, 0.5)", zIndex: 1050 }}
-      onClick={handleOverlayClick}
-    >
-      <div onClick={(e) => e.stopPropagation()}>
-        <LoginBox handleGoogleLogin={handleGoogleLogin} handleGuestLogin={handleGuestLogin} setShowLogin={setShowLogin} />
+    <FocusTrap>
+      <div
+        className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+        style={{ backgroundColor: "rgba(0, 0, 0, 0.5)", zIndex: 1050 }}
+        onClick={handleOverlayClick}
+      >
+        <div onClick={(e) => e.stopPropagation()}>
+          <LoginBox handleGoogleLogin={handleGoogleLogin} handleGuestLogin={handleGuestLogin} setShowLogin={setShowLogin} />
+        </div>
       </div>
-    </div>
+    </FocusTrap>
   );
 };
 

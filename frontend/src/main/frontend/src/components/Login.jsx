@@ -7,6 +7,7 @@ const LoginBox = ({ setShowLogin }) => {
 
   const handleClose = () => {
     setShowLogin(false);
+    navigate('/');
   };
 
   const handleGoogleLogin = () => {
@@ -32,7 +33,10 @@ const LoginBox = ({ setShowLogin }) => {
       }}
     >
       {/* Header Section */}
-      <div className="d-flex justify-content-between align-items-center" style={{ width: '222px', height: '48px', gap: '82px' }}>
+      <div 
+        className="d-flex justify-content-between align-items-center" 
+        style={{ width: '222px', height: '48px', gap: '82px' }}
+      >
         <h2 
           className="mb-0"
           style={{
@@ -58,7 +62,7 @@ const LoginBox = ({ setShowLogin }) => {
             border: 'none',
             cursor: 'pointer'
           }}
-          aria-label="Close button"
+          aria-label="Exit login box"
         >
           <FaTimes size={20} color="#1E1E1E" />
         </button>
