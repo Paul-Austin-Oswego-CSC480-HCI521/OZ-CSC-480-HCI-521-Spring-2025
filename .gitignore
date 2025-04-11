@@ -17,3 +17,10 @@ _backend/services/user-service/src/main/liberty/config/server.env
 _backend/services/quote-service/src/main/liberty/config/server.env
 _backend/services/user-service/src/main/liberty/config/resources/security/defaultKeyStore.jks
 .env
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
