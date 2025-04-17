@@ -13,15 +13,29 @@ jobs:
     - uses: actions/setup-node@v4
       with:
         node-version: lts/*
+
     - name: Install dependencies
       working-directory: frontend
       run: npm ci
+
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
+
     - name: Build all images in the docker-compose file
       run: docker compose build
+      
+    - name: Start the server
+      run: docker compose up -d
+    
+    - name: Verify that Nginx is accessible
+      run: curl -v http://localhost:9083 || echo "Nginx is not responding!"
+    
+    - name: Wait for Nginx to be available
+      run: npx wait-on http://localhost:9083 --timeout 30000
+
     - name: Wait for the app to be available
       run: npx wait-on http://localhost:9083
+
     - name: Run Playwright tests
       run: npx playwright test
     - uses: actions/upload-artifact@v4
