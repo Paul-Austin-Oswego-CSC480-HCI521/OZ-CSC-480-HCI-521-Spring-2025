@@ -74,10 +74,14 @@ const TopNavigation = () => {
                 Add Quote
               </span>
             </li>
-            <li className={`nav-item ${isActive("/my-collection") ? "active" : ""}`}>
-              <Link className="nav-link" to="/my-collection">My Collection</Link> {/* Updated path */}
-            </li>
-            {!user ? (
+            { user ? (
+              <li className={`nav-item ${isActive("/my-collection") ? "active" : ""}`}>
+                <Link className="nav-link" to="/my-collection">My Collection</Link> {/* Updated path */}
+              </li>
+            ) : (
+              <></>
+            )}
+            { !user ? (
               <li className="nav-item">
                 <button className="btn btn-dark" onClick={() => navigate("/login")}>Sign in</button>
               </li>

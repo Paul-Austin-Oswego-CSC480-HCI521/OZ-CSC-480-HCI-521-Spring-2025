@@ -4,7 +4,7 @@ import { bookmarkQuote, deleteBookmark } from "../lib/api";
 import ShareQuotePopup from "./ShareQuotePopup";
 import { shareQuote } from "../lib/api"; // near top
 
-const QuoteActions = ({ quote, onBookmarkToggle, setAlert, setShowLogin }) => {
+const QuoteActions = ({ quote, onBookmarkToggle, setAlert, setShowLogin, user }) => {
     const [isBookmarked, setIsBookmarked] = useState(false);
     const [bookmarkCount, setBookmarkCount] = useState(quote.bookmarks || 0);
     const [showSharePopup, setShowSharePopup] = useState(false);
@@ -13,7 +13,7 @@ const QuoteActions = ({ quote, onBookmarkToggle, setAlert, setShowLogin }) => {
         e.stopPropagation();
 
         if (!setAlert) {
-            setAlert({ type: "danger", message: "You must be signed in to bookmark" });
+            setAlert({ type: "danger", message: "Please sign in to bookmark!" });
             setShowLogin(true);
             return;
         }
@@ -46,6 +46,12 @@ const QuoteActions = ({ quote, onBookmarkToggle, setAlert, setShowLogin }) => {
 
 
     const handleSendQuote = async (user) => {
+
+        if ( !setAlert){
+            setAlert({ type: "danger", message: "Please sign in to share!"})
+            return;
+        }
+
         try {
             await shareQuote(quote._id, user.email);
             setAlert({
@@ -64,6 +70,12 @@ const QuoteActions = ({ quote, onBookmarkToggle, setAlert, setShowLogin }) => {
 
     const handleFlagClick = (e) => {
         e.stopPropagation();
+
+        if (!setAlert){
+            setAlert({ type: "danger", message: "To report this quote, Please sign in" });
+            return;
+        }
+
         alert("Quote has been reported. Our team will review it shortly.");
     };
 
@@ -97,6 +109,7 @@ const QuoteActions = ({ quote, onBookmarkToggle, setAlert, setShowLogin }) => {
                     alignItems: "center",
                     gap: "4px",
                     color: isBookmarked ? "green" : "inherit",
+                    opacity: user ? "1" : "0.5",
                 }}
             >
                 {isBookmarked ? <BookmarkFill size={22} /> : <Bookmark size={22} />}
@@ -110,7 +123,12 @@ const QuoteActions = ({ quote, onBookmarkToggle, setAlert, setShowLogin }) => {
             <div style={{ position: "relative" }}>
                 <button
                     onClick={handleShareClick}
-                    style={{ background: "none", border: "none", cursor: "pointer" }}
+                    style={{ 
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        opacity: user ? "1" : "0.5",
+                    }}
                 >
                     <Share size={22} />
                 </button>
@@ -141,6 +159,7 @@ const QuoteActions = ({ quote, onBookmarkToggle, setAlert, setShowLogin }) => {
                     border: "none",
                     cursor: "pointer",
                     color: "#8B0000",
+                    opacity: user ? "1" : "0.5",
                 }}
             >
                 <Flag size={22} />

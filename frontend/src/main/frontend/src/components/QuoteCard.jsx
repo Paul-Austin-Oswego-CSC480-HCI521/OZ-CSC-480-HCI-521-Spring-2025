@@ -70,6 +70,7 @@ const QuoteCard = ({ quote, onBookmarkToggle, showViewModal, onQuoteUsed }) => {
         onBookmarkToggle={onBookmarkToggle}
         setAlert={setAlert}
         setShowLogin={setShowLogin}
+        user={user}
       />
       {usedDate && (
         <div style={{ marginTop: "0px", fontSize: "14px", fontStyle: "italic", color: "#5A5A5A" }}>
