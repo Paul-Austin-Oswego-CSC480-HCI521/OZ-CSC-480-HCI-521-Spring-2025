@@ -27,7 +27,6 @@ import java.util.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.eq;
 
@@ -299,6 +298,7 @@ public class AccountService {
         }
     }
 
+   
     public Account document_to_account(Document document) {
         String email = document.getString("Email");
         String username = document.getString("Username");
@@ -313,11 +313,11 @@ public class AccountService {
         List<String> bookmarkedQuotes = document.getList("BookmarkedQuotes", String.class);
         List<Document> sharedQuotesDocs = document.getList("SharedQuotes", Document.class);
         List<SharedQuote> sharedQuotes = new ArrayList<>();
-        for(Document shareDoc:sharedQuotesDocs){
+        for (Document sharedDoc : sharedQuotesDocs) {
             SharedQuote sharedQuote = new SharedQuote();
-            sharedQuote.setTo(shareDoc.getString("to"));
-            sharedQuote.setFrom(shareDoc.getString("from"));
-            sharedQuote.setQuoteId(shareDoc.getString("quoteId"));
+            sharedQuote.setTo(sharedDoc.getString("to"));
+            sharedQuote.setFrom(sharedDoc.getString("from"));
+            sharedQuote.setQuoteId(sharedDoc.getString("quoteId"));
             sharedQuotes.add(sharedQuote);
         }
         String profession = document.getString("Profession");
@@ -343,11 +343,7 @@ public class AccountService {
                 .append("Notifications", account.Notifications)
                 .append("MyQuotes", account.MyQuotes)
                 .append("BookmarkedQuotes", account.BookmarkedQuotes)
-                .append("SharedQuotes", account.SharedQuotes.stream()
-                        .map(sq -> new Document("to", sq.getTo())
-                                .append("from", sq.getFrom())
-                                .append("quoteId", sq.getQuoteId()))
-                        .collect(Collectors.toList()))
+                .append("SharedQuotes", account.SharedQuotes)
                 .append("Profession", account.Profession)
                 .append("PersonalQuote", account.PersonalQuote)
                 .append("UsedQuotes", account.UsedQuotes);
