@@ -9,7 +9,7 @@
   "description": "",
   "devDependencies": {
     "@playwright/test": "^1.51.1",
-    "@types/node": "^22.14.0"
+    "@types/node": "^22.14.1"
   },
   "dependencies": {
     "tinycolor2": "^1.6.0"
