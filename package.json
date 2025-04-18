@@ -1,0 +1,22 @@
+{
+    "name": "oz-csc-480-hci-521-spring-2025",
+    "version": "1.0.0",
+    "description": "0. Make sure you have `java jdk17` and `maven` installed.\r 1. Clone the repo using `git clone`, and `cd` into the project",
+    "main": "index.js",
+    "devDependencies": {
+      "@playwright/test": "^1.51.1",
+      "@types/node": "^22.14.0"
+    },
+    "scripts": {},
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/Paul-Austin-Oswego-CSC480-HCI521/OZ-CSC-480-HCI-521-Spring-2025.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+      "url": "https://github.com/Paul-Austin-Oswego-CSC480-HCI521/OZ-CSC-480-HCI-521-Spring-2025/issues"
+    },
+    "homepage": "https://github.com/Paul-Austin-Oswego-CSC480-HCI521/OZ-CSC-480-HCI-521-Spring-2025#readme"
+  }
