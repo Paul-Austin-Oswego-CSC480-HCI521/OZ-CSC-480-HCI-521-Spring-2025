@@ -96,7 +96,7 @@ const TopNavigation = () => {
                 if (!isNotificationOpen) handleFetchNotifications();
               }}>
               
-                <BsPersonCircle size={40} style={{ color: "#146C43" }} />
+                {user && <BsPersonCircle size={40} style={{ color: "#146C43" }} />}
 
                {/* Notification Dot */}
                {notifications.length > 0 && (

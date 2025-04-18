@@ -1,0 +1,41 @@
+.tip {
+    position: relative;
+}
+.tip-text {
+    position: absolute;
+    left: 50%;
+    bottom: -38px;
+    text-wrap-mode: nowrap;
+    padding: 2px 7px;
+    border-radius: 5px;
+    background: #000;
+    color: #fff;
+    display: none;
+    animation: 150ms ease show;
+    transform: translateX(-50%);
+}
+
+.tip:hover > .tip-text {
+    display: block;
+}
+
+.tip:hover .tip-text::after {
+    content: " ";
+    position: absolute;
+    bottom: 100%; /* At the bottom of the tooltip */
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    animation: 150ms ease show;
+    border-color: transparent transparent black transparent;
+}
+
+@keyframes show {
+    from {
+        opacity: 0%;
+    }
+    to {
+        opacity: 100%;
+    }
+}

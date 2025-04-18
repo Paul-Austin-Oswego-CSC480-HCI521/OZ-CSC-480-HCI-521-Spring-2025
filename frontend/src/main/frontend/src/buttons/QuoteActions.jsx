@@ -1,47 +1,56 @@
 import React, { useState, useEffect } from "react";
 import { BookmarkFill, Bookmark, Share, Flag } from "react-bootstrap-icons";
 import { bookmarkQuote, deleteBookmark } from "../lib/api";
+import "../scss/tooltip.css";
 
 import ShareQuotePopup from "../components/ShareQuotePopup";
 import { shareQuote } from "../lib/api"; // near top
+import { UserContext } from "../lib/Contexts";
+import { useContext } from "react";
 
-const QuoteActions = ({ quote, onBookmarkToggle, setAlert, setShowLogin }) => {
+const QuoteActions = ({ quote, onBookmarkToggle, setAlert }) => {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [bookmarkCount, setBookmarkCount] = useState(quote.bookmarks || 0);
+  const [copied, copy] = useState(false);
   const [showSharePopup, setShowSharePopup] = useState(false);
+  const [user] = useContext(UserContext);
 
   useEffect(() => {
-    const bookmarkedQuotes = JSON.parse(localStorage.getItem("bookmarkedQuotes")) || [];
+    const bookmarkedQuotes =
+      JSON.parse(localStorage.getItem("bookmarkedQuotes")) || [];
     setIsBookmarked(bookmarkedQuotes.includes(quote._id));
   }, [quote._id]);
 
   const handleBookmarkClick = async (e) => {
     e.stopPropagation();
 
-    if (!setAlert) {
-      setAlert({ type: "danger", message: "You must be signed in to bookmark" });
-      setShowLogin(true);
+    if (!user) {
+      setAlert({ type: "danger", message: "Please sign in to bookmark!" });
       return;
     }
 
     const newBookmarkState = !isBookmarked;
     setIsBookmarked(newBookmarkState);
     setBookmarkCount((prevCount) =>
-      newBookmarkState ? prevCount + 1 : prevCount - 1
+      newBookmarkState ? prevCount + 1 : prevCount - 1,
     );
 
     try {
       let updatedQuote;
-      const bookmarkedQuotes = JSON.parse(localStorage.getItem("bookmarkedQuotes")) || [];
+      const bookmarkedQuotes =
+        JSON.parse(localStorage.getItem("bookmarkedQuotes")) || [];
 
       if (newBookmarkState) {
         updatedQuote = await bookmarkQuote(quote._id);
-        localStorage.setItem("bookmarkedQuotes", JSON.stringify([...bookmarkedQuotes, quote._id]));
+        localStorage.setItem(
+          "bookmarkedQuotes",
+          JSON.stringify([...bookmarkedQuotes, quote._id]),
+        );
       } else {
         await deleteBookmark(quote._id);
         localStorage.setItem(
           "bookmarkedQuotes",
-          JSON.stringify(bookmarkedQuotes.filter((id) => id !== quote._id))
+          JSON.stringify(bookmarkedQuotes.filter((id) => id !== quote._id)),
         );
       }
 
@@ -56,17 +65,27 @@ const QuoteActions = ({ quote, onBookmarkToggle, setAlert, setShowLogin }) => {
   const handleClipboardClick = (e) => {
     e.stopPropagation();
     const textToCopy = `"${quote.quote}" - ${quote.author}`;
-    navigator.clipboard.writeText(textToCopy).then(() => {
-      setAlert({ type: "success", message: "Quote copied to clipboard!" });
-    }).catch((error) => {
-      console.error("Error copying quote:", error);
-      setAlert({ type: "danger", message: "Failed to copy quote." });
-    });
+    navigator.clipboard
+      .writeText(textToCopy)
+      .then(() => {
+        copy(true);
+        setTimeout(() => copy(false), 3000);
+      })
+      .catch((error) => {
+        console.error("Error copying quote:", error);
+        setAlert({ type: "danger", message: "Failed to copy quote." });
+      });
   };
 
   const handleShareClick = (e) => {
     e.stopPropagation();
-    setShowSharePopup(prev => !prev);
+
+    if (!user) {
+      setAlert({ type: "danger", message: "Please sign in to share!" });
+      return;
+    }
+
+    setShowSharePopup((prev) => !prev);
   };
 
   const handleSendQuote = async (user) => {
@@ -87,6 +106,15 @@ const QuoteActions = ({ quote, onBookmarkToggle, setAlert, setShowLogin }) => {
 
   const handleFlagClick = (e) => {
     e.stopPropagation();
+
+    if (!user) {
+      setAlert({
+        type: "danger",
+        message: "To report this quote, Please sign in",
+      });
+      return;
+    }
+
     alert("Quote has been reported. Our team will review it shortly.");
   };
 
@@ -102,6 +130,7 @@ const QuoteActions = ({ quote, onBookmarkToggle, setAlert, setShowLogin }) => {
     >
       <button
         aria-label="Clipboard button"
+        className="tip"
         onClick={handleClipboardClick}
         style={{ background: "none", border: "none", cursor: "pointer" }}
       >
@@ -118,10 +147,12 @@ const QuoteActions = ({ quote, onBookmarkToggle, setAlert, setShowLogin }) => {
             fill="black"
           />
         </svg>
+        {copied && <div className="tip-text">Copied to clipboard!</div>}
       </button>
 
       <button
         aria-label="Bookmark button"
+        className="tip"
         onClick={handleBookmarkClick}
         style={{
           background: "none",
@@ -130,21 +161,31 @@ const QuoteActions = ({ quote, onBookmarkToggle, setAlert, setShowLogin }) => {
           display: "flex",
           alignItems: "center",
           gap: "4px",
-          color: isBookmarked ? "green" : "inherit",
+          color: user ? (isBookmarked ? "green" : "inherit") : "#00000055",
         }}
       >
         {isBookmarked ? <BookmarkFill size={22} /> : <Bookmark size={22} />}
         <span
-          style={{ fontSize: "14px", fontWeight: "500", color: "#5A5A5A" }}
+          style={{
+            fontSize: "14px",
+            fontWeight: "500",
+            color: user ? "#5A5A5A" : "#5A5A5A55",
+          }}
         >
           {bookmarkCount}
         </span>
+        {!user && <div className="tip-text">Sign in to use this feature!</div>}
       </button>
 
-      <div style={{ position: "relative" }}>
+      <div className="tip" style={{ position: "relative" }}>
         <button
           onClick={handleShareClick}
-          style={{ background: "none", border: "none", cursor: "pointer" }}
+          style={{
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            color: user ? "#000" : "#0005",
+          }}
         >
           <Share size={22} />
         </button>
@@ -165,18 +206,21 @@ const QuoteActions = ({ quote, onBookmarkToggle, setAlert, setShowLogin }) => {
             />
           </div>
         )}
+        {!user && <div className="tip-text">Sign in to use this feature!</div>}
       </div>
 
       <button
         onClick={handleFlagClick}
+        className="tip"
         style={{
           background: "none",
           border: "none",
           cursor: "pointer",
-          color: "#8B0000",
+          color: user ? "#8B0000" : "#8B000055",
         }}
       >
         <Flag size={22} />
+        {!user && <div className="tip-text">Sign in to use this feature!</div>}
       </button>
     </div>
   );
