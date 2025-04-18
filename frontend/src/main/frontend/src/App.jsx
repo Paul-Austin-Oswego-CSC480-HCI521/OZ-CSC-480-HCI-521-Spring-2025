@@ -11,6 +11,7 @@ import { userQuotes, bookmarkedQuotes } from "./placeholderdata";
 import SearchPage from './pages/SearchPage';
 import AccountSetup from './pages/AccountSetup';
 import { UserProvider } from "./lib/Contexts";
+import CommunityGuidelinesPage from "./pages/CommunityGuidelinesPage";
 
 const App = () => {
 
@@ -34,6 +35,7 @@ const App = () => {
             <Route path="/" element={<LandingPage />} />
             <Route path="/account" element={<AccountPage />} />
             <Route path="/search" element={<SearchPage />} />
+            <Route path="/community-guidelines" element={<CommunityGuidelinesPage/>} />
           </Route>
         </Routes>
       </Router>
