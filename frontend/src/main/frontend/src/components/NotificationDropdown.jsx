@@ -160,7 +160,7 @@ const NotificationDropdown = ({ isVisible }) => {
           </span>
 
           {/* Notification Badge */}
-          {Array.isArray(notifications) && notifications.length > 0 && (
+          {notifications && notifications.length > 0 && (
             <span
               style={{
                 backgroundColor: "red",
@@ -212,7 +212,7 @@ const NotificationDropdown = ({ isVisible }) => {
                 overflowY: "auto",
               }}
             >
-              {Array.isArray(notifications) && notifications.length === 0 ? (
+              {notifications && notifications.length === 0 ? (
                 <div
                   style={{
                     padding: "6px",
@@ -225,7 +225,7 @@ const NotificationDropdown = ({ isVisible }) => {
                 </div>
               ) : (
                 <>
-                  {Array.isArray(notifications) && notifications.map((notification, index) => (
+                  {notifications && notifications.map((notification, index) => (
                     <NotificationItem
                       key={notification._id}
                       notification={{
