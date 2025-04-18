@@ -14,6 +14,7 @@ const MyCollection = () => {
   const [filteredQuotes, setFilteredQuotes] = useState([]);
   const [showUsed, setShowUsed] = useState(false);
   const [usedQuotes, setUsedQuotes] = useState([]);
+  const [selectedTags, setSelectedTags] = useState([]); 
   const [user] = useContext(UserContext);
 
   useEffect(() => {
@@ -66,7 +67,11 @@ const MyCollection = () => {
       author.toLowerCase().includes(searchTerm) ||
       quote.toLowerCase().includes(searchTerm) ||
       tags.some((tag) => tag.toLowerCase().includes(searchTerm));
-    return matchesSearch && (showUsed ? usedQuotes.includes(_id) : !usedQuotes.includes(_id));
+
+    const matchesTags =
+      selectedTags.length === 0 || selectedTags.every((tag) => tags.includes(tag));
+
+    return matchesSearch && matchesTags && (showUsed ? usedQuotes.includes(_id) : !usedQuotes.includes(_id));
   });
 
   return (
@@ -95,6 +100,7 @@ const MyCollection = () => {
           bookmarkedQuotes={bookmarkedQuotes}
           sharedQuotes={sharedQuotes} 
           onFilterChange={handleFilterChange}
+          onTagSelect={setSelectedTags}
         />
         <div
           className="col"
