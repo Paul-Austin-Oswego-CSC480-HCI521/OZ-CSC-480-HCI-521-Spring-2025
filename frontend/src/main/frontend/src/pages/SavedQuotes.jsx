@@ -38,22 +38,49 @@ const SavedQuotes = () => {
   }, [user]);
 
   useEffect(() => {
-    const storedUsedQuotes = JSON.parse(localStorage.getItem("usedQuotes")) || [];
-    setUsedQuotes(storedUsedQuotes.map((quote) => quote.id));
-  }, []);
+    const fetchUsedQuotes = async () => {
+      if (!user || !user.UsedQuotes) return;
+      try {
+        const quoteIds = Object.keys(user.UsedQuotes);
+        const results = await Promise.all(
+          quoteIds.map(async (quoteId) => {
+            const usedQuoteId = user.UsedQuotes[quoteId];
+            const response = await fetch(`/useQuote/use/search/${usedQuoteId}`);
+            if (response.ok) return quoteId;
+            return null;
+          })
+        );
+        setUsedQuotes(results.filter(Boolean));
+      } catch (error) {
+        console.error("Error fetching used quotes:", error);
+      }
+    };
+
+    fetchUsedQuotes();
+  }, [user]);
 
   const handleFilterChange = useCallback((filtered) => {
     setFilteredQuotes((prev) => (JSON.stringify(prev) !== JSON.stringify(filtered) ? filtered : prev));
   }, []);
 
-  const handleQuoteUsed = (quoteId) => {
-    const updatedUsedQuotes = [...usedQuotes, quoteId];
-    setUsedQuotes(updatedUsedQuotes);
-    localStorage.setItem(
-      "usedQuotes",
-      JSON.stringify(updatedUsedQuotes.map((id) => ({ id, usedDate: new Date().toISOString() })))
-    );
-    setFilteredQuotes((prev) => prev.filter((quote) => quote._id !== quoteId));
+  const handleQuoteUsed = async (quoteId) => {
+    try {
+      const response = await fetch(`/useQuote/use/${quoteId}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${user.token}`, 
+        },
+      });
+
+      if (response.ok) {
+        setUsedQuotes((prev) => [...prev, quoteId]);
+        setFilteredQuotes((prev) => prev.filter((quote) => quote._id !== quoteId));
+      } else {
+        console.error("Failed to mark quote as used.");
+      }
+    } catch (error) {
+      console.error("Error using quote:", error);
+    }
   };
 
   const displayedQuotes = filteredQuotes.filter(({ _id, author, quote, tags }) => {

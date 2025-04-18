@@ -7,7 +7,7 @@ import QuoteList from "../components/QuoteList";
 import AlertMessage from "../components/AlertMessage";
 import { FetchTopQuotes } from "../lib/FetchTopQuotes";
 import { UserContext } from "../lib/Contexts";
-import AccountSetup from "../pages/AccountSetup"; // adjust path if it's in pages
+import AccountSetup from "../pages/AccountSetup"; 
 import { logout } from "../lib/api"; 
 
 const LandingPage = () => {
@@ -17,7 +17,7 @@ const LandingPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [showAccountSetup, setShowAccountSetup] = useState(false);
-  const [user] = useContext(UserContext);
+  const [user, setUser] = useContext(UserContext); 
 
   const { topQuotes, loading, error } = FetchTopQuotes();
 
@@ -65,6 +65,23 @@ const LandingPage = () => {
     setShowModal(false); 
   };
 
+  const handleLogout = async () => {
+    try {
+      const success = await logout();
+      if (success) {
+        localStorage.removeItem("hasLoggedIn");
+        setIsLoggedIn(false);
+        setUser(null); 
+        setAlert({ type: "success", message: "Successfully logged out." });
+        setShowLogin(true);
+      } else {
+        throw new Error();
+      }
+    } catch {
+      setAlert({ type: "danger", message: "An error occurred during logout." });
+    }
+  };
+
   return (
     <>
       {showLogin && <LoginOverlay aria-label="Login Overlay" aria-live="assertive" setShowLogin={setShowLogin} setIsLoggedIn={setIsLoggedIn}/>}
@@ -73,6 +90,11 @@ const LandingPage = () => {
         <div className="position-fixed top-0 start-50 translate-middle-x mt-3 px-4" style={{ zIndex: 1050 }}>
           <AlertMessage type={alert.type} message={alert.message} autoDismiss={true} />
         </div>
+      )}
+      {isLoggedIn && user && (
+        <button className="btn btn-danger position-absolute top-0 end-0 m-3" onClick={handleLogout}>
+          Log Out
+        </button>
       )}
       <Splash />
 
@@ -84,7 +106,7 @@ const LandingPage = () => {
         setQuoteText={setQuoteText}
       />
 
-{showAccountSetup && <AccountSetup user={user} onClose={() => setShowAccountSetup(false)} />}
+      {showAccountSetup && <AccountSetup user={user} onClose={() => setShowAccountSetup(false)} />}
 
       <QuoteList topQuotes={topQuotes} loading={loading} error={error} />
     </>
