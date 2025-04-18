@@ -77,12 +77,12 @@ const QuoteCard = ({ quote, onBookmarkToggle, showViewModal, onQuoteUsed }) => {
           Used on: {new Date(usedDate).toLocaleDateString()}
         </div>
       )}
-      <QuoteUseButton
+      {user && <QuoteUseButton
         quote={quote}
         setAlert={setAlert}
         setShowLogin={setShowLogin}
         onQuoteUsed={onQuoteUsed}
-      />
+      />}
     </div>
   );
 };
