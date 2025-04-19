@@ -34,7 +34,7 @@ jobs:
         working-directory: ./frontend
 
       - name: Start development server for tests
-        run: npx playwright test &
+        run: npx playwright test
         working-directory: ./frontend
 
       - name: Wait for server to start
