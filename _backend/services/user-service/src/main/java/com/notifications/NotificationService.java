@@ -20,9 +20,12 @@ public class NotificationService {
     public static MongoClient mongoClient;
     public static MongoDatabase accountDatabase;
     public static MongoDatabase dataDatabase;
+    public static MongoDatabase moderationDatabase;
     public static MongoCollection<Document> notificationsCollection;
     public static MongoCollection<Document> usersCollection;
     public static MongoCollection<Document> quotesCollection;
+    public static MongoCollection<Document> deleteCollection;
+    public static MongoCollection<Document> reportCollection;
     public static AccountService accountService;
 
     public NotificationService() {
@@ -35,6 +38,10 @@ public class NotificationService {
         dataDatabase = mongoClient.getDatabase("Data");
         quotesCollection = dataDatabase.getCollection("Quotes");
 
+        moderationDatabase = mongoClient.getDatabase("Moderation");
+        deleteCollection = moderationDatabase.getCollection("Deleted");
+        reportCollection = moderationDatabase.getCollection("Reports");
+
         accountService = new AccountService();
     }
 
@@ -46,6 +53,9 @@ public class NotificationService {
         usersCollection = accountDatabase.getCollection("Users");
 
         quotesCollection = accountDatabase.getCollection("Quotes");
+
+        deleteCollection = accountDatabase.getCollection("Deleted");
+        reportCollection = accountDatabase.getCollection("Reports");
 
         accountService = new AccountService(mongoClient, "Test", "Users");
     }

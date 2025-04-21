@@ -123,9 +123,6 @@ public class SharedQuotesResource {
             }
             accTo.SharedQuotes.add(shared);
             accFrom.SharedQuotes.add(shared);
-            String notResString = notifRes.readEntity(String.class);
-            Document notResDoc = Document.parse(notResString);
-            accTo.Notifications.add(notResDoc.getString("notification_id"));
             String toJson = accTo.toJson();
             String fromJson = accFrom.toJson();
             Response updateTo = accountService.updateUser(toJson, ToId);

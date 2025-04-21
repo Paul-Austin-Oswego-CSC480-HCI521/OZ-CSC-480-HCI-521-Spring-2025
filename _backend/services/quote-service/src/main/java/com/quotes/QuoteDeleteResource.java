@@ -40,7 +40,7 @@ public class QuoteDeleteResource {
 
     @DELETE
     @Path("/{quoteId}")
-    @Consumes(MediaType.APPLICATION_JSON)
+//    @Consumes(MediaType.APPLICATION_JSON)
     @APIResponses(value = {
             @APIResponse(responseCode = "200", description = "Quote was successfully deleted"),
             @APIResponse(responseCode = "404", description = "Quote ID was not found in the database"),
@@ -53,7 +53,7 @@ public class QuoteDeleteResource {
             required = true,
             example = "67b61f18daa68e25fbd151e9",
             schema = @Schema(type = SchemaType.STRING)
-    )@PathParam("quoteId") String quoteID, @Context HttpHeaders headers) {
+    )@PathParam("quoteId") String quoteID, String reasonForDelete, @Context HttpHeaders headers) {
         try{
             String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
 
@@ -101,10 +101,17 @@ public class QuoteDeleteResource {
 
             if (group.equals("admin")) {
                 DeleteService deleteService = new DeleteService();
-                Document deleteQuoteDoc = Document.parse(jsonQuote)
+                Document deleteQuoteDoc = new Document("author", quote.getAuthor())
+                        .append("quote", quote.getText())
+                        .append("creator", quote.getCreator())
+                        .append("reason", reasonForDelete)
                         .append("adminID", accountID)
                         .append("deletedDate", System.currentTimeMillis()/ 1000L);
-                deleteService.createDeletedQuote(deleteQuoteDoc);
+                ObjectId deleteQuoteId = deleteService.createDeletedQuote(deleteQuoteDoc);
+                deleteService.deleteReports(quote.getId());
+                Response response = deleteService.sendOwnerNotification(deleteQuoteDoc, deleteQuoteId, authHeader);
+                System.out.println(response.getStatus());
+                accountID = quote.getCreator().toString();
             }
 
             //check id is in valid form

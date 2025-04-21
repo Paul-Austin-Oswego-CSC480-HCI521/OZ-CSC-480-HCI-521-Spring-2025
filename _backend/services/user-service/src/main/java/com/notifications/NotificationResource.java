@@ -1,6 +1,8 @@
 package com.notifications;
 
+import com.accounts.Account;
 import com.accounts.AccountService;
+import com.mongodb.client.result.InsertOneResult;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Consumes;
@@ -34,6 +36,8 @@ import com.mongodb.client.FindIterable;
 
 import java.io.StringReader;
 import java.io.StringWriter;
+
+import static com.mongodb.client.model.Filters.eq;
 
 @Path("/notifications")
 public class NotificationResource {
@@ -74,6 +78,7 @@ public class NotificationResource {
                         .build();
             }
 
+            // if type is Delete, then look in the moderation delete for quote
             ObjectId userObjectId = new ObjectId(userId);
             Document user = notificationService.usersCollection.find(new Document("_id", userObjectId)).first();
             if (user == null) {
@@ -153,6 +158,7 @@ public class NotificationResource {
             String fromId = inputJson.getString("from");
             String toId = inputJson.getString("to");
             String quoteId = inputJson.getString("quote_id");
+            String type = inputJson.getString("type");
 
             if (!notificationService.isValidObjectId(fromId) || !notificationService.isValidObjectId(toId) || !notificationService.isValidObjectId(quoteId)) {
                 return Response.status(Response.Status.BAD_REQUEST)
@@ -169,21 +175,40 @@ public class NotificationResource {
             }
 
             ObjectId quoteObjectId = new ObjectId(quoteId);
-            Document quote = notificationService.quotesCollection.find(new Document("_id", quoteObjectId)).first();
-            if (quote == null) {
-                return Response.status(Response.Status.NOT_FOUND)
-                        .entity("Quote not found")
-                        .build();
+            if (!type.equals("Delete")) {
+                Document quote = notificationService.quotesCollection.find(new Document("_id", quoteObjectId)).first();
+                if (quote == null) {
+                    return Response.status(Response.Status.NOT_FOUND)
+                            .entity("Quote not found")
+                            .build();
+                }
+            } else {
+                Document quote = notificationService.deleteCollection.find(new Document("_id", quoteObjectId)).first();
+                if (quote == null) {
+                    return Response.status(Response.Status.NOT_FOUND)
+                            .entity("Deleted Quote not found")
+                            .build();
+                }
             }
 
+            ObjectId notificationId = new ObjectId();
             Document notificationDoc = new Document()
+                    .append("_id", notificationId)
                     .append("from", new ObjectId(fromId))
                     .append("to", new ObjectId(toId))
                     .append("type", inputJson.getString("type"))
                     .append("quote_id", new ObjectId(quoteId))
                     .append("Created_at", System.currentTimeMillis());
 
-            notificationService.notificationsCollection.insertOne(notificationDoc);
+            InsertOneResult result = notificationService.notificationsCollection.insertOne(notificationDoc);
+
+            toUser.remove("expires_at");
+
+            Account toAccount = notificationService.accountService.document_to_account(toUser);
+
+            toAccount.Notifications.add(notificationId.toString());
+
+            notificationService.accountService.updateUser(toAccount.toJson(), toId);
 
             JsonObject response = Json.createObjectBuilder()
                     .add("success", true)
@@ -196,6 +221,7 @@ public class NotificationResource {
                     .build();
 
         } catch (Exception e) {
+            e.printStackTrace();
             return Response.status(Response.Status.CONFLICT)
                     .entity("Exception occurred: " + e.getMessage())
                     .build();
@@ -256,6 +282,77 @@ public class NotificationResource {
             return Response.ok(response.toString()).build();
 
         } catch (Exception e) {
+            return Response.status(Response.Status.CONFLICT)
+                    .entity("Exception occurred: " + e.getMessage())
+                    .build();
+        }
+    }
+
+    @GET
+    @Path("notification/{notificationId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @APIResponses(value = {
+            @APIResponse(responseCode = "200", description = "Notification successfully deleted"),
+            @APIResponse(responseCode = "400", description = "Given ID is not a valid ObjectId"),
+            @APIResponse(responseCode = "401", description = "Authorization missing or invalid"),
+            @APIResponse(responseCode = "409", description = "Exception occurred")
+    })
+    @Operation(summary = "Retrieve a notification by ID",
+            description = "Retrieves a notification by notification ID and returns the necessary info based on the type of notification")
+    public Response getNotification(@PathParam("notificationId") String notificationId, @Context HttpHeaders headers) {
+        NotificationService notificationService = new NotificationService();
+        String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
+
+        if (authHeader == null || !authHeader.toLowerCase().startsWith("bearer ")) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(new Document("error", "Missing or invalid Authorization header").toJson())
+                    .build();
+        }
+
+        String jwtString = authHeader.replaceFirst("(?i)^Bearer\\s+", "");
+
+        Document userDoc = notificationService.accountService.retrieveUserFromJWT(jwtString);
+
+        if (userDoc == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to retrieve notifications").toJson()).build();
+        }
+
+        try {
+            if (!notificationService.isValidObjectId(notificationId)) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("Given ID is not a valid ObjectId")
+                        .build();
+            }
+
+            ObjectId objectId = new ObjectId(notificationId);
+            Document notificationDoc = notificationService.notificationsCollection.find(eq("_id", objectId)).first();
+
+            ObjectId quote_id;
+            Document doc;
+            switch (notificationDoc.getString("type")) {
+                case "Share":
+                    quote_id = notificationDoc.getObjectId("quote_id");
+                    doc = notificationService.quotesCollection.find(eq("_id", quote_id)).first();
+                    notificationDoc.putAll(doc);
+                    break;
+                case "Delete":
+                    System.out.println("Im here");
+                    quote_id = notificationDoc.getObjectId("quote_id");
+                    doc = notificationService.deleteCollection.find(eq("_id", quote_id)).first();
+                    notificationDoc.putAll(doc);
+                    break;
+                case "Report":
+                    quote_id = notificationDoc.getObjectId("quote_id");
+                    doc = notificationService.reportCollection.find(eq("_id", quote_id)).first();
+                    notificationDoc.putAll(doc);
+                    break;
+
+            }
+
+            return Response.ok(notificationDoc.toJson()).build();
+
+        } catch (Exception e) {
+            e.printStackTrace();
             return Response.status(Response.Status.CONFLICT)
                     .entity("Exception occurred: " + e.getMessage())
                     .build();
