@@ -40,14 +40,11 @@ public class AccountsUnitTest {
     // Setup Method
     @BeforeAll
     public static void setUp() throws UnknownHostException {
-//        System.setProperty("config.path", "src/main/liberty/config");
-
 //        Dotenv dotenv = Dotenv.configure()
 //                .load();
-
+//
 //        MongoClient client = MongoClients.create(dotenv.get("CONNECTION_STRING"));
 //
-//        accountService = new AccountService(client, "Test", "Users");
 
         String connectionString = mongoDBContainer.getConnectionString();
 

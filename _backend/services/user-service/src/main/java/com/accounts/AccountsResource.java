@@ -69,6 +69,33 @@ public class AccountsResource {
     }
 
     @GET
+    @Path("/search/query/{query}")
+    @APIResponses(value = {
+            @APIResponse(responseCode = "200", description = "Account has been found. Will return the account as json.", content = @Content(mediaType = "application/json")),
+            @APIResponse(responseCode = "404", description = "Account has not been found in the database.")
+    })
+    @Operation(summary = "Search for user accounts matching the search query.")
+    public Response searchByQuery(@PathParam("query") String query, @Context HttpHeaders headers) {
+        String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
+
+        if (authHeader == null || !authHeader.toLowerCase().startsWith("bearer ")) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(new Document("error", "Missing or invalid Authorization header").toJson())
+                    .build();
+        }
+
+        String jwtString = authHeader.replaceFirst("(?i)^Bearer\\s+", "");
+
+        Document userDoc = accountService.retrieveUserFromJWT(jwtString);
+
+        if (userDoc == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to search for email").toJson()).build();
+        }
+
+        return accountService.retrieveUsersQuery(query);
+    }
+
+    @GET
     @Path("/search/email/{email}")
     @APIResponses(value = {
             @APIResponse(responseCode = "200", description = "Account has been found. Will return the account as json.", content = @Content(mediaType = "application/json")),
@@ -77,7 +104,7 @@ public class AccountsResource {
     @Operation(summary = "Search a user account by email address.")
     public Response searchByEmail(@PathParam("email") String email) {
         return accountService.retrieveUserByEmail(email, true);
-    }    
+    }
 
     @DELETE
     @Path("/delete/{id}")
