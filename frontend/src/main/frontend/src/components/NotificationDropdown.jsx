@@ -1,46 +1,22 @@
-import { IoMdClose, IoIosArrowDown } from "react-icons/io";
+import { IoIosArrowDown } from "react-icons/io";
 import { Link } from "react-router-dom";
 import { useContext } from "react";
 import NotificationItem from "./Notification";
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { fetchNotifications, deleteNotification, clearAllNotifications } from "../lib/api";
 import { UserContext } from "../lib/Contexts";
+import { BsPersonCircle, BsBell, BsBoxArrowRight } from "react-icons/bs";
 
 const NotificationDropdown = ({ isVisible }) => {
   const [notifications, setNotifications] = useState([]);
   const [isNotificationsVisible, setIsNotificationsVisible] = useState(false);
-  const contentRef = useRef(null);
-  const [user] = useContext(UserContext); 
-  const [dropdownStyles, setDropdownStyles] = useState({
-    maxHeight: "0px",
-    opacity: 0,
-    overflow: "hidden",
-    transition: "max-height 0.4s ease, opacity 0.4s ease",
-  });
-
-  useEffect(() => {
-    if (isNotificationsVisible) {
-      const scrollHeight = contentRef.current?.scrollHeight || 500;
-      setDropdownStyles((prev) => ({
-        ...prev,
-        maxHeight: `${scrollHeight}px`,
-        opacity: 1,
-      }));
-    } else {
-      setDropdownStyles((prev) => ({
-        ...prev,
-        maxHeight: "0px",
-        opacity: 0,
-      }));
-    }
-  }, [isNotificationsVisible, notifications]);
+  const [user] = useContext(UserContext);
 
   useEffect(() => {
     const loadNotifications = async () => {
       try {
-
         const userId = user._id.$oid;
-        const fetchedNotifications = await fetchNotifications(userId); 
+        const fetchedNotifications = await fetchNotifications(userId);
         setNotifications(fetchedNotifications);
       } catch (error) {
         console.error("Error fetching notifications:", error);
@@ -62,6 +38,18 @@ const NotificationDropdown = ({ isVisible }) => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await logout(); 
+      localStorage.removeItem("hasLoggedIn");
+      setIsLoggedIn(false);
+      setAlert({ type: "success", message: "Successfully logged out." });
+      setShowLogin(true);
+    } catch (error) {
+      setAlert({ type: "danger", message: "An error occurred during logout." });
+    }
+  };
+
   const handleClearAll = async () => {
     try {
       await clearAllNotifications(user._id);
@@ -73,44 +61,23 @@ const NotificationDropdown = ({ isVisible }) => {
 
   if (!isVisible) return null;
 
-  // Color updates
-  const backgroundColor = "#f5e7c7"; // darker cream
-  const borderColor = "#1e7c3e"; // darker green
-
   return (
     <div
       style={{
         position: "absolute",
-        top: "60px", // moved down for more space
+        top: "60px",
         left: "50%",
         transform: "translateX(-50%)",
         width: "250px",
-        backgroundColor,
+        backgroundColor: "#f5e7c7",
         color: "black",
-        border: `2px solid ${borderColor}`,
         borderRadius: "8px",
         boxShadow: "0 4px 12px rgba(0, 100, 0, 0.3)",
         zIndex: 1050,
-        paddingTop: "10px", // space for the arrow
+        paddingTop: "10px",
       }}
     >
-      {/* Arrow */}
-      <div
-        style={{
-          position: "absolute",
-          top: "-10px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "0",
-          height: "0",
-          borderLeft: "10px solid transparent",
-          borderRight: "10px solid transparent",
-          borderBottom: `10px solid ${backgroundColor}`,
-          zIndex: 1051,
-        }}
-      />
-
-      {/* Container */}
+      
       <ul
         style={{
           listStyle: "none",
@@ -118,49 +85,112 @@ const NotificationDropdown = ({ isVisible }) => {
           padding: 0,
         }}
       >
-        {/* Account Page Link */}
+
+        {/* User Profile Section */}
         <li
           style={{
-            padding: "8px 14px", // reduced padding
+            display: "flex",
+            alignItems: "center",
+            padding: "4px 10px",
             borderBottom: "1px solid #ccc",
-            cursor: "pointer",
+            margin: "0 10px",
           }}
         >
+          {user.profilePicture ? (
+            <img
+              src={user.profilePicture}
+              alt="Profile"
+              style={{
+                width: "32px",
+                height: "32px",
+                borderRadius: "50%",
+                marginRight: "8px",
+              }}
+            />
+          ) : (
+            <BsPersonCircle
+              style={{
+                fontSize: "32px",
+                color: "#666",
+                marginRight: "8px",
+              }}
+            />
+          )}
+          <span
+            style={{
+              fontSize: "16px",
+              color: "black",
+              fontWeight: "bold",
+            }}
+          >
+            {user.username || "Guest"}
+          </span>
+        </li>
+
+        {/* Profile Sections*/}
+        <li
+          style={{
+            padding: "4px 10px",
+            borderBottom: "1px solid #ccc",
+            margin: "0 10px",
+            cursor: "pointer",
+            textAlign: "left",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <BsPersonCircle
+            style={{
+              fontSize: "20px", 
+              color: "#0d5c05",
+              marginRight: "8px",
+            }}
+          />
           <Link
             to="/account"
             style={{
               textDecoration: "none",
               color: "black",
-              fontSize: "13px",
+              fontSize: "16px",
+              fontWeight: "bold",
             }}
           >
-            Account Page
+            Profile
           </Link>
         </li>
 
-        {/* Notifications Section */}
+        {/* Notification Section */}
         <li
           onClick={() => setIsNotificationsVisible(!isNotificationsVisible)}
           style={{
-            padding: "8px 14px", // reduced padding
+            padding: "4px 10px",
             cursor: "pointer",
             position: "relative",
             display: "flex",
             alignItems: "center",
+            margin: "0 10px",
           }}
         >
+          <BsBell
+            style={{
+              fontSize: "20px",
+              color: "#0d5c05",
+              marginRight: "8px",
+            }}
+          />
           <span
             style={{
-              fontSize: "13px",
+              fontSize: "16px",
               color: "black",
+              fontWeight: "bold",
               flex: 1,
+              textAlign: "left",
             }}
           >
-            Notifications
+            Notification
           </span>
 
-          {/* Notification Badge */}
-          {notifications && notifications.length > 0 && (
+          {Array.isArray(notifications) && notifications.length > 0 && (
             <span
               style={{
                 backgroundColor: "red",
@@ -171,7 +201,7 @@ const NotificationDropdown = ({ isVisible }) => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: "11px",
+                fontSize: "12px",
                 marginRight: "6px",
               }}
             >
@@ -179,7 +209,6 @@ const NotificationDropdown = ({ isVisible }) => {
             </span>
           )}
 
-          {/* Rotating Arrow */}
           <IoIosArrowDown
             style={{
               fontSize: "16px",
@@ -187,77 +216,93 @@ const NotificationDropdown = ({ isVisible }) => {
               transform: isNotificationsVisible ? "rotate(180deg)" : "rotate(0deg)",
             }}
           />
+        </li>
 
-          {/* Animated Dropdown */}
-          <div
+        {/* Notifications List */}
+        {isNotificationsVisible && (
+          <li
             style={{
-              position: "absolute",
-              top: "100%",
-              left: "0",
-              width: "250px",
-              backgroundColor,
-              color: "black",
-              border: `2px solid ${borderColor}`,
-              borderRadius: "8px",
-              boxShadow: "0 4px 12px rgba(0, 100, 0, 0.3)",
-              zIndex: 1051,
-              marginTop: "0",
-              ...dropdownStyles,
+              padding: "0 14px",
+              maxHeight: "300px",
+              overflowY: "auto",
             }}
           >
-            <div
-              ref={contentRef}
-              style={{
-                maxHeight: "300px",
-                overflowY: "auto",
-              }}
-            >
-              {notifications && notifications.length === 0 ? (
-                <div
-                  style={{
-                    padding: "6px",
-                    textAlign: "center",
-                    color: "#666",
-                    fontSize: "12px",
-                  }}
-                >
-                  No new notifications
-                </div>
-              ) : (
-                <>
-                  {notifications && notifications.map((notification, index) => (
+            {Array.isArray(notifications) && notifications.length === 0 ? (
+              <div
+                style={{
+                  padding: "6px",
+                  textAlign: "center",
+                  color: "#666",
+                  fontSize: "12px",
+                }}
+              >
+                No new notifications
+              </div>
+            ) : (
+              <>
+                {Array.isArray(notifications) &&
+                  notifications.map((notification, index) => (
                     <NotificationItem
                       key={notification._id}
-                      notification={{
-                        ...notification,
-                        isLast: index === notifications.length - 1,
-                      }}
+                      notification={notification}
                       onRemove={() => handleRemoveNotification(index)}
                     />
                   ))}
-                  <div style={{ padding: "6px", textAlign: "center" }}>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleClearAll();
-                      }}
-                      style={{
-                        background: borderColor,
-                        border: "none",
-                        color: "white",
-                        cursor: "pointer",
-                        fontSize: "11px",
-                        borderRadius: "16px",
-                        padding: "2px 20px",
-                      }}
-                    >
-                      Clear All
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
+                <div style={{ padding: "6px", textAlign: "center" }}>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleClearAll();
+                    }}
+                    style={{
+                      background: borderColor,
+                      border: "none",
+                      color: "white",
+                      cursor: "pointer",
+                      fontSize: "11px",
+                      borderRadius: "16px",
+                      padding: "2px 20px",
+                    }}
+                  >
+                    Clear All
+                  </button>
+                </div>
+              </>
+            )}
+          </li>
+        )}
+
+        {/* Logout Section */}
+        <li
+          style={{
+            padding: "4px 10px",
+            borderTop: "1px solid #ccc",
+            margin: "0 10px",
+            cursor: "pointer",
+            textAlign: "left",
+            display: "flex",
+            alignItems: "center",
+          }}
+          onClick={() => {
+            handleLogout(); // Taken from the AccountPage component, should work here as well.
+          }}
+        >
+          <BsBoxArrowRight
+            style={{
+              fontSize: "20px",
+              color: "#0d5c05",
+              marginRight: "8px",
+            }}
+          />
+          <span
+            style={{
+              fontSize: "16px",
+              color: "black",
+              fontWeight: "bold",
+            }}
+          >
+            Log Out
+          </span>
         </li>
       </ul>
     </div>

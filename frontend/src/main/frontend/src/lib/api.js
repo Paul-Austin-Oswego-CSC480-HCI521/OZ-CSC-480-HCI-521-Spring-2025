@@ -65,27 +65,16 @@ export const deleteQuote = async (quoteId) => {
 export const reportQuote = async (reportData) => {
   //send a request to report a quote by ID
   try {
-    const response = await fetch(`${PROXY_URL}/users/auth/jwt?redirectURL=${encodeURIComponent(`${PROXY_URL}/quotes/report/create`)}`, {
+    const response = await fetch(`${PROXY_URL}/quotes/report/id`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        method: "POST",
-        body: reportData,
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ quoteID: reportData.quoteID }),
     });
-    
     if (!response.ok) throw new Error("Failed to report quote");
-    const data = await response.json();
-
-    console.log("Quote reported successfully");
-    return data;
+    return await response.json();
   } catch (error) {
     console.error("Error reporting quote:", error);
   }
- 
 };
 
 export const updateQuote = async (quoteData) => {
@@ -408,6 +397,7 @@ export const useQuote = async (quoteId) => {
 
 {/* Notification Related */}
 export const fetchNotifications = async (userId) => {
+  try {
     const response = await fetch(
       `${PROXY_URL}/users/auth/jwt?redirectURL=${encodeURIComponent(`${PROXY_URL}/users/notifications/user/${userId}`)}`,
       {
@@ -415,19 +405,47 @@ export const fetchNotifications = async (userId) => {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include", 
+        credentials: "include",
         body: JSON.stringify({
           method: "GET",
         }),
       }
-    );
+    )
 
     if (!response.ok) {
-      const errorMessage = await response.text();
+      const errorMessage = await response.text(); 
       console.error("Error fetching notifications:", errorMessage);
+      throw new Error(`Failed to fetch notifications: ${errorMessage}`);
     }
-    
-  return await response.json();
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    throw error;
+  }
+};
+
+
+export const fetchNotification = async (notificationId) => {
+  const response = await fetch(
+      `${PROXY_URL}/users/auth/jwt?redirectURL=${encodeURIComponent(`${PROXY_URL}/users/notifications/notification/${notificationId}`)}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          method: "GET",
+        }),
+      }
+  );
+
+  if (!response.ok) {
+    const errorMessage = await response.text();
+    console.error("Error fetching notification:", errorMessage);
+  }
 };
 
 export const deleteNotification = async (notificationId) => {
@@ -563,5 +581,3 @@ export const filteredSearch = async (query, filters = {}) => {
     throw error;
   }
 };
-
-
