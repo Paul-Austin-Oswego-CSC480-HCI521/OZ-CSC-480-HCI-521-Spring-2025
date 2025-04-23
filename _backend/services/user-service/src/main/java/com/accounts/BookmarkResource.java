@@ -63,7 +63,7 @@ public class BookmarkResource {
             if(acc.BookmarkedQuotes.contains(quoteId)){
                 return Response
             .status(Response.Status.BAD_REQUEST)
-            .entity("You already bookmarked that")
+            .entity(new Document("error","You already bookmarked that"))
             .build();
             }
             String userId = accountService.getAccountIdByEmail(acc.Email);
@@ -76,8 +76,7 @@ public class BookmarkResource {
             catch(WebApplicationException e){
                  quoteSearchRes = e.getResponse();
                  return Response.status(Response.Status.NOT_FOUND)
-                 .entity(new Document("error", "That quote doesn't exist")
-                 .toJson())
+                 .entity(new Document("error", "That quote doesn't exist").toJson())
                  .build();
             }
             if(quoteSearchRes.getStatus()==Response.Status.OK.getStatusCode()){
@@ -89,13 +88,14 @@ public class BookmarkResource {
                 Boolean sharedWithYou = false;
                 for (SharedQuote shared : acc.SharedQuotes) {
                     if(shared.getTo().equals(userId)
-                    && shared.getQuoteId().equals(quoteId)){
+                    && shared.getQuoteId().equals(quoteId)&&shared.getFrom().equals(quoteSearchDoc.get("creator").toString())
+                    &&shared.getFrom().equals(quoteSearchDoc.get("creator").toString())){
                         sharedWithYou = true;
                     }
                 }
                 if(!sharedWithYou){
                     return Response.status(Response.Status.UNAUTHORIZED)
-                    .entity(new Document("error", "You can't boomark this it's private").toJson())
+                    .entity(new Document("error", "You can't bookmark this it's private").toJson())
                     .build();
                 }
              
@@ -153,15 +153,15 @@ public class BookmarkResource {
                         updatedBookmarks.remove(objectId);
                     }
                     if(quoteSearchRes.getStatus()==Response.Status.OK.getStatusCode()){
-                       
 
                         JsonObject quoteSearchJson = quoteSearchRes.readEntity(JsonObject.class);
                         if(quoteSearchJson.getBoolean("private")
-                        &&!quoteSearchJson.get("creator").toString().equals(accountService.getAccountIdByEmail(acc.Email))){
+                        &&!quoteSearchJson.getString("creator").equals(accountService.getAccountIdByEmail(acc.Email))){
                             Boolean sharedWithYou = false;
                             for (SharedQuote shared : acc.SharedQuotes) {
                                 if(shared.getTo().equals(accountService.getAccountIdByEmail(acc.Email))
-                                && shared.getQuoteId().equals(objectId)){
+                                && shared.getQuoteId().equals(objectId)
+                                &&shared.getFrom().equals(quoteSearchJson.getString("creator"))){
                                     sharedWithYou = true;
                                 }
                             }
@@ -173,9 +173,12 @@ public class BookmarkResource {
                         jsonList.add(quoteSearchJson);
                     }
                 }
+                
             }
             acc.BookmarkedQuotes = updatedBookmarks;
             accountService.updateUser(acc.toJson(), accountService.getAccountIdByEmail(acc.Email));
+            return Response
+            .ok(jsonList).build();
         }
         return Response.status(Response.Status.BAD_REQUEST).entity("Failed to retrieve account").build();
     }
@@ -219,13 +222,15 @@ public class BookmarkResource {
             if(quoteSearchRes.getStatus()==Response.Status.OK.getStatusCode()){
             JsonObject quoteSearchJson = quoteSearchRes.readEntity(JsonObject.class);
             if(quoteSearchJson.getBoolean("private")
-            &&!quoteSearchJson.get("creator").toString().equals(accountService.getAccountIdByEmail(acc.Email))){
+            &&!quoteSearchJson.getString("creator").equals(accountService.getAccountIdByEmail(acc.Email))){
                 Boolean sharedWithYou = false;
-                            for (SharedQuote shared : acc.SharedQuotes) {
-                                if(shared.getTo().equals(accountService.getAccountIdByEmail(acc.Email))
-                                && shared.getQuoteId().equals(objectId)){
-                                    sharedWithYou = true;
-                                }
+                for (SharedQuote shared : acc.SharedQuotes) {
+                    if(shared.getTo().equals(accountService.getAccountIdByEmail(acc.Email))
+                    && shared.getQuoteId().equals(objectId) 
+                    &&shared.getFrom().equals(quoteSearchJson.getString("creator"))){
+                        sharedWithYou = true;
+                    }
+                
                             }
                             if(!sharedWithYou){
                                 updatedBookmarks.remove(objectId);
@@ -252,6 +257,7 @@ public class BookmarkResource {
 
     @GET
     @Path("/UsedQuotes")
+    @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get users used quotes.")
     public Response userUsedQuotes(@Context HttpHeaders header) {
         String authHeader = header.getHeaderString(HttpHeaders.AUTHORIZATION);
@@ -284,7 +290,8 @@ public class BookmarkResource {
                         Boolean sharedWithYou = false;
                         for (SharedQuote shared : account.SharedQuotes) {
                             if(shared.getTo().equals(accountService.getAccountIdByEmail(account.Email))
-                            && shared.getQuoteId().equals(oid)){
+                            && shared.getQuoteId().equals(oid) &&shared.getFrom().equals(quoteObject.get("creator").toString())
+                            &&shared.getFrom().equals(quoteObject.get("creator").toString())){
                                 sharedWithYou = true;
                             }
                         }

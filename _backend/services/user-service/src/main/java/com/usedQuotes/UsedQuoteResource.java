@@ -80,7 +80,8 @@ public class UsedQuoteResource {
                 Boolean sharedWithYou = false;
                         for (SharedQuote shared : requestUser.SharedQuotes) {
                             if(shared.getTo().equals(accountService.getAccountIdByEmail(requestUser.Email))
-                            && shared.getQuoteId().equals(id)){
+                            && shared.getQuoteId().equals(id)
+                            &&shared.getFrom().equals(quoteSearchDoc.get("creator"))){
                                 sharedWithYou = true;
                             }
                         }
@@ -97,6 +98,7 @@ public class UsedQuoteResource {
             requestUser.UsedQuotes.put(id, usedQuoteId.toString());
             Document backToDoc = accountService.account_to_document(requestUser);
             backToDoc.remove("expires_at");
+            backToDoc.remove("SharedQuotes");
             Response updateUser = accountService.updateUser(backToDoc.toJson(), accountId);
              if(updateUser.getStatus()==Response.Status.OK.getStatusCode()){
                 return Response
@@ -128,7 +130,8 @@ public class UsedQuoteResource {
                 Boolean sharedWithYou = false;
                 for (SharedQuote shared : requestUser.SharedQuotes) {
                     if(shared.getTo().equals(accountService.getAccountIdByEmail(requestUser.Email))
-                    && shared.getQuoteId().equals(id)){
+                    && shared.getQuoteId().equals(id)
+                    &&shared.getFrom().equals(quoteSearchDoc.get("creator"))){
                         sharedWithYou = true;
                     }
                 }
