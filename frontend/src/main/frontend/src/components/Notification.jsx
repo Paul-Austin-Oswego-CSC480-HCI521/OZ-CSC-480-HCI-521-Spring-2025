@@ -1,3 +1,5 @@
+import { IoMdClose } from "react-icons/io";
+
 const NotificationItem = ({ notification, onRemove }) => (
     <div
       style={{

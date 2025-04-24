@@ -11,6 +11,7 @@ const NotificationDropdown = ({ isVisible }) => {
   const [notifications, setNotifications] = useState([]);
   const [isNotificationsVisible, setIsNotificationsVisible] = useState(false);
   const [user] = useContext(UserContext);
+  const borderColor = "#0d5c05"; 
 
   useEffect(() => {
     const loadNotifications = async () => {
@@ -116,46 +117,16 @@ const NotificationDropdown = ({ isVisible }) => {
               }}
             />
           )}
-          <span
-            style={{
-              fontSize: "16px",
-              color: "black",
-              fontWeight: "bold",
-            }}
-          >
-            {user.username || "Guest"}
-          </span>
-        </li>
-
-        {/* Profile Sections*/}
-        <li
-          style={{
-            padding: "4px 10px",
-            borderBottom: "1px solid #ccc",
-            margin: "0 10px",
-            cursor: "pointer",
-            textAlign: "left",
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          <BsPersonCircle
-            style={{
-              fontSize: "20px", 
-              color: "#0d5c05",
-              marginRight: "8px",
-            }}
-          />
           <Link
             to="/account"
             style={{
               textDecoration: "none",
-              color: "black",
               fontSize: "16px",
+              color: "black",
               fontWeight: "bold",
             }}
           >
-            Profile
+            {user.Username || "Guest"}
           </Link>
         </li>
 
