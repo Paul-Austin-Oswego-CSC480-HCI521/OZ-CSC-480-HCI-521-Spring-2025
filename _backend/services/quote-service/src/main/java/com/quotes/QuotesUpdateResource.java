@@ -114,4 +114,65 @@ public class QuotesUpdateResource {
             return Response.status(Response.Status.BAD_REQUEST).entity("IOException: "+e).build();
         }
     }
+
+    @PUT
+    @Path("/visibility/{quoteId}")
+    public Response updateVisibility(@PathParam("quoteId") String quoteId, @Context HttpHeaders headers) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectId objectId = new ObjectId(quoteId);
+            String jsonQuote = mongo.getQuote(objectId);
+            QuoteObject quote = objectMapper.readValue(jsonQuote, QuoteObject.class);
+
+            String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
+
+            if (authHeader == null || !authHeader.toLowerCase().startsWith("bearer ")) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                        .entity(new Document("error", "Missing or invalid Authorization header").toJson())
+                        .build();
+            }
+
+            String jwtString = authHeader.replaceFirst("(?i)^Bearer\\s+", "");
+
+            Map<String, String> jwtMap= QuotesRetrieveAccount.retrieveJWTData(jwtString);
+
+
+            if (jwtMap == null) {
+                return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to update this quote").toJson()).build();
+            }
+
+            // get account ID from JWT
+            String accountID = jwtMap.get("subject");
+
+            // get group from JWT
+            String group = jwtMap.get("group");
+
+            // check if account has not been logged in
+            if (accountID == null || group == null) {
+                return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to update this quote").toJson()).build();
+            }
+
+            // string to ObjectId
+            ObjectId accountObjectID = new ObjectId(accountID);
+
+            // user is not owner of quote
+            if (!accountObjectID.equals(quote.getCreator())) {
+                return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to update this quote").toJson()).build();
+            }
+
+            quote.setPrivate(!quote.getisPrivate());
+
+            boolean updated = mongo.updateQuote(quote);
+
+            if(updated) {
+                return Response.ok(quote.getisPrivate()).build();
+            } else {
+                return Response.status(Response.Status.CONFLICT).entity("Error updating quote, Json could be wrong or is missing quote ID").build();
+            }
+
+        } catch (IOException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("IOException: "+e).build();
+        }
+
+    }
 }

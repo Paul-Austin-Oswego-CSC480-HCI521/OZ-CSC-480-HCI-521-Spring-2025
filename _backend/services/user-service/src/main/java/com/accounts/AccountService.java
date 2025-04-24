@@ -238,12 +238,8 @@ public class AccountService {
                 ));
             }
 
-            System.out.println("mustClause: " + MustClause.toString());
-
             //build search query document
             Document CompoundDoc = new Document("must", MustClause); //default searching
-
-            System.out.println("CompoundDoc: " + CompoundDoc.toJson());
 
             // create query document
             AggregateIterable<Document> results = accountCollection.aggregate(Arrays.asList(
@@ -256,10 +252,7 @@ public class AccountService {
 
             JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
 
-            System.out.println("results: " + results.toString());
-
             for(Document doc : results) {
-                System.out.println("doc: " + doc.toJson());
                 JsonObject jsonObject = Json.createReader(new StringReader(doc.toJson())).readObject();
                 jsonArrayBuilder.add(jsonObject);
             }

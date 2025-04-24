@@ -336,7 +336,6 @@ public class NotificationResource {
                     notificationDoc.putAll(doc);
                     break;
                 case "Delete":
-                    System.out.println("Im here");
                     quote_id = notificationDoc.getObjectId("quote_id");
                     doc = notificationService.deleteCollection.find(eq("_id", quote_id)).first();
                     notificationDoc.putAll(doc);
