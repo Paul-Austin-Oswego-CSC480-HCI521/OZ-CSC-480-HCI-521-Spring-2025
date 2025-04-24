@@ -1,13 +1,9 @@
 import React, { useState } from "react";
+import {reportQuote} from "../lib/api.js";
 
-const ReportModal = ({ showReportModal, onClose, user }) => {
+const ReportModal = ({ showReportModal, onClose, user, quoteID }) => {
     const [reportReasons, setReportReasons] = useState([]);
     const [customReason, setCustomReason] = useState("");
-
-    const handleSubmit = () => {
-        console.log("Report submitted:", reportReasons, customReason);
-        onClose();
-    };
 
     const handleCheckboxChange = (e) => {
         const { value, checked } = e.target;
@@ -18,6 +14,18 @@ const ReportModal = ({ showReportModal, onClose, user }) => {
             setReportReasons(reportReasons.filter((reason) => reason !== value)); // Remove from selected reasons
         }
     };
+
+    const submitQuoteReport = () => {
+        const contextTypeValue = reportReasons.join(", ");
+
+        const reportData = { 
+        quote_id: quoteID, 
+        context_type: contextTypeValue, 
+        message: customReason };
+
+        reportQuote(reportData);
+        onClose();
+    }
     
 
     return showReportModal ? (
@@ -89,7 +97,9 @@ const ReportModal = ({ showReportModal, onClose, user }) => {
                             </div>
                             <div className="col-sm pl-0">
                                 <input className="rounded-textbox" name="otherReasonText" type="text" placeholder="This is an example reason for reporting"
-                                disabled={!reportReasons.includes("Other")} />
+                                disabled={!reportReasons.includes("Other")} 
+                                value={customReason}
+                                onChange={(e) => setCustomReason(e.target.value)}/>
                             </div>
                         </div>
 
@@ -97,7 +107,7 @@ const ReportModal = ({ showReportModal, onClose, user }) => {
                     <div className="row mt-3">
                         <div className="col-sm">
                         {reportReasons !=0 && (
-                            <button className="rounded-button-style" name="reportQuoteBtn" onClick={handleSubmit} 
+                            <button className="rounded-button-style" name="reportQuoteBtn" onClick={submitQuoteReport} 
                             style={{ margin: "auto", display: "block" }}>
                                 Report Quote</button>
                                 )}
