@@ -42,7 +42,7 @@ class NotificationServiceTest {
                 .append("quote_id", new ObjectId("67e6bb0f629c75688b150e53"))
                 .append("Created_at", System.currentTimeMillis());
 
-        notificationService.notificationsCollection.insertOne(notificationDoc);
+        notificationService.getNotificationsCollection().insertOne(notificationDoc);
 
     }
 
@@ -154,7 +154,7 @@ class NotificationServiceTest {
                 .append("quote_id", new ObjectId("67e6ba7c629c75688b150e50"))
                 .append("Created_at", System.currentTimeMillis());
 
-        notificationService.notificationsCollection.insertOne(notificationDoc);
+        notificationService.getNotificationsCollection().insertOne(notificationDoc);
     }
 
     @Test
@@ -181,7 +181,7 @@ class NotificationServiceTest {
     void deleteNotifications(){
         ObjectId objectId = new ObjectId("67ec3b1f05ab413c177608a3");
         Document filter = new Document("to", objectId);
-        notificationService.notificationsCollection.deleteMany(filter).getDeletedCount();
+        notificationService.getNotificationsCollection().deleteMany(filter).getDeletedCount();
     }
 
 }

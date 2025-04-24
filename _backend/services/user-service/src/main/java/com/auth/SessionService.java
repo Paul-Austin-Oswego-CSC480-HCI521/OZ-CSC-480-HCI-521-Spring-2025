@@ -1,10 +1,15 @@
 package com.auth;
 
+import com.accounts.MongoUtil;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -14,16 +19,23 @@ import java.util.Date;
 
 import static com.mongodb.client.model.Filters.eq;
 
+@RequestScoped
 public class SessionService {
 
-    public static MongoClient client;
-    public static MongoDatabase sessionsDB;
-    public static MongoCollection<Document> sessionsCollection;
+    @Inject
+    MongoUtil mongoUtil;
 
-    public SessionService() {
+    private MongoClient client;
+    private MongoDatabase sessionsDB;
+    private MongoCollection<Document> sessionsCollection;
+
+    public SessionService() {}
+
+    @PostConstruct
+    public void init(){
         String connectionString = System.getenv("CONNECTION_STRING");
 
-        client = MongoClients.create(connectionString);
+        client = mongoUtil.getMongoClient();
         sessionsDB = client.getDatabase("Accounts");
         sessionsCollection = sessionsDB.getCollection("Sessions");
     }

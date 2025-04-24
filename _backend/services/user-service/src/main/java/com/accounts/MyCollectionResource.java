@@ -17,22 +17,22 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.bson.Document;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 
-@Path("MyCollection")
+@Path("/MyCollection")
 public class MyCollectionResource {
 
     @Inject
     @RestClient
     private QuoteClient quoteClient;
 
-    public static AccountService accountService = new AccountService();
-
+    @Inject
+    AccountService accountService;
     public static UsedQuoteService usedQuoteService = new UsedQuoteService();
 
     public enum SortOptions {
@@ -62,21 +62,30 @@ public class MyCollectionResource {
     @GET
     @Path("/MyQuotes")
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Get user data foy Collection page")
     public Response getSavedPublicQuotes(@Context HttpHeaders header,
-                                         @QueryParam("visibility") List<String> visibility, // public, private, shared
-                                         @QueryParam("usage") String usageString, // all, used, unused
-                                         @QueryParam("tags") List<String> tags, // tags quote must have
-                                         @QueryParam("sort") String sortParam) throws JsonProcessingException // how to order results
+                                         @QueryParam("visibility") @Parameter(description = "List that contains visibility you WANT to see. Enter as comma separated string Example: public,private,shared", required = true)
+                                         String visibilityString, // public, private, shared
+                                         @QueryParam("usage") @Parameter(description = "String value for filtering by usage, will only show quotes meeting this value. Defaults to ALL if left blank. Values can be: \"ALL\", \"USED\", \"UNUSED\" (case insensitive)", required = false)
+                                             String usageString, // all, used, unused
+                                         @QueryParam("tags") @Parameter(description = "List of tags the quote MUST include, used for filtering by tags. Enter tags as comma separated string", required = false)
+                                             String tagsString, // tags quote must have
+                                         @QueryParam("sort") @Parameter(description = "How the quotes should be sorted. Defaults to NONE if left blank. Values can be: \"NONE\", \"USED_NEWEST\", \"USED_OLDEST\", \"CREATED_NEWEST\", \"CREATED_OLDEST\" (case insensitive)", required = false)
+                                             String sortParam) // how to order results
     {
         SortOptions sort = SortOptions.fromString(sortParam);
         UsedOptions used = UsedOptions.fromString(usageString);
-        //String authHeader = header.getHeaderString(HttpHeaders.AUTHORIZATION);
-        System.out.println("Visibility: "+visibility);
-        System.out.println("Usage: "+used);
-        System.out.println("Tags: "+tags);
-        System.out.println("Sort: "+sort);
+        List<String> visibility;
+        visibility = Arrays.stream(visibilityString.split(",")).toList();
+        List<String> tags;
+        tags = Arrays.stream(tagsString.split(",")).filter(s -> !s.isEmpty()).toList();
 
-        /*
+        String authHeader = header.getHeaderString(HttpHeaders.AUTHORIZATION);
+        //System.out.println("Visibility: "+visibility);
+        //System.out.println("Usage: "+used);
+        //System.out.println("Tags: "+tags);
+        //System.out.println("Sort: "+sort);
+
         if (authHeader == null || !authHeader.toLowerCase().startsWith("bearer ")) {
             return Response.status(Response.Status.UNAUTHORIZED)
                     .entity(new Document("error", "Missing or invalid Authorization header").toJson())
@@ -85,10 +94,13 @@ public class MyCollectionResource {
         String jwtString = authHeader.replaceFirst("(?i)^Bearer\\s+", "");
 
         Document doc = accountService.retrieveUserFromJWT(jwtString);
-         */
-        Response ResponseDoc = accountService.retrieveUser("67e38613aff70c6dbbbecb45", false);
+        /*
+        Response ResponseDoc = accountService.retrieveUser("680a6f20e438c004a600a543", false);
         String DocJson = ResponseDoc.readEntity(String.class);
         Document doc = Document.parse(DocJson);
+        for testing
+         */
+
 
         if(doc != null) {
             doc.remove("expires_at");
@@ -118,19 +130,21 @@ public class MyCollectionResource {
             bookmarkedQuotes.removeIf(quote -> (quote.getBoolean("private") && !visibility.contains("private")) ||
                     (!quote.getBoolean("private") && !visibility.contains("public")));
 
-
             //filter usage
             switch(used) {
                 case ALL -> {break;}
                 case USED -> {
-                    bookmarkedQuotes.removeIf(quote -> acc.UsedQuotes.containsKey(quote.getString("_id")));
+                    //remove all unused quotes, to show only used quotes
+                    bookmarkedQuotes.removeIf(quote -> !acc.UsedQuotes.containsKey(quote.getString("_id")));
                 }
                 case UNUSED -> {
-                    bookmarkedQuotes.removeIf(quote -> !acc.UsedQuotes.containsKey(quote.getString("_id")));
+                    //remove all used quotes to show only unused quotes
+                    bookmarkedQuotes.removeIf(quote -> acc.UsedQuotes.containsKey(quote.getString("_id")));
                 }
             }
 
             //filter tags
+            System.out.println("Tags List empty: "+tags.isEmpty());
             if(!tags.isEmpty()){ //if there are specified tags
                 bookmarkedQuotes.removeIf(quote -> {
                     JsonArray tagsArray = quote.getJsonArray("tags");
@@ -162,7 +176,7 @@ public class MyCollectionResource {
                     }
                     //sort by used date
                     sort_Used_Oldest(usedQuotes, acc, 0, usedQuotes.size()-1);
-                    usedQuotes.reversed();
+                    Collections.reverse(usedQuotes);
                     //add used quotes back to front of list
                     bookmarkedQuotes.addAll(0, usedQuotes);
                 }
@@ -198,11 +212,10 @@ public class MyCollectionResource {
 
             return Response.ok().entity(bookmarkedQuotes).build();
         }
-
-        return Response.ok().build();
+        return Response.status(Response.Status.NOT_FOUND).entity("Error finding user document").build();
     }
 
-    private static void sort_Used_Oldest(List<JsonObject> usedQuotes, Account acc, int lower, int upper) throws JsonProcessingException {
+    private static void sort_Used_Oldest(List<JsonObject> usedQuotes, Account acc, int lower, int upper) {
         if(upper <= lower) return;
 
         int pivot = partition(usedQuotes, acc, lower, upper);
@@ -210,29 +223,34 @@ public class MyCollectionResource {
         sort_Used_Oldest(usedQuotes, acc, pivot + 1, upper);
     }
 
-    private static int partition(List<JsonObject> usedQuotes, Account acc, int lower, int upper) throws JsonProcessingException {
-        JsonObject pivotObject = usedQuotes.get(upper);
-        long pivotTime = pivotObject.getInt("date");
+    private static int partition(List<JsonObject> usedQuotes, Account acc, int lower, int upper) {
+        try {
+            JsonObject pivotObject = usedQuotes.get(upper);
+            long pivotTime = pivotObject.getInt("date");
 
-        int i = lower - 1;
-        ObjectMapper mapper = new ObjectMapper();
+            int i = lower - 1;
+            ObjectMapper mapper = new ObjectMapper();
 
-        for(int j = lower; j <= upper - 1; j++) {
-            //get used quote object
-            Document usedQuoteDoc = usedQuoteService.retrieveUsedQuote(acc.UsedQuotes.get(usedQuotes.get(j).getString("_id")));
-            UsedQuote usedQuoteObject = mapper.readValue(usedQuoteDoc.toJson(), UsedQuote.class);
-            if(usedQuoteObject.getUsed().getTime() < pivotTime) {
-                i++;
-                JsonObject temp = usedQuotes.get(i);
-                usedQuotes.set(i, usedQuotes.get(j));
-                usedQuotes.set(j, temp);
+            for(int j = lower; j <= upper - 1; j++) {
+                //get used quote object
+                Document usedQuoteDoc = usedQuoteService.retrieveUsedQuote(acc.UsedQuotes.get(usedQuotes.get(j).getString("_id")));
+                UsedQuote usedQuoteObject = mapper.readValue(usedQuoteDoc.toJson(), UsedQuote.class);
+                if(usedQuoteObject.getUsed().getTime() < pivotTime) {
+                    i++;
+                    JsonObject temp = usedQuotes.get(i);
+                    usedQuotes.set(i, usedQuotes.get(j));
+                    usedQuotes.set(j, temp);
+                }
             }
+            i++;
+            JsonObject temp = usedQuotes.get(i + 1);
+            usedQuotes.set(i + 1, usedQuotes.get(upper));
+            usedQuotes.set(upper, temp);
+            return i + 1;
+        } catch (JsonProcessingException e) {
+            System.out.print("Error in partition step: "+e);
+            return -1;
         }
-        i++;
-        JsonObject temp = usedQuotes.get(i + 1);
-        usedQuotes.set(i + 1, usedQuotes.get(upper));
-        usedQuotes.set(upper, temp);
-        return i + 1;
     }
 
     private List<String> intersection(List<String> list1, List<String> list2) {

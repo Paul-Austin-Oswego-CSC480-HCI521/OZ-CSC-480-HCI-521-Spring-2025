@@ -4,6 +4,7 @@ import com.auth.Session;
 import com.auth.SessionService;
 import com.mongodb.client.model.Updates;
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.inject.Inject;
 import jakarta.json.Json;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.servlet.http.Cookie;
@@ -32,7 +33,8 @@ import java.util.Arrays;
 @Path("/accounts")
 public class AccountsResource {
 
-    public static AccountService accountService = new AccountService();
+    @Inject
+    AccountService accountService;
     public static SessionService sessionService = new SessionService();
 
     @POST

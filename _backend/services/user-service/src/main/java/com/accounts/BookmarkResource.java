@@ -27,8 +27,8 @@ public class BookmarkResource {
     @RestClient
     private QuoteClient quoteClient;
 
-   
-    public static AccountService accountService = new AccountService();
+    @Inject
+    AccountService accountService;
     public static UsedQuoteService usedQuoteService = new UsedQuoteService();
 
 

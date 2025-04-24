@@ -80,7 +80,7 @@ public class NotificationResource {
 
             // if type is Delete, then look in the moderation delete for quote
             ObjectId userObjectId = new ObjectId(userId);
-            Document user = notificationService.usersCollection.find(new Document("_id", userObjectId)).first();
+            Document user = notificationService.getUsersCollection().find(new Document("_id", userObjectId)).first();
             if (user == null) {
                 return Response.status(Response.Status.NOT_FOUND)
                         .entity("User not found")
@@ -167,7 +167,7 @@ public class NotificationResource {
             }
 
             ObjectId toObjectId = new ObjectId(toId);
-            Document toUser = notificationService.usersCollection.find(new Document("_id", toObjectId)).first();
+            Document toUser = notificationService.getUsersCollection().find(new Document("_id", toObjectId)).first();
             if (toUser == null) {
                 return Response.status(Response.Status.NOT_FOUND)
                         .entity("to user not found")
@@ -176,14 +176,14 @@ public class NotificationResource {
 
             ObjectId quoteObjectId = new ObjectId(quoteId);
             if (!type.equals("Delete")) {
-                Document quote = notificationService.quotesCollection.find(new Document("_id", quoteObjectId)).first();
+                Document quote = notificationService.getQuotesCollection().find(new Document("_id", quoteObjectId)).first();
                 if (quote == null) {
                     return Response.status(Response.Status.NOT_FOUND)
                             .entity("Quote not found")
                             .build();
                 }
             } else {
-                Document quote = notificationService.deleteCollection.find(new Document("_id", quoteObjectId)).first();
+                Document quote = notificationService.getDeleteCollection().find(new Document("_id", quoteObjectId)).first();
                 if (quote == null) {
                     return Response.status(Response.Status.NOT_FOUND)
                             .entity("Deleted Quote not found")
@@ -200,7 +200,7 @@ public class NotificationResource {
                     .append("quote_id", new ObjectId(quoteId))
                     .append("Created_at", System.currentTimeMillis());
 
-            InsertOneResult result = notificationService.notificationsCollection.insertOne(notificationDoc);
+            InsertOneResult result = notificationService.getNotificationsCollection().insertOne(notificationDoc);
 
             toUser.remove("expires_at");
 
@@ -266,7 +266,7 @@ public class NotificationResource {
 
             ObjectId objectId = new ObjectId(notificationId);
             Document filter = new Document("_id", objectId);
-            long deletedCount = notificationService.notificationsCollection.deleteOne(filter).getDeletedCount();
+            long deletedCount = notificationService.getNotificationsCollection().deleteOne(filter).getDeletedCount();
 
             if (deletedCount == 0) {
                 return Response.status(Response.Status.NOT_FOUND)
@@ -325,24 +325,24 @@ public class NotificationResource {
             }
 
             ObjectId objectId = new ObjectId(notificationId);
-            Document notificationDoc = notificationService.notificationsCollection.find(eq("_id", objectId)).first();
+            Document notificationDoc = notificationService.getNotificationsCollection().find(eq("_id", objectId)).first();
 
             ObjectId quote_id;
             Document doc;
             switch (notificationDoc.getString("type")) {
                 case "Share":
                     quote_id = notificationDoc.getObjectId("quote_id");
-                    doc = notificationService.quotesCollection.find(eq("_id", quote_id)).first();
+                    doc = notificationService.getQuotesCollection().find(eq("_id", quote_id)).first();
                     notificationDoc.putAll(doc);
                     break;
                 case "Delete":
                     quote_id = notificationDoc.getObjectId("quote_id");
-                    doc = notificationService.deleteCollection.find(eq("_id", quote_id)).first();
+                    doc = notificationService.getDeleteCollection().find(eq("_id", quote_id)).first();
                     notificationDoc.putAll(doc);
                     break;
                 case "Report":
                     quote_id = notificationDoc.getObjectId("quote_id");
-                    doc = notificationService.reportCollection.find(eq("_id", quote_id)).first();
+                    doc = notificationService.getReportCollection().find(eq("_id", quote_id)).first();
                     notificationDoc.putAll(doc);
                     break;
 

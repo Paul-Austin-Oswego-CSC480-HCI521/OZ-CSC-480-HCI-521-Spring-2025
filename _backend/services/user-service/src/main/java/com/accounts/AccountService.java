@@ -15,6 +15,10 @@ import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import com.sharedQuotes.SharedQuote;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObject;
@@ -41,15 +45,22 @@ import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.eq;
 
+@RequestScoped
 public class AccountService {
 
-    public static MongoClient client;
-    public static MongoDatabase accountDB;
-    public static MongoCollection<Document> accountCollection;
+    @Inject
+    MongoUtil mongoUtil;
 
-    public AccountService() {
+    private MongoClient client;
+    private MongoDatabase accountDB;
+    private MongoCollection<Document> accountCollection;
+
+    public AccountService() {}
+
+    @PostConstruct
+    public void init() {
         String connectionString = System.getenv("CONNECTION_STRING");
-        client = MongoClients.create(connectionString);
+        client = mongoUtil.getMongoClient();
         accountDB = client.getDatabase("Accounts");
         accountCollection = accountDB.getCollection("Users");
     }
@@ -58,6 +69,10 @@ public class AccountService {
         client = mongoClient;
         accountDB = client.getDatabase(dbName);
         accountCollection = accountDB.getCollection(collectionName);
+    }
+
+    public MongoCollection<Document> getAccountCollection() {
+        return accountCollection;
     }
 
     public Response newUser(String accountJson) {

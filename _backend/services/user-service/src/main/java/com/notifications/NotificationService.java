@@ -1,6 +1,11 @@
 package com.notifications;
 
 import com.accounts.AccountService;
+import com.accounts.MongoUtil;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObject;
@@ -15,21 +20,35 @@ import com.mongodb.client.FindIterable;
 
 import java.io.StringWriter;
 
+@RequestScoped
 public class NotificationService {
 
-    public static MongoClient mongoClient;
-    public static MongoDatabase accountDatabase;
-    public static MongoDatabase dataDatabase;
-    public static MongoDatabase moderationDatabase;
-    public static MongoCollection<Document> notificationsCollection;
-    public static MongoCollection<Document> usersCollection;
-    public static MongoCollection<Document> quotesCollection;
-    public static MongoCollection<Document> deleteCollection;
-    public static MongoCollection<Document> reportCollection;
-    public static AccountService accountService;
+    @Inject
+    MongoUtil mongoUtil;
 
-    public NotificationService() {
-        mongoClient = MongoClients.create(System.getenv("CONNECTION_STRING"));
+    private MongoClient mongoClient;
+    private MongoDatabase accountDatabase;
+    private MongoDatabase dataDatabase;
+    private MongoDatabase moderationDatabase;
+    private MongoCollection<Document> notificationsCollection;
+    private MongoCollection<Document> usersCollection;
+    private MongoCollection<Document> quotesCollection;
+    private MongoCollection<Document> deleteCollection;
+    private MongoCollection<Document> reportCollection;
+    @Inject
+    AccountService accountService;
+
+    public NotificationService() {}
+
+    public MongoCollection<Document> getNotificationsCollection() {return notificationsCollection;}
+    public MongoCollection<Document> getUsersCollection() {return usersCollection;}
+    public MongoCollection<Document> getQuotesCollection() {return quotesCollection;}
+    public MongoCollection<Document> getDeleteCollection() {return deleteCollection;}
+    public MongoCollection<Document> getReportCollection() {return reportCollection;}
+
+    @PostConstruct
+    public void init(){
+        mongoClient = mongoUtil.getMongoClient();
 
         accountDatabase = mongoClient.getDatabase("Accounts");
         notificationsCollection = accountDatabase.getCollection("Notifications");
@@ -42,7 +61,8 @@ public class NotificationService {
         deleteCollection = moderationDatabase.getCollection("Deleted");
         reportCollection = moderationDatabase.getCollection("Reports");
 
-        accountService = new AccountService();
+
+        //accountService = new AccountService();
     }
 
     public NotificationService(String connectionString) {

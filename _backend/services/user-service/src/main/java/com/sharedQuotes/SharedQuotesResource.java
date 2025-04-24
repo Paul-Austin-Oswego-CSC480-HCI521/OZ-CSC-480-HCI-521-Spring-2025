@@ -36,7 +36,8 @@ public class SharedQuotesResource {
     @RestClient
     private QuoteClient quoteClient;
 
-    public static AccountService accountService = new AccountService();
+    @Inject
+    AccountService accountService;
 
     @POST
     @Path("/share/{email}/{quoteId}")

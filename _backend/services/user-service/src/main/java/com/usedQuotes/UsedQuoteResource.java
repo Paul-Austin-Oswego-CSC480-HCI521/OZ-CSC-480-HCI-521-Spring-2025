@@ -20,7 +20,8 @@ import com.sharedQuotes.SharedQuote;
 @Path("/useQuote")
 public class UsedQuoteResource {
 
-    public static AccountService accountService = new AccountService();
+    @Inject
+    AccountService accountService;
     public static UsedQuoteService usedQuoteService = new UsedQuoteService();
 
     @Inject

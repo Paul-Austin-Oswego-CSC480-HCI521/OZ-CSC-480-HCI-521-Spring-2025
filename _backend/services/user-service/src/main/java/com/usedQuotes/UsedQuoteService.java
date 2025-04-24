@@ -1,9 +1,14 @@
 package com.usedQuotes;
 
+import com.accounts.MongoUtil;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Projections;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
@@ -13,16 +18,21 @@ import java.util.List;
 
 import static com.mongodb.client.model.Filters.eq;
 
+@RequestScoped
 public class UsedQuoteService {
 
-    public static MongoClient client;
-    public static MongoDatabase accountDB;
-    public static MongoCollection<Document> usedQuoteCollection;
+    @Inject
+    MongoUtil mongoUtil;
 
-    public UsedQuoteService() {
-        String connectionString = System.getenv("CONNECTION_STRING");
+    private MongoClient client;
+    private MongoDatabase accountDB;
+    private MongoCollection<Document> usedQuoteCollection;
 
-        client = MongoClients.create(connectionString);
+    public UsedQuoteService() {}
+
+    @PostConstruct
+    public void init() {
+        client = mongoUtil.getMongoClient();
         accountDB = client.getDatabase("Accounts");
         usedQuoteCollection = accountDB.getCollection("UsedQuotes");
     }

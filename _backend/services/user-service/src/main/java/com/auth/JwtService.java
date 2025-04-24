@@ -22,7 +22,7 @@ public class JwtService {
                 System.out.println(e);
             }
 
-            Document user = accountService.accountCollection.find(eq("_id", objectId)).first();
+            Document user = accountService.getAccountCollection().find(eq("_id", objectId)).first();
 
             System.out.println("user from jwt builder" + user);
 
