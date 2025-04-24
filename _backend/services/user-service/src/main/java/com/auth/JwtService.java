@@ -2,17 +2,20 @@ package com.auth;
 
 import com.accounts.AccountService;
 import com.ibm.websphere.security.jwt.*;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.inject.spi.CDI;
 import jakarta.ws.rs.core.Response;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
 import static com.mongodb.client.model.Filters.eq;
 
+@RequestScoped
 public class JwtService {
 
     public static String buildJwt(String id) {
         try {
-            AccountService accountService = new AccountService();
+            AccountService accountService = CDI.current().select(AccountService.class).get();
 
             ObjectId objectId = new ObjectId();
 
