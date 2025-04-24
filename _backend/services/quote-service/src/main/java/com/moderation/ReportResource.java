@@ -45,16 +45,22 @@ public class ReportResource {
     private MongoDatabase moderationDB;
     private MongoCollection<Document> reportsCollection;
 
+    private MongoDatabase dataDB;
+    private MongoCollection<Document> quotesCollection;
+
     public ReportResource() {
         client = MongoClients.create(System.getenv("CONNECTION_STRING"));
         moderationDB = client.getDatabase("Moderation");
         reportsCollection = moderationDB.getCollection("Reports");
+
+        dataDB = client.getDatabase("Data");
+        quotesCollection = dataDB.getCollection("Quotes");
     }
 
     /*
-     * TODO: endpoint to change the status of a report
-     * TODO: endpoint to get all reports 
-     * TODO: fix create ep to increment the number of reports on a quote
+     * TODO: send notification to owner of the quote that thier quote has been reported
+     *      set quote_id as the id of the report
+     *      set type as report
      */
 
 
@@ -102,8 +108,6 @@ public class ReportResource {
             return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to create quotes").toJson()).build();
         }
 
-        ObjectId accountObjectId = new ObjectId(accountID);
-
         try {
             Document reportDoc = Document.parse(reportJson);
             
@@ -123,7 +127,8 @@ public class ReportResource {
             }
             
             String message = reportDoc.getString("message");
-            
+            boolean isNewReporter = false;
+
             // check if a report for this quote already exists
             Document existingReport = reportsCollection.find(eq("quote_id", quoteId)).first();
             
@@ -138,7 +143,8 @@ public class ReportResource {
                             .build();
                 }
                 
-                // update existing report
+                // update existing report - This is a new reporter
+                isNewReporter = true;
                 reporterIds.add(accountID);
                 existingReport.put("reporter_ids", reporterIds);
                 
@@ -163,11 +169,9 @@ public class ReportResource {
                 
                 reportsCollection.replaceOne(eq("_id", existingReport.getObjectId("_id")), existingReport);
                 
-                return Response.status(Response.Status.CREATED)
-                        .entity(new Document("message", "Report updated successfully").toJson())
-                        .build();
             } else {
-                // create new report
+                // create new report - This is a new reporter
+                isNewReporter = true;
                 Document newReport = new Document()
                         .append("_id", new ObjectId())
                         .append("quote_id", quoteId)
@@ -182,17 +186,89 @@ public class ReportResource {
                 }
                 
                 reportsCollection.insertOne(newReport);
-                
-                return Response.status(Response.Status.CREATED)
-                        .entity(new Document()
-                                .append("message", "Report created successfully")
-                                .append("_id", newReport.getObjectId("_id").toString())
-                                .toJson())
-                        .build();
             }
+            
+            // if this is a new reporter, increment the flags counter of the quote
+            if (isNewReporter) {
+                ObjectId quoteObjectId = new ObjectId(quoteId);
+                
+                Document quote = quotesCollection.find(eq("_id", quoteObjectId)).first();
+                if (quote != null) {
+                    int currentFlags = quote.getInteger("flags", 0);
+
+                    quotesCollection.updateOne(
+                        eq("_id", quoteObjectId),
+                        new Document("$set", new Document("flags", currentFlags + 1))
+                    );
+                }
+            }
+            
+            return Response.status(Response.Status.CREATED)
+                    .entity(new Document("message", "Report " + 
+                           (existingReport != null ? "updated" : "created") + " successfully")
+                           .toJson())
+                    .build();
+                    
         } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new Document("error", "Error processing request: " + e.getMessage()).toJson())
+                    .build();
+        }
+    }
+
+    @GET
+    @Path("/all")
+    @Produces(MediaType.APPLICATION_JSON)
+    @APIResponses(value = {
+            @APIResponse(responseCode = "200", description = "Successfully retrieved all reports"),
+            @APIResponse(responseCode = "401", description = "Unauthorized - invalid or missing JWT"),
+            @APIResponse(responseCode = "409", description = "Exception occurred during operation")
+    })
+    @Operation(summary = "Get all reports", 
+              description = "Returns JSON array of all reports in the system. Only accessible by moderators and administrators.")
+    public Response getAllReports(@Context HttpHeaders headers) {
+        // auth
+        String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
+
+        if (authHeader == null || !authHeader.toLowerCase().startsWith("bearer ")) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(new Document("error", "Missing or invalid Authorization header").toJson())
+                    .build();
+        }
+
+        String jwtString = authHeader.replaceFirst("(?i)^Bearer\\s+", "");
+
+        Map<String, String> jwtMap= QuotesRetrieveAccount.retrieveJWTData(jwtString);
+
+        if (jwtMap == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to create quotes").toJson()).build();
+        }
+
+        // get account ID from JWT
+        String accountID = jwtMap.get("subject");
+
+        // get group from JWT
+        String group = jwtMap.get("group");
+
+        if (group == null || accountID == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to create quotes").toJson()).build();
+        }
+
+        try {
+            List<Document> reports = reportsCollection.find().into(new ArrayList<>());
+            
+            for (Document report : reports) {
+                if (report.containsKey("_id")) {
+                    report.put("_id", report.getObjectId("_id").toString());
+                }
+            }
+            
+            Document result = new Document("reports", reports);
+            return Response.ok(result.toJson()).build();
+            
+        } catch (Exception e) {
+            return Response.status(Response.Status.CONFLICT)
+                    .entity(new Document("error", "Error retrieving reports: " + e.getMessage()).toJson())
                     .build();
         }
     }
@@ -210,6 +286,31 @@ public class ReportResource {
                description = "Removes a report from the database")
     public Response deleteReport(@PathParam("reportId") String reportId, @Context HttpHeaders headers) {
         // auth
+        String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
+
+        if (authHeader == null || !authHeader.toLowerCase().startsWith("bearer ")) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(new Document("error", "Missing or invalid Authorization header").toJson())
+                    .build();
+        }
+
+        String jwtString = authHeader.replaceFirst("(?i)^Bearer\\s+", "");
+
+        Map<String, String> jwtMap= QuotesRetrieveAccount.retrieveJWTData(jwtString);
+
+        if (jwtMap == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to create quotes").toJson()).build();
+        }
+
+        // get account ID from JWT
+        String accountID = jwtMap.get("subject");
+
+        // get group from JWT
+        String group = jwtMap.get("group");
+
+        if (group == null || accountID == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to create quotes").toJson()).build();
+        }
         
         try {
             if (!SanitizerClass.validObjectId(reportId)) {
@@ -236,6 +337,77 @@ public class ReportResource {
         } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new Document("error", "Error deleting report: " + e.getMessage()).toJson())
+                    .build();
+        }
+    }
+
+    @PATCH
+    @Path("/ignore/{reportId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @APIResponses(value = {
+            @APIResponse(responseCode = "200", description = "Report status successfully changed to ignored"),
+            @APIResponse(responseCode = "400", description = "Invalid report ID format"),
+            @APIResponse(responseCode = "404", description = "Report not found")
+    })
+    @Operation(summary = "Ignore a report", 
+               description = "Changes the status of a report to 'ignored'")
+    public Response ignoreReport(@PathParam("reportId") String reportId, @Context HttpHeaders headers) {
+        // auth
+        String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
+
+        if (authHeader == null || !authHeader.toLowerCase().startsWith("bearer ")) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(new Document("error", "Missing or invalid Authorization header").toJson())
+                    .build();
+        }
+
+        String jwtString = authHeader.replaceFirst("(?i)^Bearer\\s+", "");
+
+        Map<String, String> jwtMap= QuotesRetrieveAccount.retrieveJWTData(jwtString);
+
+        if (jwtMap == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to create quotes").toJson()).build();
+        }
+
+        // get account ID from JWT
+        String accountID = jwtMap.get("subject");
+
+        // get group from JWT
+        String group = jwtMap.get("group");
+
+        if (group == null || accountID == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to create quotes").toJson()).build();
+        }
+        
+        try {
+            
+            if (!SanitizerClass.validObjectId(reportId)) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(new Document("error", "Invalid report ID format").toJson())
+                        .build();
+            }
+            
+            ObjectId objectId = new ObjectId(reportId);
+            Document report = reportsCollection.find(eq("_id", objectId)).first();
+            
+            if (report == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(new Document("error", "Report not found").toJson())
+                        .build();
+            }
+            
+            reportsCollection.updateOne(
+                eq("_id", objectId),
+                new Document("$set", new Document("status", ReportObject.STATUS_IGNORED))
+            );
+            
+            return Response.status(Response.Status.OK)
+                    .entity(new Document("message", "Report status changed to ignored").toJson())
+                    .build();
+            
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new Document("error", "Error updating report status: " + e.getMessage()).toJson())
                     .build();
         }
     }
