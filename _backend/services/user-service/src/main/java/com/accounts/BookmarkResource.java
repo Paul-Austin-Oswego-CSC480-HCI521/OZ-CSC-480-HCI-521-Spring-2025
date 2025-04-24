@@ -29,7 +29,9 @@ public class BookmarkResource {
 
     @Inject
     AccountService accountService;
-    public static UsedQuoteService usedQuoteService = new UsedQuoteService();
+
+    @Inject
+    UsedQuoteService usedQuoteService;
 
 
     @POST

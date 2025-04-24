@@ -35,7 +35,9 @@ public class AccountsResource {
 
     @Inject
     AccountService accountService;
-    public static SessionService sessionService = new SessionService();
+
+    @Inject
+    SessionService sessionService;
 
     @POST
     @Path("/create")
