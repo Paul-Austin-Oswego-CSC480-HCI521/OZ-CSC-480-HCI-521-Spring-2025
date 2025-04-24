@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.model.Updates;
 
 import jakarta.annotation.security.RolesAllowed;
-import jakarta.inject.Inject;
 import jakarta.json.Json;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.servlet.http.Cookie;
@@ -34,7 +33,6 @@ import java.security.Principal;
 import java.util.Arrays;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.moderation.ProfanityClass;
 
 @Path("/accounts")
 public class AccountsResource {
@@ -42,8 +40,6 @@ public class AccountsResource {
     public static AccountService accountService = new AccountService();
     public static SessionService sessionService = new SessionService();
 
-    @Inject
-    ProfanityClass profanityFilter;
 
     @POST
     @Path("/create")
@@ -64,8 +60,6 @@ public class AccountsResource {
             + "\"SharedQuotes\": [\"Success is a journey\"], "
             + "\"MyTags\": [\"Inspiration\", \"Wisdom\"], " + "\"Profession\": \"NFL Head Coach\"," + "\"PersonalQuote\": \"67abf469b0d20a5237456444\"" + "}")))
     public Response create(String json) {
-
-   
         return accountService.newUser(json);
     }
 
