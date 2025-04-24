@@ -1,6 +1,7 @@
 package com.quotes;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.inject.Inject;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
@@ -10,6 +11,7 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.*;
+
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -24,11 +26,16 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 
+import com.moderation.ProfanityClass;
+
 @Path("/update")
 public class QuotesUpdateResource {
 
     @Inject
     MongoUtil mongo;
+
+    @Inject
+    ProfanityClass profanityFilter;
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
@@ -100,6 +107,15 @@ public class QuotesUpdateResource {
                 return Response.status(Response.Status.CONFLICT).entity("Error when sanitizing quote, returned null").build();
             }
 
+
+                if(profanityFilter.checkProfanity(quote.getText())) {
+                    return Response.status(Response.Status.BAD_REQUEST).entity("Quote content is inappropiate").build();
+                }
+                if(profanityFilter.checkProfanity(quote.getAuthor())) {
+                    return Response.status(Response.Status.BAD_REQUEST).entity("Author content is inappropiate").build();
+                }
+
+         
             boolean updated = mongo.updateQuote(quote);
 
             if(updated) {

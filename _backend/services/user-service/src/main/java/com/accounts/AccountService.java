@@ -24,28 +24,36 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.NewCookie;
+
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
+
 import jakarta.ws.rs.core.Response;
 
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URI;
 import java.util.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.google.api.client.googleapis.auth.clientlogin.ClientLogin;
+import com.moderation.ProfanityClass;
 import static com.mongodb.client.model.Filters.eq;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
+@ApplicationScoped
 public class AccountService {
 
     public static MongoClient client;
     public static MongoDatabase accountDB;
     public static MongoCollection<Document> accountCollection;
+
+    @Inject
+    ProfanityClass profanityFilter;
 
     public AccountService() {
         String connectionString = System.getenv("CONNECTION_STRING");
@@ -86,6 +94,16 @@ public class AccountService {
                     .entity(new Document("error", "Email already exists!").toJson())
                     .build();
         }
+
+     
+                if (profanityFilter.checkProfanity(accountDocument.getString("Profession"))) {
+                    return Response.status(Response.Status.BAD_REQUEST).entity(new Document("error", "Profession is not appropiate.").toJson()).build();
+                }
+
+                if (profanityFilter.checkProfanity(accountDocument.getString("PersonalQuote"))) {
+                    return Response.status(Response.Status.BAD_REQUEST).entity(new Document("error", "Personal Quote is not appropiate.").toJson()).build();
+                }
+
 
         accountCollection.insertOne(accountDocument);
 
@@ -351,6 +369,15 @@ public class AccountService {
                     .entity(new Document("error", "Cannot parse Json!").toJson())
                     .build();
         }
+
+        if (profanityFilter.checkProfanity(updatedAccountDocument.getString("Profession"))) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(new Document("error", "Profession is not appropiate.").toJson()).build();
+        }
+
+        if (profanityFilter.checkProfanity(updatedAccountDocument.getString("PersonalQuote"))) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(new Document("error", "Personal Quote is not appropiate.").toJson()).build();
+        }
+        
 
         UpdateResult updateResult = accountCollection.updateOne(
                 eq("_id", objectId),

@@ -1,6 +1,7 @@
 package com.quotes;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.inject.Inject;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
@@ -10,6 +11,7 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -24,11 +26,17 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.List;
 
+import com.github.dockerjava.transport.DockerHttpClient;
+import com.moderation.ProfanityClass;
+
 @Path("/create")
 public class QuoteCreateResource {
 
     @Inject
     MongoUtil mongo;
+
+    @Inject
+    ProfanityClass profanityFilter;
 
     @Inject 
     private UserClient userClient;
@@ -92,6 +100,15 @@ public class QuoteCreateResource {
                 return Response.status(Response.Status.CONFLICT).entity("Error when sanitizing quote, returned null").build();
             }
 
+
+                if(profanityFilter.checkProfanity(quote.getText())) {
+                    return Response.status(Response.Status.BAD_REQUEST).entity("Quote content is inappropiate").build();
+                }
+                if(profanityFilter.checkProfanity(quote.getAuthor())) {
+                    return Response.status(Response.Status.BAD_REQUEST).entity("Author content is inappropiate").build();
+                }
+
+        
             ObjectId newQuoteId = mongo.createQuote(quote); //add to mongo database
             Response findAccount = userClient.search(accountID);
             if (findAccount.getStatus() == Response.Status.OK.getStatusCode()) {
