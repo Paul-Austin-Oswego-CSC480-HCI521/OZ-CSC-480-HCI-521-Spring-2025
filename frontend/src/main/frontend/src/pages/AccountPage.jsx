@@ -187,6 +187,19 @@ const AccountPage = () => {
               Uploaded Quotes (PR/PB)
             </button>
           </div>
+
+          <hr/>
+
+          {/* Community Guidelines Link */}
+          <div className="mt-4">
+                <button
+                  className="fw-bold text-start w-100"
+                  style={{background:"none",border:"none"}}
+                  onClick={() => navigate("/community-guidelines")}
+                >
+                Community Guidelines
+                </button>
+          </div>
         </div>
       )}
     </div>
