@@ -1,6 +1,8 @@
 package com.quotes;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.moderation.ProfanityClass;
+
 import jakarta.inject.Inject;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
@@ -29,6 +31,8 @@ public class QuotesUpdateResource {
 
     @Inject
     MongoUtil mongo;
+
+    private ProfanityClass profanityFilter = new ProfanityClass();
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
@@ -98,6 +102,13 @@ public class QuotesUpdateResource {
             quote = SanitizerClass.sanitizeQuote(quote);
             if(quote == null) {
                 return Response.status(Response.Status.CONFLICT).entity("Error when sanitizing quote, returned null").build();
+            }
+
+            if(profanityFilter.checkProfanity(quote.getText())) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("Quote content is inappropiate").build();
+            }
+            if(profanityFilter.checkProfanity(quote.getAuthor())) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("Author content is inappropiate").build();
             }
 
             boolean updated = mongo.updateQuote(quote);

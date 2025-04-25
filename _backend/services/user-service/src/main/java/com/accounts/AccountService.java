@@ -28,21 +28,21 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.NewCookie;
+
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
+
 import jakarta.ws.rs.core.Response;
 
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URI;
 import java.util.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.moderation.ProfanityClass;
 import static com.mongodb.client.model.Filters.eq;
 
 @RequestScoped
@@ -54,6 +54,8 @@ public class AccountService {
     private MongoClient client;
     private MongoDatabase accountDB;
     private MongoCollection<Document> accountCollection;
+
+    private ProfanityClass profanityFilter = new ProfanityClass();
 
     public AccountService() {}
 
@@ -91,6 +93,14 @@ public class AccountService {
                     .status(Response.Status.BAD_REQUEST)
                     .entity(new Document("error", "Missing required field: email").toJson())
                     .build();
+        }
+
+         if (profanityFilter.checkProfanity(accountDocument.getString("Profession"))) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(new Document("error", "Profession is not appropiate.").toJson()).build();
+        }
+
+        if (profanityFilter.checkProfanity(accountDocument.getString("PersonalQuote"))) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(new Document("error", "Personal Quote is not appropiate.").toJson()).build();
         }
 
         FindIterable<Document> result = accountCollection.find(eq("email", accountDocument.getString("email")));
