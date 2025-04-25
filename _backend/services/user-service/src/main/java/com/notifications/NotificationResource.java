@@ -43,10 +43,7 @@ import static com.mongodb.client.model.Filters.eq;
 @Path("/notifications")
 public class NotificationResource {
 
-    @Inject
     NotificationService notificationService;
-
-    @Inject
     AccountService accountService;
 
     @GET
@@ -61,7 +58,7 @@ public class NotificationResource {
     @Operation(summary = "Get all notifications for a specific user",
             description = "Returns JSON of all notifications where the user is the recipient, enter ID of user recieving notifications")
     public Response getNotificationsForUser(@PathParam("userId") String userId, @Context HttpHeaders headers) {
-        //NotificationService notificationService = new NotificationService();
+        NotificationService notificationService = new NotificationService();
         String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
 
         if (authHeader == null || !authHeader.toLowerCase().startsWith("bearer ")) {
@@ -135,7 +132,7 @@ public class NotificationResource {
             description = "notification data required: from(id), to(id), type(string), and quote_id(id)"
     )
     public Response createNotification(String jsonInput, @Context HttpHeaders headers) {
-        //NotificationService notificationService = new NotificationService();
+        NotificationService notificationService = new NotificationService();
         String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
 
         if (authHeader == null || !authHeader.toLowerCase().startsWith("bearer ")) {
@@ -247,7 +244,7 @@ public class NotificationResource {
     @Operation(summary = "Delete a notification by ID",
             description = "Deletes a notification with the specified ID")
     public Response deleteNotification(@PathParam("notificationId") String notificationId, @Context HttpHeaders headers) {
-        //NotificationService notificationService = new NotificationService();
+        NotificationService notificationService = new NotificationService();
         String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
 
         if (authHeader == null || !authHeader.toLowerCase().startsWith("bearer ")) {
@@ -307,7 +304,7 @@ public class NotificationResource {
     @Operation(summary = "Retrieve a notification by ID",
             description = "Retrieves a notification by notification ID and returns the necessary info based on the type of notification")
     public Response getNotification(@PathParam("notificationId") String notificationId, @Context HttpHeaders headers) {
-        //NotificationService notificationService = new NotificationService();
+        NotificationService notificationService = new NotificationService();
         String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
 
         if (authHeader == null || !authHeader.toLowerCase().startsWith("bearer ")) {

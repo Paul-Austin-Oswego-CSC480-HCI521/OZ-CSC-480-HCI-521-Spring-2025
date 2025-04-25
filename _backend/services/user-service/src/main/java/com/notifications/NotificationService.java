@@ -20,7 +20,6 @@ import com.mongodb.client.FindIterable;
 
 import java.io.StringWriter;
 
-@RequestScoped
 public class NotificationService {
 
     @Inject
@@ -35,20 +34,10 @@ public class NotificationService {
     private MongoCollection<Document> quotesCollection;
     private MongoCollection<Document> deleteCollection;
     private MongoCollection<Document> reportCollection;
-    @Inject
-    AccountService accountService;
+    private AccountService accountService;
 
-    public NotificationService() {}
-
-    public MongoCollection<Document> getNotificationsCollection() {return notificationsCollection;}
-    public MongoCollection<Document> getUsersCollection() {return usersCollection;}
-    public MongoCollection<Document> getQuotesCollection() {return quotesCollection;}
-    public MongoCollection<Document> getDeleteCollection() {return deleteCollection;}
-    public MongoCollection<Document> getReportCollection() {return reportCollection;}
-
-    @PostConstruct
-    public void init(){
-        mongoClient = mongoUtil.getMongoClient();
+    public NotificationService() {
+        mongoClient = MongoClients.create(System.getenv("CONNECTION_STRING"));
 
         accountDatabase = mongoClient.getDatabase("Accounts");
         notificationsCollection = accountDatabase.getCollection("Notifications");
@@ -62,7 +51,18 @@ public class NotificationService {
         reportCollection = moderationDatabase.getCollection("Reports");
 
 
-        //accountService = new AccountService();
+        accountService = new AccountService();
+    }
+
+    public MongoCollection<Document> getNotificationsCollection() {return notificationsCollection;}
+    public MongoCollection<Document> getUsersCollection() {return usersCollection;}
+    public MongoCollection<Document> getQuotesCollection() {return quotesCollection;}
+    public MongoCollection<Document> getDeleteCollection() {return deleteCollection;}
+    public MongoCollection<Document> getReportCollection() {return reportCollection;}
+
+    @PostConstruct
+    public void init(){
+
     }
 
     public NotificationService(String connectionString) {
