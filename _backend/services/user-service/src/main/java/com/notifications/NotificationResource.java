@@ -3,6 +3,7 @@ package com.notifications;
 import com.accounts.Account;
 import com.accounts.AccountService;
 import com.mongodb.client.result.InsertOneResult;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Consumes;
@@ -42,6 +43,12 @@ import static com.mongodb.client.model.Filters.eq;
 @Path("/notifications")
 public class NotificationResource {
 
+    @Inject
+    NotificationService notificationService;
+
+    @Inject
+    AccountService accountService;
+
     @GET
     @Path("/user/{userId}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -54,7 +61,7 @@ public class NotificationResource {
     @Operation(summary = "Get all notifications for a specific user",
             description = "Returns JSON of all notifications where the user is the recipient, enter ID of user recieving notifications")
     public Response getNotificationsForUser(@PathParam("userId") String userId, @Context HttpHeaders headers) {
-        NotificationService notificationService = new NotificationService();
+        //NotificationService notificationService = new NotificationService();
         String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
 
         if (authHeader == null || !authHeader.toLowerCase().startsWith("bearer ")) {
@@ -65,7 +72,7 @@ public class NotificationResource {
 
         String jwtString = authHeader.replaceFirst("(?i)^Bearer\\s+", "");
 
-        Document userDoc = notificationService.accountService.retrieveUserFromJWT(jwtString);
+        Document userDoc = accountService.retrieveUserFromJWT(jwtString);
 
         if (userDoc == null) {
             return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to have notifications").toJson()).build();
@@ -128,7 +135,7 @@ public class NotificationResource {
             description = "notification data required: from(id), to(id), type(string), and quote_id(id)"
     )
     public Response createNotification(String jsonInput, @Context HttpHeaders headers) {
-        NotificationService notificationService = new NotificationService();
+        //NotificationService notificationService = new NotificationService();
         String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
 
         if (authHeader == null || !authHeader.toLowerCase().startsWith("bearer ")) {
@@ -139,7 +146,7 @@ public class NotificationResource {
 
         String jwtString = authHeader.replaceFirst("(?i)^Bearer\\s+", "");
 
-        Document userDoc = notificationService.accountService.retrieveUserFromJWT(jwtString);
+        Document userDoc = accountService.retrieveUserFromJWT(jwtString);
 
         if (userDoc == null) {
             return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to create notification").toJson()).build();
@@ -204,11 +211,11 @@ public class NotificationResource {
 
             toUser.remove("expires_at");
 
-            Account toAccount = notificationService.accountService.document_to_account(toUser);
+            Account toAccount = accountService.document_to_account(toUser);
 
             toAccount.Notifications.add(notificationId.toString());
 
-            notificationService.accountService.updateUser(toAccount.toJson(), toId);
+            accountService.updateUser(toAccount.toJson(), toId);
 
             JsonObject response = Json.createObjectBuilder()
                     .add("success", true)
@@ -240,7 +247,7 @@ public class NotificationResource {
     @Operation(summary = "Delete a notification by ID",
             description = "Deletes a notification with the specified ID")
     public Response deleteNotification(@PathParam("notificationId") String notificationId, @Context HttpHeaders headers) {
-        NotificationService notificationService = new NotificationService();
+        //NotificationService notificationService = new NotificationService();
         String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
 
         if (authHeader == null || !authHeader.toLowerCase().startsWith("bearer ")) {
@@ -251,7 +258,7 @@ public class NotificationResource {
 
         String jwtString = authHeader.replaceFirst("(?i)^Bearer\\s+", "");
 
-        Document userDoc = notificationService.accountService.retrieveUserFromJWT(jwtString);
+        Document userDoc = accountService.retrieveUserFromJWT(jwtString);
 
         if (userDoc == null) {
             return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to delete notifications").toJson()).build();
@@ -300,7 +307,7 @@ public class NotificationResource {
     @Operation(summary = "Retrieve a notification by ID",
             description = "Retrieves a notification by notification ID and returns the necessary info based on the type of notification")
     public Response getNotification(@PathParam("notificationId") String notificationId, @Context HttpHeaders headers) {
-        NotificationService notificationService = new NotificationService();
+        //NotificationService notificationService = new NotificationService();
         String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
 
         if (authHeader == null || !authHeader.toLowerCase().startsWith("bearer ")) {
@@ -311,7 +318,7 @@ public class NotificationResource {
 
         String jwtString = authHeader.replaceFirst("(?i)^Bearer\\s+", "");
 
-        Document userDoc = notificationService.accountService.retrieveUserFromJWT(jwtString);
+        Document userDoc = accountService.retrieveUserFromJWT(jwtString);
 
         if (userDoc == null) {
             return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to retrieve notifications").toJson()).build();
