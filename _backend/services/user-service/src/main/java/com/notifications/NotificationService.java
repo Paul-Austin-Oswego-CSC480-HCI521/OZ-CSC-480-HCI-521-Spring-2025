@@ -34,7 +34,7 @@ public class NotificationService {
     private MongoCollection<Document> quotesCollection;
     private MongoCollection<Document> deleteCollection;
     private MongoCollection<Document> reportCollection;
-    private AccountService accountService;
+    public AccountService accountService;
 
     public NotificationService() {
         mongoClient = MongoClients.create(System.getenv("CONNECTION_STRING"));

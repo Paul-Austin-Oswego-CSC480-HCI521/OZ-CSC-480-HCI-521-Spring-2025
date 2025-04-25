@@ -44,7 +44,6 @@ import static com.mongodb.client.model.Filters.eq;
 public class NotificationResource {
 
     NotificationService notificationService;
-    AccountService accountService;
 
     @GET
     @Path("/user/{userId}")
@@ -69,7 +68,7 @@ public class NotificationResource {
 
         String jwtString = authHeader.replaceFirst("(?i)^Bearer\\s+", "");
 
-        Document userDoc = accountService.retrieveUserFromJWT(jwtString);
+        Document userDoc = notificationService.accountService.retrieveUserFromJWT(jwtString);
 
         if (userDoc == null) {
             return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to have notifications").toJson()).build();
@@ -143,7 +142,7 @@ public class NotificationResource {
 
         String jwtString = authHeader.replaceFirst("(?i)^Bearer\\s+", "");
 
-        Document userDoc = accountService.retrieveUserFromJWT(jwtString);
+        Document userDoc = notificationService.accountService.retrieveUserFromJWT(jwtString);
 
         if (userDoc == null) {
             return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to create notification").toJson()).build();
@@ -208,11 +207,11 @@ public class NotificationResource {
 
             toUser.remove("expires_at");
 
-            Account toAccount = accountService.document_to_account(toUser);
+            Account toAccount = notificationService.accountService.document_to_account(toUser);
 
             toAccount.Notifications.add(notificationId.toString());
 
-            accountService.updateUser(toAccount.toJson(), toId);
+            notificationService.accountService.updateUser(toAccount.toJson(), toId);
 
             JsonObject response = Json.createObjectBuilder()
                     .add("success", true)
@@ -255,7 +254,7 @@ public class NotificationResource {
 
         String jwtString = authHeader.replaceFirst("(?i)^Bearer\\s+", "");
 
-        Document userDoc = accountService.retrieveUserFromJWT(jwtString);
+        Document userDoc = notificationService.accountService.retrieveUserFromJWT(jwtString);
 
         if (userDoc == null) {
             return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to delete notifications").toJson()).build();
@@ -315,7 +314,7 @@ public class NotificationResource {
 
         String jwtString = authHeader.replaceFirst("(?i)^Bearer\\s+", "");
 
-        Document userDoc = accountService.retrieveUserFromJWT(jwtString);
+        Document userDoc = notificationService.accountService.retrieveUserFromJWT(jwtString);
 
         if (userDoc == null) {
             return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to retrieve notifications").toJson()).build();
