@@ -41,7 +41,7 @@ public class AuthResource {
 
     public static AccountService accountService = new AccountService();
     public static SessionService sessionService = new SessionService();
-    public static String HOME_URL = System.getenv("FRONTEND_URL");
+    public static String HOME_URL = System.getenv("HOME_URL");
 
 
     @GET
