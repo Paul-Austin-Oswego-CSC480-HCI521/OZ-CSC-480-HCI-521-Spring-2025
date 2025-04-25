@@ -160,7 +160,6 @@ public class AuthResource {
                 .value(sessionId)
                 .path("/")
                 .maxAge(21 * 24 * 60 * 60)
-                .secure(true)
                 .sameSite(NewCookie.SameSite.LAX)
                 .httpOnly(true)
                 .build();
@@ -322,7 +321,6 @@ public class AuthResource {
                     .value("")
                     .path("/")
                     .maxAge(0)
-                    .secure(true)
                     .sameSite(NewCookie.SameSite.LAX)
                     .httpOnly(true)
                     .build();
