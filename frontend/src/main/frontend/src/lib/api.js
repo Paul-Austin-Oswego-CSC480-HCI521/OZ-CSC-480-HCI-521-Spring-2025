@@ -84,6 +84,7 @@ export const reportQuote = async (reportData) => {
     return data;
   } catch (error) {
     console.error("Error reporting quote:", error);
+    throw "Error reporting quote:" + error;
   }
  
 };

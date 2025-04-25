@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {reportQuote} from "../lib/api.js";
+import { AlertContext } from "../lib/Contexts.jsx";
 
 const ReportModal = ({ showReportModal, onClose, user, quoteID }) => {
     const [reportReasons, setReportReasons] = useState([]);
     const [customReason, setCustomReason] = useState("");
+    const [_, setAlert] = useContext(AlertContext);
 
     const handleCheckboxChange = (e) => {
         const { value, checked } = e.target;
@@ -23,7 +25,14 @@ const ReportModal = ({ showReportModal, onClose, user, quoteID }) => {
         context_type: contextTypeValue, 
         message: customReason };
 
-        reportQuote(reportData);
+
+        reportQuote(reportData)
+            .then(() => {
+                setAlert({ type: "success", message: "Your report was submitted successfully!"})
+            })
+            .catch(() => {
+                setAlert({ type: "danger", message: "Something went wrong submitting your report"})
+            })
         onClose();
     }
     
