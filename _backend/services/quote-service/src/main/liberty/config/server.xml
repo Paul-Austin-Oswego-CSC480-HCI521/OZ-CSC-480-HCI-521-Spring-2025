@@ -10,7 +10,6 @@
         <feature>servlet-6.0</feature> <!-- Required for handling HTTP requests -->
         <feature>mpJwt-2.1</feature>
         <feature>appSecurity-5.0</feature>
-        <feature>cdi-2.0</feature>
     </featureManager>
 
     <!-- Define server ports -->
