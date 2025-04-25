@@ -3,10 +3,11 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { updateMe } from "../lib/api";
 import { BsCheckSquare, BsPencilSquare } from "react-icons/bs"; // Import icons
 import { useNavigate } from "react-router-dom";
-import { UserContext } from "../lib/Contexts";
+import { AlertContext, UserContext } from "../lib/Contexts";
 
 const AccountPage = () => {
   const [user, setUser] = useContext(UserContext);
+  const [_, setAlert] = useContext(AlertContext);
   const [error, setError] = useState(null);
   const [isEditingProfession, setIsEditingProfession] = useState(false);
   const [isEditingPersonalQuote, setIsEditingPersonalQuote] = useState(false);
@@ -41,6 +42,7 @@ const AccountPage = () => {
       })
       .catch((error) => {
         console.error("Failed to update profession:", error);
+        setAlert(error);
         setIsEditingProfession(false); // Still exit edit mode on failure
       });
   };
@@ -60,6 +62,7 @@ const AccountPage = () => {
       })
       .catch((error) => {
         console.error("Failed to update personal quote:", error);
+        setAlert(error);
         setIsEditingPersonalQuote(false);
       });
   };

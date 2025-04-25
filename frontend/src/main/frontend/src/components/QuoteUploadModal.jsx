@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { createQuote } from "../lib/api";
-import button from "bootstrap/js/src/button.js";
+import { AlertContext } from "../lib/Contexts";
 const QuoteUploadModal = ({ isVisible, onClose, onSubmit, quoteText, setQuoteText }) => {
     if (!isVisible) return null; //if the modal is not visible, do not render anything
 
+    const [_, setAlert] = useContext(AlertContext);
     const [author, setAuthor] = useState("");
     const [tags, setTags] = useState([]);
     const [customTag, setCustomTag] = useState("");
@@ -35,7 +36,6 @@ const QuoteUploadModal = ({ isVisible, onClose, onSubmit, quoteText, setQuoteTex
 
         try {
             await createQuote(quoteData);
-            onSubmit(quoteData);
             setQuoteText("");
             setAuthor("");
             setTags([]);
@@ -43,6 +43,7 @@ const QuoteUploadModal = ({ isVisible, onClose, onSubmit, quoteText, setQuoteTex
             onClose();
             window.location.href = "/";
         } catch (err) {
+            setAlert(err);
             console.error("Error submitting quote:", err);
         }
     };
