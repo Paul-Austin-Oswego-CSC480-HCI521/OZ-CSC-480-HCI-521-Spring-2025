@@ -183,6 +183,7 @@ const QuoteActions = ({ quote, onBookmarkToggle, setAlert }) => {
 
       <div className="tip" style={{ position: "relative" }}>
         <button
+          aria-label="Share Button"
           onClick={handleShareClick}
           style={{
             background: "none",
@@ -196,6 +197,7 @@ const QuoteActions = ({ quote, onBookmarkToggle, setAlert }) => {
 
         {showSharePopup && (
           <div
+            aria-label="Share Pop-Up"
             style={{
               position: "absolute",
               top: "30px",
@@ -214,6 +216,7 @@ const QuoteActions = ({ quote, onBookmarkToggle, setAlert }) => {
       </div>
 
       <button
+        aria-label="Report Button"
         onClick={handleFlagClick}
         className="tip"
         style={{
