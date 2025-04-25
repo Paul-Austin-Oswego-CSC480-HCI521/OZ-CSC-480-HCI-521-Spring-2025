@@ -51,6 +51,11 @@ export const deleteQuote = async (quoteId) => {
       }),
     });
 
+    if (!response.ok) {
+      const message = await response.json();
+      throw new Error(message);
+    }
+
     const contentType = response.headers.get("Content-Type");
     if (contentType && contentType.includes("application/json")) {
       return await response.json();
