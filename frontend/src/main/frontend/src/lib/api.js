@@ -623,4 +623,27 @@ export const fetchReportedQuotes = async () => {
   }
 };
 
+export const searchUsersByQuery = async (query) => {
+  try {
+    const response = await fetch(
+      `${PROXY_URL}/users/auth/jwt?redirectURL=${encodeURIComponent(`${PROXY_URL}/users/accounts/search/query/${query}`)}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          method: "GET",
+        }),
+      }
+    );
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error searching users:", error);
+    throw error;
+  }
+};
+
 
