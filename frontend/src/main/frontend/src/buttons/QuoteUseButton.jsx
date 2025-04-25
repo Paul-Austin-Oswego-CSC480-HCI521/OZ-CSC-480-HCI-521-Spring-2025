@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
+import { UserContext } from "../lib/Contexts";
 
-const QuoteUseButton = ({ quote, setAlert, setShowLogin, onQuoteUsed }) => {
+const QuoteUseButton = ({ quote, setShowLogin, onQuoteUsed }) => {
   const [used, setUsed] = useState(false);
+  const [_, setAlert] = useContext(UserContext);
 
   const handleUsedClick = (e) => {
     e.stopPropagation();

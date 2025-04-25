@@ -9,39 +9,38 @@ import QuoteForm from "./components/QuoteForm";
 import DebugPage from "./pages/DebugPage";
 import { userQuotes, bookmarkedQuotes } from "./placeholderdata";
 import SearchPage from './pages/SearchPage';
-import AccountSetup from './pages/AccountSetup';
-import { UserProvider } from "./lib/Contexts";
+import { AlertProvider, UserProvider } from "./lib/Contexts";
 import CommunityGuidelinesPage from "./pages/CommunityGuidelinesPage";
-import AdminPanel from "./pages/AdminPanel";
 
 const App = () => {
 
   return (
-    <UserProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route path="/login" element={<LoginPage />} />
-            <Route
-              path="/my-collection"
-              element={
-                <MyCollection 
-                  userQuotes={userQuotes}
-                  bookmarkedQuotes={bookmarkedQuotes}
-                />
-              }
-            />
-            <Route path="/edit-quote/:id" element={<QuoteForm />} />
-            <Route path="/debug" element={<DebugPage />} />
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/account" element={<AccountPage />} />
-            <Route path="/search" element={<SearchPage />} />
-            <Route path="/community-guidelines" element={<CommunityGuidelinesPage/>} />
-            <Route path="/admin" element={<AdminPanel />} />
-          </Route>
-        </Routes>
-      </Router>
-    </UserProvider>
+    <AlertProvider>
+      <UserProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route path="/login" element={<LoginPage />} />
+              <Route
+                path="/my-collection"
+                element={
+                  <MyCollection 
+                    userQuotes={userQuotes}
+                    bookmarkedQuotes={bookmarkedQuotes}
+                  />
+                }
+              />
+              <Route path="/edit-quote/:id" element={<QuoteForm />} />
+              <Route path="/debug" element={<DebugPage />} />
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/account" element={<AccountPage />} />
+              <Route path="/search" element={<SearchPage />} />
+              <Route path="/community-guidelines" element={<CommunityGuidelinesPage/>} />
+            </Route>
+          </Routes>
+        </Router>
+      </UserProvider>
+    </AlertProvider>
   );
 };
 

@@ -3,12 +3,11 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { updateMe } from "../lib/api";
 import { BsCheckSquare, BsPencilSquare } from "react-icons/bs"; // Import icons
 import { useNavigate } from "react-router-dom";
-import { UserContext } from "../lib/Contexts";
-import AlertMessage from "../components/AlertMessage";
+import { AlertContext, UserContext } from "../lib/Contexts";
 
 const AccountPage = () => {
   const [user, setUser] = useContext(UserContext);
-  const [alert, setAlert] = useState(null);
+  const [_, setAlert] = useContext(AlertContext);
   const [error, setError] = useState(null);
   const [isEditingProfession, setIsEditingProfession] = useState(false);
   const [isEditingPersonalQuote, setIsEditingPersonalQuote] = useState(false);

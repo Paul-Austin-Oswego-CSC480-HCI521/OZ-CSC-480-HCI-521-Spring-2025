@@ -2,7 +2,7 @@ import { useState } from "react";
 import QuoteCard from "../components/QuoteCard";
 import QuoteViewModal from "./QuoteViewModal";
 
-const QuoteList = ({ topQuotes, loading, error, setAlert, setShowLogin }) => {
+const QuoteList = ({ topQuotes, loading, error, setShowLogin }) => {
 
   const [viewedQuote, setViewedQuote] = useState(null);
 
@@ -31,7 +31,6 @@ const QuoteList = ({ topQuotes, loading, error, setAlert, setShowLogin }) => {
                       quote={viewedQuote} 
                       close={closeView}   
                       onBookmarkToggle={handleBookmarkToggle}
-                      setAlert={setAlert} 
                       setShowLogin={setShowLogin}
                       onQuoteUsed={handleQuoteUsed}
                       /> : (<></>)}

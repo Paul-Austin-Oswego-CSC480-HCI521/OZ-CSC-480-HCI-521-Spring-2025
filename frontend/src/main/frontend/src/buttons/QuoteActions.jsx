@@ -6,10 +6,11 @@ import "../scss/tooltip.css";
 import ReportModal from "../components/ReportModal";
 import ShareQuotePopup from "../components/ShareQuotePopup";
 import { shareQuote } from "../lib/api"; // near top
-import { UserContext } from "../lib/Contexts";
+import { AlertContext, UserContext } from "../lib/Contexts";
 import { useContext } from "react";
 
-const QuoteActions = ({ quote, onBookmarkToggle, setAlert }) => {
+const QuoteActions = ({ quote, onBookmarkToggle }) => {
+  const [_, setAlert] = useContext(AlertContext);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [bookmarkCount, setBookmarkCount] = useState(quote.bookmarks || 0);
   const [copied, copy] = useState(false);

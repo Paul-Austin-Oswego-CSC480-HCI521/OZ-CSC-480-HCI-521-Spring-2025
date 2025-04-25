@@ -3,6 +3,8 @@ import { fetchMe } from "./api";
 
 export const UserContext = createContext(null)
 
+export const AlertContext = createContext(null)
+
 export const UserProvider = (props) => {
 
   // Fetch user and return state in value
@@ -22,4 +24,12 @@ export const UserProvider = (props) => {
   }, []);
 
   return <UserContext.Provider value={[user, setUser]}>{props.children}</UserContext.Provider>
+}
+
+export const AlertProvider = (props) => {
+
+  // Fetch user and return state in value
+  const [alertMessage, sendAlert] = useState(null);
+
+  return <AlertContext.Provider value={[alertMessage, sendAlert]}>{props.children}</AlertContext.Provider>
 }

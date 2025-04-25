@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import TopNavigation from './TopNavigation';
 import LoginBox from './Login';
+import AlertMessage from './AlertMessage';
+import { AlertContext } from '../lib/Contexts';
 
 const Layout = () => {
   const [showLogin, setShowLogin] = useState(null); //track whether to show the login modal
+  const [alert] = useContext(AlertContext);
 
   const handleGoogleLogin = () => {
     //redirect user to the Google login page
@@ -20,6 +23,13 @@ const Layout = () => {
   return (
     <div className="container">
       <TopNavigation /> {/* display the top navigation bar with user data */}
+
+      {alert && (
+        <div className="position-fixed top-0 start-50 translate-middle-x mt-3 px-4" style={{ zIndex: 1050 }}>
+          <AlertMessage autoDismiss={true} />
+        </div>
+      )}
+
       <main>
         {showLogin && (
           //display the login modal if user needs to log in

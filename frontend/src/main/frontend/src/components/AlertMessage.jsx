@@ -1,25 +1,21 @@
-import { useState, useEffect } from "react";
+import { useEffect, useContext } from "react";
+import { AlertContext } from "../lib/Contexts";
 
-const AlertMessage = ({ type = "success", message, autoDismiss = false, dismissTime = 3000 }) => {
-  const [visible, setVisible] = useState(true);
+const AlertMessage = ({ autoDismiss = false, dismissTime = 3000 }) => {
+  const [alert, setAlert] = useContext(AlertContext);
 
   useEffect(() => {
     if (autoDismiss) {
-      const timer = setTimeout(() => setVisible(false), dismissTime);
+      const timer = setTimeout(() => setAlert(null), dismissTime);
       return () => clearTimeout(timer);
     }
   }, [autoDismiss, dismissTime]);
 
-  if (!visible) return null;
-
-  const alertClass = type === "success" ? "alert-success" : "alert-danger";
-
-  return (
-    <div className={`alert ${alertClass} alert-dismissible fade show`} role="alert" onClick={(e) => e.stopPropagation()}>
-      {message}
-      <button type="button" className="btn-close" onClick={() => setVisible(false)} aria-label="Close"></button>
+  return alert && 
+    <div className={`alert ${alert.type == "success" ? "alert-success" : "alert-danger"} alert-dismissible fade show`} role="alert" onClick={(e) => e.stopPropagation()}>
+      {alert.message}
+      <button type="button" className="btn-close" onClick={() => setAlert(null)} aria-label="Close"></button>
     </div>
-  );
 };
 
 export default AlertMessage;
