@@ -3,12 +3,13 @@ import { Link } from "react-router-dom";
 import { useContext } from "react";
 import NotificationItem from "./Notification";
 import { useState, useEffect } from "react";
-import { fetchNotifications, deleteNotification, clearAllNotifications } from "../lib/api";
-import { UserContext } from "../lib/Contexts";
+import { fetchNotifications, deleteNotification, clearAllNotifications, logout } from "../lib/api";
+import { AlertContext, UserContext } from "../lib/Contexts";
 import { BsPersonCircle, BsBell, BsBoxArrowRight } from "react-icons/bs";
 
 const NotificationDropdown = ({ isVisible }) => {
   const [notifications, setNotifications] = useState([]);
+  const [_, setAlert] = useContext(AlertContext)
   const [isNotificationsVisible, setIsNotificationsVisible] = useState(false);
   const [user] = useContext(UserContext);
   const borderColor = "#0d5c05"; 
@@ -42,10 +43,8 @@ const NotificationDropdown = ({ isVisible }) => {
   const handleLogout = async () => {
     try {
       await logout(); 
-      localStorage.removeItem("hasLoggedIn");
-      setIsLoggedIn(false);
       setAlert({ type: "success", message: "Successfully logged out." });
-      setShowLogin(true);
+      setTimeout(() => window.location.reload(), 3000)
     } catch (error) {
       setAlert({ type: "danger", message: "An error occurred during logout." });
     }
