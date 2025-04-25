@@ -378,6 +378,14 @@ public class AccountService {
                     .build();
         }
 
+        if (profanityFilter.checkProfanity(updatedAccountDocument.getString("Profession"))) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(new Document("error", "Profession is not appropiate.").toJson()).build();
+        }
+
+        if (profanityFilter.checkProfanity(updatedAccountDocument.getString("PersonalQuote"))) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(new Document("error", "Personal Quote is not appropiate.").toJson()).build();
+        }
+
         UpdateResult updateResult = accountCollection.updateOne(
                 eq("_id", objectId),
                 new Document("$set", updatedAccountDocument)
