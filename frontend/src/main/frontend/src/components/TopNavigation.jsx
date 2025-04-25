@@ -55,7 +55,7 @@ const TopNavigation = () => {
     <>
       <nav
         className="navbar navbar-expand-lg navbar-light sticky-top custom-nav"
-        style={{ backgroundColor: "#FFFFFF" }}
+        style={{ backgroundColor: "#fffcf4" }}
       >
         <Link className="navbar-brand pl-2" to="/">
           <img src={logo} alt="Logo" style={{ height: "40px" }} /> 
