@@ -53,7 +53,10 @@ const TopNavigation = () => {
 
   return (
     <>
-      <nav className="navbar navbar-expand-lg navbar-light sticky-top custom-nav">
+      <nav
+        className="navbar navbar-expand-lg navbar-light sticky-top custom-nav"
+        style={{ backgroundColor: "#FFFFFF" }}
+      >
         <Link className="navbar-brand pl-2" to="/">
           <img src={logo} alt="Logo" style={{ height: "40px" }} /> 
         </Link>
@@ -80,6 +83,11 @@ const TopNavigation = () => {
               </li>
             ) : (
               <></>
+            )}
+            {user && user.admin === 1 && (
+              <li className={`nav-item ${isActive("/admin") ? "active" : ""}`}>
+                <Link className="nav-link" to="/admin">Admin Panel</Link>
+              </li>
             )}
             { !user ? (
               <li className="nav-item">
