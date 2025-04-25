@@ -241,17 +241,15 @@ public class ReportResource {
         Map<String, String> jwtMap= QuotesRetrieveAccount.retrieveJWTData(jwtString);
 
         if (jwtMap == null) {
-            return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to create quotes").toJson()).build();
+            return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized for admin panel").toJson()).build();
         }
-
         // get account ID from JWT
         String accountID = jwtMap.get("subject");
 
         // get group from JWT
         String group = jwtMap.get("group");
-
         if (group == null || accountID == null) {
-            return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to create quotes").toJson()).build();
+            return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized for admin panel").toJson()).build();
         }
 
         try {
@@ -260,6 +258,17 @@ public class ReportResource {
             for (Document report : reports) {
                 if (report.containsKey("_id")) {
                     report.put("_id", report.getObjectId("_id").toString());
+                }
+
+                //full quote information from id, add to report
+                String quoteId = report.getString("quote_id");
+                if (quoteId != null && SanitizerClass.validObjectId(quoteId)) {
+                    ObjectId quoteObjectId = new ObjectId(quoteId);
+                    Document quote = quotesCollection.find(eq("_id", quoteObjectId)).first();
+                    if (quote != null) {
+                        quote.put("_id", quote.getObjectId("_id").toString());
+                        report.put("quote", quote); 
+                    }
                 }
             }
             
