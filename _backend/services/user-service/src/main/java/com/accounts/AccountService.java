@@ -116,10 +116,11 @@ public class AccountService {
         }
 
         String jwt = JwtService.buildJwt(id).toString();
+        String userServiceUrl = System.getenv("USER_SERVICE_URL");
 
         return Response
                 .status(Response.Status.FOUND)
-                .location(URI.create("http://localhost:9081/users/auth/checkJWT/" + jwt))
+                .location(URI.create(userServiceUrl + "/users/auth/checkJWT/" + jwt))
                 .build();
     }
 
