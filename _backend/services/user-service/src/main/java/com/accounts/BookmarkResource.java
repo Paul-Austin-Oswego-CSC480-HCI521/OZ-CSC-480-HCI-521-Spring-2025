@@ -48,7 +48,6 @@ public class BookmarkResource {
     @PathParam("quoteId") String quoteId,
     @Context HttpHeaders headers) {
 
-        String json = null;
         String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
 
         if (authHeader == null || !authHeader.toLowerCase().startsWith("bearer ")) {
@@ -70,7 +69,7 @@ public class BookmarkResource {
             }
             String userId = accountService.getAccountIdByEmail(acc.Email);
             acc.BookmarkedQuotes.add(quoteId);
-            json = acc.toJson();
+            String json = acc.toJson();
             Response quoteSearchRes;
             try{
                 quoteSearchRes = quoteClient.idSearch(quoteId);
@@ -102,13 +101,10 @@ public class BookmarkResource {
                 }
              
             }
-           
-            int currentBookmarks = quoteSearchDoc.getInteger("bookmarks", 0);
-            quoteSearchDoc.put("bookmarks", currentBookmarks + 1);
-            quoteSearchDoc.remove("creator");
-            Response quoteUpdateRes = quoteClient.updateQuote(quoteSearchDoc.toJson());
-            if(quoteUpdateRes.getStatus()!=Response.Status.OK.getStatusCode()){
-            return quoteUpdateRes;
+            
+            Response quoteBookmarkRes = quoteClient.bookmarkQuote(quoteId,authHeader);
+            if(quoteBookmarkRes.getStatus()!=Response.Status.OK.getStatusCode()){
+            return quoteBookmarkRes;
          }
         }
         else{
@@ -393,12 +389,7 @@ public class BookmarkResource {
             if(quoteSearchRes.getStatus()!=Response.Status.OK.getStatusCode()){
                 return quoteSearchRes;
                 }
-            String quoteSearchString = quoteSearchRes.readEntity(String.class);
-            Document quoteSearchDoc = Document.parse(quoteSearchString);
-            quoteSearchDoc.remove("creator");
-            int currentBookmarks = quoteSearchDoc.getInteger("bookmarks", 0);
-            quoteSearchDoc.put("bookmarks", currentBookmarks - 1);
-            Response quoteUpdateRes = quoteClient.updateQuote(quoteSearchDoc.toJson());
+            Response quoteUpdateRes = quoteClient.deleteBookmark(quoteId,authHeader);
             if(quoteUpdateRes.getStatus()!=Response.Status.OK.getStatusCode()){
             return Response
             .status(Response.Status.BAD_GATEWAY)

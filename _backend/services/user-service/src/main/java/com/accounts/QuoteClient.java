@@ -9,9 +9,14 @@ import jakarta.ws.rs.core.Response;
 public interface QuoteClient{
    
     @PUT
-    @Path("/quotes/update/bookmark")
-    @Consumes(MediaType.APPLICATION_JSON)
-    Response updateQuote(String rawJson);
+    @Path("/quotes/bookmark/increment/{quoteID}")
+    @Produces(MediaType.APPLICATION_JSON)
+    Response bookmarkQuote(@PathParam("quoteID") String quoteID, @HeaderParam("Authorization") String authHeader);
+
+    @DELETE
+    @Path("/quotes/bookmark/decrement/{quoteID}")
+    @Produces(MediaType.APPLICATION_JSON)
+    Response deleteBookmark(@PathParam("quoteID") String quoteID, @HeaderParam("Authorization") String authHeader);
 
     @GET
     @Path("/quotes/search/id/{quoteID}")

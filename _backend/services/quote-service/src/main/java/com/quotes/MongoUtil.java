@@ -17,6 +17,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.StringWriter;
 import java.util.*;
 
+import javax.print.Doc;
+
 import static com.mongodb.client.model.Filters.eq;
 
 @ApplicationScoped
@@ -331,9 +333,43 @@ public class MongoUtil {
         }
     }
 
+    public boolean incrementBookmarkCount(ObjectId quoteId) {
+        MongoCollection<Document> collection = database.getCollection("Quotes");
+        try{
+            Document IdQuery = new Document("_id",quoteId);
+            Document updateOperation = new Document("$inc",new Document("bookmarks",1));
+            long modifiedCount = collection.updateOne(IdQuery, updateOperation).getModifiedCount();
+            return modifiedCount > 0;
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
+       
+        
+    }
+
+    public boolean decrementBookmarkCount(ObjectId quoteId) {
+        MongoCollection<Document> collection = database.getCollection("Quotes");
+        try{
+            Document IdQuery = new Document("_id",quoteId);
+            Document updateOperation = new Document("$inc",new Document("bookmarks",-1));
+            long modifiedCount = collection.updateOne(IdQuery, updateOperation).getModifiedCount();
+            return modifiedCount > 0;
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
+       
+        
+    }
+
+
     public boolean deleteQuote(ObjectId quoteId) {
         MongoCollection<Document> collection = database.getCollection("Quotes");
         try {
+
             //create query document with id
             Document idQuery = new Document();
             idQuery.append("_id", quoteId);

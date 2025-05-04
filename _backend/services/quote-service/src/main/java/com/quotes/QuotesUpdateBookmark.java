@@ -24,14 +24,14 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 
-@Path("/update/bookmark")
+@Path("/bookmark")
 public class QuotesUpdateBookmark {
 
     @Inject
     MongoUtil mongo;
 
     @PUT
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/increment/{quoteId}")
     @APIResponses(value = {
             @APIResponse(responseCode = "200", description = "The quote was successfully updated. Returns json {\"success\": \"true\""),
             @APIResponse(responseCode = "409", description = "Error when sanitizing quote texts, or updating into the database"),
@@ -41,41 +41,102 @@ public class QuotesUpdateBookmark {
             " All other fields are optional. Currently the integer fields \"bookmarks\", \"shares\", and \"flags\" can only change by 1 at a time, " +
             "so only +1 or -1. If the current value is 5 it will only accept 4 or 6. Let Engine know if you want" +
             " more dedicated update endpoints such as unique ones for each field or any other changes")
-    @RequestBody(description = "Example request body endpoint is expecting. \"_id\" field IS REQUIRED. All other fields are optional",
-            required = true, content = @Content(
-            mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = QuoteObject.class),
-            examples = {@ExampleObject(name = "Example: update author and quote text", value = "{\"_id\": \"67abf3b6b0d20a5237456441\", \"author\": \"New Value\", " +
-                    "\"quote\": \"New quote text\"}"),
-            @ExampleObject(name = "Example: update bookmarks", value = "{\"_id\": \"67abf3b6b0d20a5237456441\", \"bookmarks\": 6}")
-            }
-    ))
-    public Response updateQuote(String rawJson) {
-        try{
-            //Map json to Java Object
-            ObjectMapper objectMapper = new ObjectMapper();
-            QuoteObject quote = objectMapper.readValue(rawJson, QuoteObject.class);
+    public Response bookmarkQuote(@PathParam("quoteId")String quoteId, @Context HttpHeaders headers) {
+        ObjectId objectId = new ObjectId(quoteId);
+        
 
-            ObjectId objectId = new ObjectId(quote.getId().toString());
-            String jsonQuote = mongo.getQuote(objectId);
-            QuoteObject oldQuote = objectMapper.readValue(jsonQuote, QuoteObject.class);
+        String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
 
-            quote = SanitizerClass.sanitizeQuote(quote);
-            if(quote == null) {
-                return Response.status(Response.Status.CONFLICT).entity("Error when sanitizing quote, returned null").build();
-            }
+        if (authHeader == null || !authHeader.toLowerCase().startsWith("bearer ")) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(new Document("error", "Missing or invalid Authorization header").toJson())
+                    .build();
+        }
 
-            boolean updated = mongo.updateQuote(quote);
+        String jwtString = authHeader.replaceFirst("(?i)^Bearer\\s+", "");
 
-            if(updated) {
-                JsonObject jsonResponse = Json.createObjectBuilder()
-                        .add("Response", "200")
-                        .build();
-                return Response.ok(jsonResponse).build();
-            } else {
-                return Response.status(Response.Status.CONFLICT).entity("Error updating quote, Json could be wrong or is missing quote ID").build();
-            }
-        } catch (IOException e) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("IOException: "+e).build();
+        Map<String, String> jwtMap= QuotesRetrieveAccount.retrieveJWTData(jwtString);
+
+
+        if (jwtMap == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to update quotes").toJson()).build();
+        }
+
+        // get account ID from JWT
+        String accountID = jwtMap.get("subject");
+
+        // get group from JWT
+        String group = jwtMap.get("group");
+
+        // check if account has not been logged in
+        if (accountID == null || group == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to update quotes").toJson()).build();
+        }
+
+        
+        boolean bookmarked = mongo.incrementBookmarkCount(objectId);
+        if(bookmarked) {
+            JsonObject jsonResponse = Json.createObjectBuilder()
+                    .add("Response", "200")
+                    .build();
+            return Response.ok(jsonResponse).build();
+        } else {
+            return Response.status(Response.Status.CONFLICT).entity("Error bookmarking quote").build();
+        }
+    }
+
+    @DELETE
+    @Path("/decrement/{quoteId}")
+    @APIResponses(value = {
+            @APIResponse(responseCode = "200", description = "The quote was successfully updated. Returns json {\"success\": \"true\""),
+            @APIResponse(responseCode = "409", description = "Error when sanitizing quote texts, or updating into the database"),
+            @APIResponse(responseCode = "400", description = "IOException Occurred"),
+    })
+    @Operation(summary = "Update fields of a quote in the database", description = "Update quote within database. \"_id\" field IS REQUIRED." +
+            " All other fields are optional. Currently the integer fields \"bookmarks\", \"shares\", and \"flags\" can only change by 1 at a time, " +
+            "so only +1 or -1. If the current value is 5 it will only accept 4 or 6. Let Engine know if you want" +
+            " more dedicated update endpoints such as unique ones for each field or any other changes")
+    public Response deleteBookmark(@PathParam("quoteId")String quoteId, @Context HttpHeaders headers) {
+        ObjectId objectId = new ObjectId(quoteId);
+        
+
+        String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
+
+        if (authHeader == null || !authHeader.toLowerCase().startsWith("bearer ")) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(new Document("error", "Missing or invalid Authorization header").toJson())
+                    .build();
+        }
+
+        String jwtString = authHeader.replaceFirst("(?i)^Bearer\\s+", "");
+
+        Map<String, String> jwtMap= QuotesRetrieveAccount.retrieveJWTData(jwtString);
+
+
+        if (jwtMap == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to update quotes").toJson()).build();
+        }
+
+        // get account ID from JWT
+        String accountID = jwtMap.get("subject");
+
+        // get group from JWT
+        String group = jwtMap.get("group");
+
+        // check if account has not been logged in
+        if (accountID == null || group == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to update quotes").toJson()).build();
+        }
+
+        
+        boolean bookmarked = mongo.decrementBookmarkCount(objectId);
+        if(bookmarked) {
+            JsonObject jsonResponse = Json.createObjectBuilder()
+                    .add("Response", "200")
+                    .build();
+            return Response.ok(jsonResponse).build();
+        } else {
+            return Response.status(Response.Status.CONFLICT).entity("Error bookmarking quote").build();
         }
     }
 }
