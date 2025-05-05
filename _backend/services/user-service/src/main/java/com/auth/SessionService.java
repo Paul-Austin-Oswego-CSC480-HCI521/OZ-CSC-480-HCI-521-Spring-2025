@@ -1,8 +1,5 @@
 package com.auth;
 
-import com.accounts.MongoUtil;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
@@ -21,30 +18,8 @@ import static com.mongodb.client.model.Filters.eq;
 
 @RequestScoped
 public class SessionService {
-
-    @Inject
-    MongoUtil mongoUtil;
-
-    private MongoClient client;
-    private MongoDatabase sessionsDB;
-    private MongoCollection<Document> sessionsCollection;
-
-    public SessionService() {}
-
-    @PostConstruct
-    public void init(){
-        String connectionString = System.getenv("CONNECTION_STRING");
-
-        client = mongoUtil.getMongoClient();
-        sessionsDB = client.getDatabase("Accounts");
-        sessionsCollection = sessionsDB.getCollection("Sessions");
-    }
-
-    public SessionService(MongoClient mongoClient, String dbName, String collectionName) {
-        client = mongoClient;
-        sessionsDB = client.getDatabase(dbName);
-        sessionsCollection = sessionsDB.getCollection(collectionName);
-    }
+    private static final MongoDatabase sessionsDB = MongoUtil.getDatabase();
+    private static final MongoCollection<Document> sessionsCollection = sessionsDB.getCollection("Sessions");
 
     public String createSession(Session session) {
         Document sessionDoc = new Document()

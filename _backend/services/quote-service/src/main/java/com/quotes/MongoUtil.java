@@ -5,6 +5,8 @@ import com.ibm.websphere.security.jwt.InvalidConsumerException;
 import com.ibm.websphere.security.jwt.InvalidTokenException;
 import com.ibm.websphere.security.jwt.JwtConsumer;
 import com.ibm.websphere.security.jwt.JwtToken;
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Projections;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -30,19 +32,16 @@ public class MongoUtil {
     private static MongoClient mongoClient;
     private static MongoDatabase database;
 
-
-    public MongoUtil() {
-        mongoClient = MongoClients.create(getConnectionString());
+    static {
+        MongoClientSettings settings = MongoClientSettings.builder()
+                .applyConnectionString(new ConnectionString(System.getenv("CONNECTION_STRING")))
+                .applyToConnectionPoolSettings(builder -> builder
+                        .maxSize(50) 
+                        .minSize(5) 
+                )
+                .build();
+        mongoClient = MongoClients.create(settings);
         database = mongoClient.getDatabase(DATABASE_NAME);
-    }
-
-    public MongoUtil(String connectionString, String database1) {
-        mongoClient = MongoClients.create(connectionString);
-        database = mongoClient.getDatabase(database1);
-    }
-
-    private static String getConnectionString() {
-        return System.getenv("CONNECTION_STRING");
     }
 
     public static MongoDatabase getDatabase() {
@@ -514,7 +513,7 @@ public class MongoUtil {
     }
 
     public static void close() {
-        if(mongoClient != null) {
+        if (mongoClient != null) {
             mongoClient.close();
         }
     }
