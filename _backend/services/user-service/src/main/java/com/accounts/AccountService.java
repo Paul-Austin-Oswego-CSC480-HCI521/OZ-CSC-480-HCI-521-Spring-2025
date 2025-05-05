@@ -490,4 +490,98 @@ public class AccountService {
 
         return doc.getObjectId("_id").toHexString();
     }
+
+    public Response deleteFromUsersMyQuotes(String userId,String quoteId) {
+        ObjectId objectId;
+
+        try {
+            objectId = new ObjectId(userId);
+        } catch (Exception e) {
+            return Response
+                    .status(Response.Status.NOT_FOUND)
+                    .entity(new Document("error", "Invalid object id!").toJson())
+                    .build();
+        }
+        Response res = retrieveUser(userId, false);
+        String entity = res.readEntity(String.class);
+        Document updatedAccountDocument = Document.parse(entity);
+        updatedAccountDocument.getList("MyQuotes",String.class).remove(quoteId);
+        UpdateResult updateResult = accountCollection.updateOne(
+                eq("_id", objectId),
+                new Document("$set", updatedAccountDocument)
+        );
+
+        if (updateResult.getModifiedCount() == 1) {
+            try {
+                ArrayList<String> fieldsList = new ArrayList<String>(
+                        List.of("Email", "Username", "admin", "Notifications", "MyQuotes",
+                                "BookmarkedQuotes", "SharedQuotes", "MyTags", "Profession", "PersonalQuote","UsedQuotes"));
+
+                Bson projectionFields = Projections.fields(
+                        Projections.include(fieldsList));
+
+                return Response
+                        .status(Response.Status.OK)
+                        .entity(accountCollection.find(eq("_id", objectId)).projection(projectionFields).first().toJson())
+                        .build();
+            } catch (NullPointerException e) {
+                return Response
+                        .status(Response.Status.NOT_FOUND)
+                        .entity(new Document("error", "Account Not found!").toJson())
+                        .build();
+            }
+        } else {
+            return Response
+                    .status(Response.Status.NOT_FOUND)
+                    .entity(new Document("error", "Account Not found!").toJson())
+                    .build();
+        }
+    }
+
+    public Response insertIntoUsersMyQuotes(String userId,String quoteId) {
+        ObjectId objectId;
+
+        try {
+            objectId = new ObjectId(userId);
+        } catch (Exception e) {
+            return Response
+                    .status(Response.Status.NOT_FOUND)
+                    .entity(new Document("error", "Invalid object id!").toJson())
+                    .build();
+        }
+        Response res = retrieveUser(userId, false);
+        String entity = res.readEntity(String.class);
+        Document updatedAccountDocument = Document.parse(entity);
+        updatedAccountDocument.getList("MyQuotes",String.class).add(quoteId);
+        UpdateResult updateResult = accountCollection.updateOne(
+                eq("_id", objectId),
+                new Document("$set", updatedAccountDocument)
+        );
+
+        if (updateResult.getModifiedCount() == 1) {
+            try {
+                ArrayList<String> fieldsList = new ArrayList<String>(
+                        List.of("Email", "Username", "admin", "Notifications", "MyQuotes",
+                                "BookmarkedQuotes", "SharedQuotes", "MyTags", "Profession", "PersonalQuote","UsedQuotes"));
+
+                Bson projectionFields = Projections.fields(
+                        Projections.include(fieldsList));
+
+                return Response
+                        .status(Response.Status.OK)
+                        .entity(accountCollection.find(eq("_id", objectId)).projection(projectionFields).first().toJson())
+                        .build();
+            } catch (NullPointerException e) {
+                return Response
+                        .status(Response.Status.NOT_FOUND)
+                        .entity(new Document("error", "Account Not found!").toJson())
+                        .build();
+            }
+        } else {
+            return Response
+                    .status(Response.Status.NOT_FOUND)
+                    .entity(new Document("error", "Account Not found!").toJson())
+                    .build();
+        }
+    }
 }

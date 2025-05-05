@@ -39,6 +39,8 @@ public class AccountsResource {
     @Inject
     SessionService sessionService;
 
+    @Inject QuoteClient quoteClient;
+
     @POST
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -196,9 +198,8 @@ public class AccountsResource {
         return accountService.updateUser(accountJson, id);
     }
 
-    @PUT
-    @Path("/update/MyQuotes/{id}")
-    @Consumes(MediaType.APPLICATION_JSON)
+    @DELETE
+    @Path("/delete/MyQuotes/{userId}/{quoteId}")
     @Produces(MediaType.APPLICATION_JSON)
     @APIResponses(value = {
             @APIResponse(responseCode = "200", description = "User Successfully updated in the database. Will return updated account document.", content = @Content(mediaType = "application/json")),
@@ -206,20 +207,64 @@ public class AccountsResource {
             @APIResponse(responseCode = "404", description = "Account was not found or the ID was invalid."),
     })
     @Operation(summary = "Updates a user account. Ensure the request header is `application/json` and provide a JSON body in the specified format.")
-    @RequestBody(description = "Example request body endpoint is expecting.", required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON, examples = @ExampleObject(name = "Example", value = "{ " + "\"SharedQuotes\": [\"Success is a journey\"]" + " }")))
-    public Response updateMyQuotes(@PathParam("id") String id, String accountJson, @Context HttpServletRequest request) {
+    public Response deleteFromMyQuotes(@PathParam("userId") String userId, @PathParam("quoteId") String quoteId,String accountJson, @Context HttpHeaders headers) {
+        String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
 
-        ObjectId objectId;
-        try {
-            objectId = new ObjectId(id);
-        } catch (Exception e) {
-            return Response
-                    .status(Response.Status.NOT_FOUND)
-                    .entity(new Document("error", "Invalid object id!").toJson())
+        if (authHeader == null || !authHeader.toLowerCase().startsWith("bearer ")) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(new Document("error", "Missing or invalid Authorization header").toJson())
                     .build();
         }
-        return accountService.updateUser(accountJson, id);
+
+        String jwtString = authHeader.replaceFirst("(?i)^Bearer\\s+", "");
+
+        Document userDoc = accountService.retrieveUserFromJWT(jwtString);
+
+        if (userDoc == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to MyQuotes").toJson()).build();
+        }
+        return accountService.deleteFromUsersMyQuotes(userId,quoteId);
     }
+
+    @PUT
+    @Path("/insert/MyQuotes/{userId}/{quoteId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @APIResponses(value = {
+            @APIResponse(responseCode = "200", description = "User Successfully updated in the database. Will return updated account document.", content = @Content(mediaType = "application/json")),
+            @APIResponse(responseCode = "400", description = "Invalid JSON format."),
+            @APIResponse(responseCode = "404", description = "Account was not found or the ID was invalid."),
+    })
+    @Operation(summary = "Updates a user account. Ensure the request header is `application/json` and provide a JSON body in the specified format.")
+    public Response insertIntoMyQuotes(@PathParam("userId") String userId, @PathParam("quoteId") String quoteId,String accountJson, @Context HttpHeaders headers) {
+        String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
+
+        if (authHeader == null || !authHeader.toLowerCase().startsWith("bearer ")) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(new Document("error", "Missing or invalid Authorization header").toJson())
+                    .build();
+        }
+
+        String jwtString = authHeader.replaceFirst("(?i)^Bearer\\s+", "");
+
+        Document userDoc = accountService.retrieveUserFromJWT(jwtString);
+
+        if (userDoc == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to MyQuotes").toJson()).build();
+        }
+      
+        Response quoteSearch = quoteClient.idSearch(quoteId);
+        String entity = quoteSearch.readEntity(String.class);
+        Document quoteDoc = Document.parse(entity);
+        userDoc.remove("expires_at");
+        Account requestUser = accountService.document_to_account(userDoc);
+        String accountId = accountService.getAccountIdByEmail(requestUser.Email);;
+        if(!quoteDoc.getString("creator").equals(accountId)|| 
+        !accountId.equals(userId)){
+            return Response.status(Response.Status.UNAUTHORIZED).entity(new Document("error", "User not authorized to MyQuotes").toJson()).build();
+        }
+        return accountService.insertIntoUsersMyQuotes(userId,quoteId);
+    }
+
 
     @GET
     @Path("/whoami")

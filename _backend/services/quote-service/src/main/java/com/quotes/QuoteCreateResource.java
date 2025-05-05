@@ -114,7 +114,7 @@ public class QuoteCreateResource {
                 List<String> MyQuotes = accDoc.getList("MyQuotes", String.class);
                 MyQuotes.add(newQuoteId.toString());
                 accDoc.put("MyQuotes",MyQuotes);
-                Response updateUser = userClient.updateMyQuotes(accountID,accDoc.toJson());
+                Response updateUser = userClient.insertIntoMyQuotes(accountID,newQuoteId.toString(),authHeader);
                 
             }
             

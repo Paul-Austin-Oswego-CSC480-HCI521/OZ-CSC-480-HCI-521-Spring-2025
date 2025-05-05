@@ -126,15 +126,7 @@ public class QuoteDeleteResource {
             }
             boolean result = mongo.deleteQuote(objectId);
             if(result) {
-                Response findAccount = userClient.search(accountID);
-            if (findAccount.getStatus() == Response.Status.OK.getStatusCode()) {
-                String accSearchString = findAccount.readEntity(String.class);
-                Document accDoc = Document.parse(accSearchString);
-                List<String> MyQuotes = accDoc.getList("MyQuotes", String.class);
-                MyQuotes.remove(quoteID);
-                accDoc.put("MyQuotes",MyQuotes);
-                Response updateUser = userClient.updateMyQuotes(accountID,accDoc.toJson());   
-            }
+                Response updateUser = userClient.deleteFromMyQuotes(accountID,quoteID,authHeader);   
                 JsonObject jsonResponse = Json.createObjectBuilder()
                         .add("Response", "200")
                         .build();

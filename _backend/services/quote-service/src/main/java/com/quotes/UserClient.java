@@ -11,10 +11,15 @@ import jakarta.ws.rs.core.Response;
 @RegisterRestClient(baseUri = "http://user-service:9081")
 public interface UserClient{
    
-    @PUT
-    @Path("/users/accounts/update/MyQuotes/{id}")
+    @DELETE
+    @Path("/users/accounts/delete/MyQuotes/{userId}/{quoteId}")
     @Consumes(MediaType.APPLICATION_JSON)
-    Response updateMyQuotes(@PathParam("id") String id, String accountJson);
+    Response deleteFromMyQuotes(@PathParam("userId") String id, @PathParam("quoteId") String quoteId,@HeaderParam("Authorization") String authHeader);
+
+    @PUT
+    @Path("/users/accounts/insert/MyQuotes/{userId}/{quoteId}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    Response insertIntoMyQuotes(@PathParam("userId") String id, @PathParam("quoteId") String quoteId,@HeaderParam("Authorization") String authHeader);
 
     @GET
     @Path("/users/accounts/search/{id}")
