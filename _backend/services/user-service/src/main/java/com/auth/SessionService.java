@@ -23,9 +23,8 @@ import static com.mongodb.client.model.Filters.eq;
 public class SessionService {
 
     @Inject
-    MongoUtil mongoUtil;
-
     private MongoClient client;
+
     private MongoDatabase sessionsDB;
     private MongoCollection<Document> sessionsCollection;
 
@@ -33,9 +32,6 @@ public class SessionService {
 
     @PostConstruct
     public void init(){
-        String connectionString = System.getenv("CONNECTION_STRING");
-
-        client = mongoUtil.getMongoClient();
         sessionsDB = client.getDatabase("Accounts");
         sessionsCollection = sessionsDB.getCollection("Sessions");
     }

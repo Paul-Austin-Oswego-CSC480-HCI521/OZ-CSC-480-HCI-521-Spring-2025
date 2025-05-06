@@ -8,10 +8,11 @@ import com.ibm.websphere.security.jwt.InvalidConsumerException;
 import com.ibm.websphere.security.jwt.InvalidTokenException;
 import com.ibm.websphere.security.jwt.JwtConsumer;
 import com.ibm.websphere.security.jwt.JwtToken;
-import com.quotes.MongoUtil;
 import com.quotes.QuotesRetrieveAccount;
 import com.quotes.SanitizerClass;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
@@ -40,17 +41,20 @@ import java.util.List;
 import java.util.Map;
 
 @Path("/report")
+@ApplicationScoped
 public class ReportResource {
 
+    @Inject
     private MongoClient client;
+
     private MongoDatabase moderationDB;
     private MongoCollection<Document> reportsCollection;
 
     private MongoDatabase dataDB;
     private MongoCollection<Document> quotesCollection;
 
-    public ReportResource() {
-        client = MongoClients.create(System.getenv("CONNECTION_STRING"));
+    @PostConstruct
+    public void init() {
         moderationDB = client.getDatabase("Moderation");
         reportsCollection = moderationDB.getCollection("Reports");
 

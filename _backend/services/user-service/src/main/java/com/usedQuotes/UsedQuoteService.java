@@ -22,9 +22,8 @@ import static com.mongodb.client.model.Filters.eq;
 public class UsedQuoteService {
 
     @Inject
-    MongoUtil mongoUtil;
-
     private MongoClient client;
+
     private MongoDatabase accountDB;
     private MongoCollection<Document> usedQuoteCollection;
 
@@ -32,7 +31,6 @@ public class UsedQuoteService {
 
     @PostConstruct
     public void init() {
-        client = mongoUtil.getMongoClient();
         accountDB = client.getDatabase("Accounts");
         usedQuoteCollection = accountDB.getCollection("UsedQuotes");
     }

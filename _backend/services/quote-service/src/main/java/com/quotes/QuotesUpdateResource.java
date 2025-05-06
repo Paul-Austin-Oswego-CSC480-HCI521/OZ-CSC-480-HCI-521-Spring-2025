@@ -30,7 +30,7 @@ import java.util.Objects;
 public class QuotesUpdateResource {
 
     @Inject
-    MongoUtil mongo;
+    QuoteService quoteService;
 
     private ProfanityClass profanityFilter = new ProfanityClass();
 
@@ -60,7 +60,7 @@ public class QuotesUpdateResource {
             QuoteObject quote = objectMapper.readValue(rawJson, QuoteObject.class);
 
             ObjectId objectId = new ObjectId(quote.getId().toString());
-            String jsonQuote = mongo.getQuote(objectId);
+            String jsonQuote = quoteService.getQuote(objectId);
             QuoteObject oldQuote = objectMapper.readValue(jsonQuote, QuoteObject.class);
 
             String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
@@ -116,7 +116,7 @@ public class QuotesUpdateResource {
                 return Response.status(Response.Status.BAD_REQUEST).entity("Author content is inappropiate").build();
             }
 
-            boolean updated = mongo.updateQuote(quote);
+            boolean updated = quoteService.updateQuote(quote);
 
             if(updated) {
                 JsonObject jsonResponse = Json.createObjectBuilder()
@@ -137,7 +137,7 @@ public class QuotesUpdateResource {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             ObjectId objectId = new ObjectId(quoteId);
-            String jsonQuote = mongo.getQuote(objectId);
+            String jsonQuote = quoteService.getQuote(objectId);
             QuoteObject quote = objectMapper.readValue(jsonQuote, QuoteObject.class);
 
             String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
@@ -178,7 +178,7 @@ public class QuotesUpdateResource {
 
             quote.setPrivate(!quote.getisPrivate());
 
-            boolean updated = mongo.updateQuote(quote);
+            boolean updated = quoteService.updateQuote(quote);
 
             if(updated) {
                 return Response.ok(quote.getisPrivate()).build();

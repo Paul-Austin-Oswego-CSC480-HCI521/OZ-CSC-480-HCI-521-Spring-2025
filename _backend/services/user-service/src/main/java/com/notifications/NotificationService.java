@@ -20,12 +20,12 @@ import com.mongodb.client.FindIterable;
 
 import java.io.StringWriter;
 
+@RequestScoped
 public class NotificationService {
 
     @Inject
-    MongoUtil mongoUtil;
+    private MongoClient client;
 
-    private MongoClient mongoClient;
     private MongoDatabase accountDatabase;
     private MongoDatabase dataDatabase;
     private MongoDatabase moderationDatabase;
@@ -34,24 +34,9 @@ public class NotificationService {
     private MongoCollection<Document> quotesCollection;
     private MongoCollection<Document> deleteCollection;
     private MongoCollection<Document> reportCollection;
-    public AccountService accountService;
 
     public NotificationService() {
-        mongoClient = MongoClients.create(System.getenv("CONNECTION_STRING"));
 
-        accountDatabase = mongoClient.getDatabase("Accounts");
-        notificationsCollection = accountDatabase.getCollection("Notifications");
-        usersCollection = accountDatabase.getCollection("Users");
-
-        dataDatabase = mongoClient.getDatabase("Data");
-        quotesCollection = dataDatabase.getCollection("Quotes");
-
-        moderationDatabase = mongoClient.getDatabase("Moderation");
-        deleteCollection = moderationDatabase.getCollection("Deleted");
-        reportCollection = moderationDatabase.getCollection("Reports");
-
-
-        accountService = new AccountService(mongoClient, "Accounts", "Users");
     }
 
     public MongoCollection<Document> getNotificationsCollection() {return notificationsCollection;}
@@ -63,12 +48,23 @@ public class NotificationService {
     @PostConstruct
     public void init(){
 
+        accountDatabase = client.getDatabase("Accounts");
+        notificationsCollection = accountDatabase.getCollection("Notifications");
+        usersCollection = accountDatabase.getCollection("Users");
+
+        dataDatabase = client.getDatabase("Data");
+        quotesCollection = dataDatabase.getCollection("Quotes");
+
+        moderationDatabase = client.getDatabase("Moderation");
+        deleteCollection = moderationDatabase.getCollection("Deleted");
+        reportCollection = moderationDatabase.getCollection("Reports");
+
     }
 
     public NotificationService(String connectionString) {
-        mongoClient = MongoClients.create(connectionString);
+        MongoClient client = MongoClients.create(connectionString);
 
-        accountDatabase = mongoClient.getDatabase("Test");
+        accountDatabase = client.getDatabase("Test");
         notificationsCollection = accountDatabase.getCollection("Notifications");
         usersCollection = accountDatabase.getCollection("Users");
 
@@ -76,8 +72,6 @@ public class NotificationService {
 
         deleteCollection = accountDatabase.getCollection("Deleted");
         reportCollection = accountDatabase.getCollection("Reports");
-
-        accountService = new AccountService(mongoClient, "Test", "Users");
     }
 
 

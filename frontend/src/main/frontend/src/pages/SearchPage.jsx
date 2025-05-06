@@ -44,8 +44,6 @@ const SearchPage = () => {
       }
     })();
   }, [location.search, location.state]);
-  
-
 
   return (
     <div className="container">
@@ -55,14 +53,23 @@ const SearchPage = () => {
           close={closeView}
         />
       )}
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1>Search Results</h1>
-        <Funnel
-          size={24}
-          style={{ cursor: 'pointer', color: '#146C43' }}
+      <div className="position-relative d-flex align-items-center mb-2 pt-3" style={{ minHeight: "60px" }}>
+        <h1 className="mb-0">Search Results: </h1>
+        <button 
+          className="rounded-button-style position-absolute start-50 translate-middle-x"
+          style={{
+            fontSize: "18px",
+            width: "250px",
+            height: "50px"
+          }}
           onClick={() => setIsFilterModalVisible(true)}
-        />
+        >
+          Filter Search
+        </button>
       </div>
+
+      <hr/>
+      
       {loading && <p>Loading...</p>}
       {!loading && error && <p>{error}</p>}
       {!loading && !error && searchResults.length > 0 ? (

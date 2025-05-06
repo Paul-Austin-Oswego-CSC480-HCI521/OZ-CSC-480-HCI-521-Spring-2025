@@ -32,7 +32,7 @@ import com.moderation.ProfanityClass;
 public class QuoteCreateResource {
 
     @Inject
-    MongoUtil mongo;
+    QuoteService quoteService;
 
     @Inject 
     private UserClient userClient;
@@ -106,7 +106,7 @@ public class QuoteCreateResource {
             }
             
 
-            ObjectId newQuoteId = mongo.createQuote(quote); //add to mongo database
+            ObjectId newQuoteId = quoteService.createQuote(quote); //add to mongo database
             Response findAccount = userClient.search(accountID);
             if (findAccount.getStatus() == Response.Status.OK.getStatusCode()) {
                 String accSearchString = findAccount.readEntity(String.class);

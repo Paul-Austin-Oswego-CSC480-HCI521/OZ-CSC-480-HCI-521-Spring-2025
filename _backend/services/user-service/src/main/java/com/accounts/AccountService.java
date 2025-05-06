@@ -49,9 +49,8 @@ import static com.mongodb.client.model.Filters.eq;
 public class AccountService {
 
     @Inject
-    MongoUtil mongoUtil;
-
     private MongoClient client;
+
     private MongoDatabase accountDB;
     private MongoCollection<Document> accountCollection;
 
@@ -61,9 +60,6 @@ public class AccountService {
 
     @PostConstruct
     public void init() {
-        String connectionString = System.getenv("CONNECTION_STRING");
-        client = MongoClients.create(connectionString);
-//        client = mongoUtil.getMongoClient();
         accountDB = client.getDatabase("Accounts");
         accountCollection = accountDB.getCollection("Users");
     }
@@ -202,7 +198,7 @@ public class AccountService {
             }
 
             Document user = accountCollection.find(eq("Email", email)).first();
-            
+
             if (user == null) {
                 return Response.status(Response.Status.NOT_FOUND)
                         .entity(new Document("error", "User with email " + email + " not found").toJson())
@@ -382,11 +378,11 @@ public class AccountService {
                     .build();
         }
 
-        if (profanityFilter.checkProfanity(updatedAccountDocument.getString("Profession"))) {
+        if (updatedAccountDocument.getString("Profession") != null && profanityFilter.checkProfanity(updatedAccountDocument.getString("Profession"))) {
             return Response.status(Response.Status.BAD_REQUEST).entity(new Document("error", "Profession is not appropiate.").toJson()).build();
         }
 
-        if (profanityFilter.checkProfanity(updatedAccountDocument.getString("PersonalQuote"))) {
+        if (updatedAccountDocument.getString("PersonalQuote") != null && profanityFilter.checkProfanity(updatedAccountDocument.getString("PersonalQuote"))) {
             return Response.status(Response.Status.BAD_REQUEST).entity(new Document("error", "Personal Quote is not appropiate.").toJson()).build();
         }
 

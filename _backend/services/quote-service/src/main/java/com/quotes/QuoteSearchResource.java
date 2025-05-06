@@ -20,7 +20,7 @@ import jakarta.ws.rs.core.Response;
 public class QuoteSearchResource {
 
     @Inject
-    MongoUtil mongo;
+    QuoteService quoteService;
 
     @GET
     @Path("/id/{quoteID}")
@@ -45,7 +45,7 @@ public class QuoteSearchResource {
             }
 
             ObjectId objectId = new ObjectId(quoteID);
-            String jsonQuote = mongo.getQuote(objectId);
+            String jsonQuote = quoteService.getQuote(objectId);
 
             if(jsonQuote != null) {
                 return Response.ok(jsonQuote).build();
@@ -109,7 +109,7 @@ public class QuoteSearchResource {
             }
             query = SanitizerClass.sanitize(query); //removes special characters
             //search database using Atlas Search
-            String result = mongo.searchQuote(query, filterUsed, filterBookmarked, filterUploaded, Included, Excluded, jwtString, isGuest);
+            String result = quoteService.searchQuote(query, filterUsed, filterBookmarked, filterUploaded, Included, Excluded, jwtString, isGuest);
             if(result == null) {
                 return Response.status(Response.Status.NOT_FOUND).entity("No quotes matched the search criteria").build();
             }
@@ -131,7 +131,7 @@ public class QuoteSearchResource {
             " is limited to 100 results")
     public Response getTopBookmarks() {
         try{
-            String result = mongo.getTopBookmarked();
+            String result = quoteService.getTopBookmarked();
             return Response.ok(result).build();
         } catch (Exception e) {
             return Response.status(Response.Status.CONFLICT).entity("Exception Occurred: "+e).build();
@@ -150,7 +150,7 @@ public class QuoteSearchResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getSharedBookmarked() {
         try{
-            String result = mongo.getTopShared();
+            String result = quoteService.getTopShared();
             return Response.ok(result).build();
         } catch (Exception e) {
             return Response.status(Response.Status.CONFLICT).entity("Exception Occurred: "+e).build();
@@ -176,7 +176,7 @@ public class QuoteSearchResource {
         }
 
         try {
-            String result = mongo.getTopFlagged();
+            String result = quoteService.getTopFlagged();
             return Response.ok(result).build();
         } catch (Exception e) {
             return Response.status(Response.Status.CONFLICT).entity("Exception Occurred: "+e).build();
@@ -194,7 +194,7 @@ public class QuoteSearchResource {
             ". It is sorted in descending order. Currently it is limited to 100 results")
     public Response getMostRecent() {
         try{
-            String result = mongo.getMostRecent();
+            String result = quoteService.getMostRecent();
             return Response.ok(result).build();
         } catch (Exception e) {
             return Response.status(Response.Status.CONFLICT).entity("Exception Occurred: "+e).build();
@@ -231,7 +231,7 @@ public class QuoteSearchResource {
             }
 
             ObjectId objectId = new ObjectId(userId);
-            String jsonQuotes = mongo.getQuotesByUser(objectId);
+            String jsonQuotes = quoteService.getQuotesByUser(objectId);
 
             return Response.ok(jsonQuotes).build();
         } catch (Exception e) {

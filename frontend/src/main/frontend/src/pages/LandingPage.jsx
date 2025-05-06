@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react"; 
+import { useState, useEffect, useContext, useRef } from "react"; 
 import "bootstrap/dist/css/bootstrap.min.css";
 import QuoteUploadModal from "../components/QuoteUploadModal";
 import Splash from "../components/Splash";
@@ -28,6 +28,13 @@ const LandingPage = () => {
       return () => clearTimeout(timer);
     }
   }, []);
+
+  const loginOverlayRef = useRef(null);
+  useEffect( () => {
+    if (showLogin && loginOverlayRef.current){
+      loginOverlayRef.current.focus();
+    }
+  }, [showLogin]);
 
   useEffect(() => {
     const message = localStorage.getItem("alertMessage");
@@ -65,7 +72,7 @@ const LandingPage = () => {
 
   return (
     <>
-      {showLogin && <LoginOverlay aria-label="Login Overlay" aria-live="assertive" setShowLogin={setShowLogin} setIsLoggedIn={setIsLoggedIn}/>}
+      {showLogin && <LoginOverlay ref={loginOverlayRef} showLogin={showLogin} setShowLogin={setShowLogin} setIsLoggedIn={setIsLoggedIn}/>}
       
       <Splash />
 

@@ -28,7 +28,7 @@ import java.util.Objects;
 public class QuotesUpdateBookmark {
 
     @Inject
-    MongoUtil mongo;
+    QuoteService quoteService;
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
@@ -56,7 +56,7 @@ public class QuotesUpdateBookmark {
             QuoteObject quote = objectMapper.readValue(rawJson, QuoteObject.class);
 
             ObjectId objectId = new ObjectId(quote.getId().toString());
-            String jsonQuote = mongo.getQuote(objectId);
+            String jsonQuote = quoteService.getQuote(objectId);
             QuoteObject oldQuote = objectMapper.readValue(jsonQuote, QuoteObject.class);
 
             quote = SanitizerClass.sanitizeQuote(quote);
@@ -64,7 +64,7 @@ public class QuotesUpdateBookmark {
                 return Response.status(Response.Status.CONFLICT).entity("Error when sanitizing quote, returned null").build();
             }
 
-            boolean updated = mongo.updateQuote(quote);
+            boolean updated = quoteService.updateQuote(quote);
 
             if(updated) {
                 JsonObject jsonResponse = Json.createObjectBuilder()

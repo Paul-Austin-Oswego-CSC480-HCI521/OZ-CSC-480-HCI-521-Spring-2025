@@ -1,5 +1,6 @@
 package com.notifications;
 
+import com.accounts.AccountService;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import io.github.cdimascio.dotenv.Dotenv;
@@ -18,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Testcontainers
 class NotificationServiceTest {
     static NotificationService notificationService;
+    static AccountService accountService;
 
     @Container
     private static final MongoDBContainer mongoDBContainer =
@@ -43,6 +45,9 @@ class NotificationServiceTest {
                 .append("Created_at", System.currentTimeMillis());
 
         notificationService.getNotificationsCollection().insertOne(notificationDoc);
+
+        MongoClient client = MongoClients.create(connectionString);
+        accountService = new AccountService(client, "Test", "Users");
 
     }
 

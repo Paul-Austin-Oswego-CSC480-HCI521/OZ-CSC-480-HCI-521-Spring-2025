@@ -4,9 +4,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.quotes.MongoUtil;
 import com.quotes.QuoteObject;
-import jakarta.json.Json;
-import jakarta.json.JsonArrayBuilder;
-import jakarta.json.JsonObjectBuilder;
+import com.quotes.QuoteService;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.*;
 import org.testcontainers.containers.MongoDBContainer;
@@ -20,8 +18,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Testcontainers
-public class MongoUtilTesting {
-    public static MongoUtil mongoUtil;
+public class QuoteServiceTesting {
+    public static QuoteService quoteService;
     public static QuoteObject quoteObject;
     ObjectId id;
     public static ArrayList<ObjectId> ids;
@@ -34,8 +32,9 @@ public class MongoUtilTesting {
     public static void setUp() {
         ids = new ArrayList<>();
         String connectionString = mongoDBContainer.getConnectionString();
-        System.out.println(connectionString);
-        mongoUtil = new MongoUtil(connectionString, "test");
+        MongoClient client = MongoClients.create(connectionString);
+
+        quoteService = new QuoteService(client, "test");
     }
 
     @BeforeEach
@@ -50,7 +49,7 @@ public class MongoUtilTesting {
         quoteObject.setTags(new ArrayList<>(Arrays.asList("tag1", "tag2")));
         quoteObject.setText("text");
         quoteObject.setCreator(creatorId);
-        id = mongoUtil.createQuote(quoteObject);
+        id = quoteService.createQuote(quoteObject);
         System.out.println(id);
         ids.add(id);
     }
@@ -58,7 +57,7 @@ public class MongoUtilTesting {
     @AfterEach
     public void afterEach() {
         for (ObjectId id : ids) {
-            mongoUtil.deleteQuote(id);
+            quoteService.deleteQuote(id);
         }
     }
 
@@ -73,7 +72,7 @@ public class MongoUtilTesting {
     @Order(2)
     public void testCreateQuoteWithIdAndText(){
         quoteObject.setText("test");
-        ids.add(mongoUtil.createQuote(quoteObject));
+        ids.add(quoteService.createQuote(quoteObject));
         assertEquals(3, ids.size());
     }
 
@@ -87,7 +86,7 @@ public class MongoUtilTesting {
         quoteObject.setAuthor("author");
         quoteObject.setText("");
         quoteObject.setCreator(objectId);
-        assertNull(mongoUtil.createQuote(quoteObject));
+        assertNull(quoteService.createQuote(quoteObject));
     }
 
     // just passing id and text
@@ -98,13 +97,13 @@ public class MongoUtilTesting {
     @Order(4)
     public void testCreateQuoteWithTextNull(){
         quoteObject.setText(null);
-        assertNull(mongoUtil.createQuote(quoteObject));
+        assertNull(quoteService.createQuote(quoteObject));
     }
 
     @Test
     @Order(5)
     public void testGetQuote(){
-        assertNotNull(mongoUtil.getQuote(id));
+        assertNotNull(quoteService.getQuote(id));
     }
 
 
@@ -112,14 +111,14 @@ public class MongoUtilTesting {
     @Test
     @Order(6)
     public void testGetQuoteswithRandomID(){
-        assertNull(mongoUtil.getQuote(new ObjectId()));
+        assertNull(quoteService.getQuote(new ObjectId()));
     }
 
     //checking when the id is null
     @Test
     @Order(7)
     public void testGetQuoteswithNullID(){
-        assertNull(mongoUtil.getQuote(null));
+        assertNull(quoteService.getQuote(null));
     }
 
     //checking when the creator is null
@@ -133,8 +132,8 @@ public class MongoUtilTesting {
         quoteObject.setAuthor("author");
         quoteObject.setText("trial");
         quoteObject.setCreator(null);
-        ObjectId id = mongoUtil.createQuote(quoteObject);
-        assertNull(mongoUtil.getQuote(id));
+        ObjectId id = quoteService.createQuote(quoteObject);
+        assertNull(quoteService.getQuote(id));
     }
 
 
@@ -150,7 +149,7 @@ public class MongoUtilTesting {
     public void testUpdateQuotes(){
         quoteObject.setText("this is a test");
         quoteObject.setAuthor("author2");
-        assertTrue(mongoUtil.updateQuote(quoteObject));
+        assertTrue(quoteService.updateQuote(quoteObject));
     }
 
 
@@ -159,7 +158,7 @@ public class MongoUtilTesting {
     @Order(10)
     public void testUpdateQuotesWithNull(){
         quoteObject = null;
-        assertFalse(mongoUtil.updateQuote(quoteObject));
+        assertFalse(quoteService.updateQuote(quoteObject));
     }
 
 
@@ -171,7 +170,7 @@ public class MongoUtilTesting {
         QuoteObject newQuoteObject = new QuoteObject();
         newQuoteObject.setId(new ObjectId());
         newQuoteObject.setAuthor("author3");
-        assertFalse(mongoUtil.updateQuote(newQuoteObject));
+        assertFalse(quoteService.updateQuote(newQuoteObject));
     }
 
 
@@ -181,6 +180,6 @@ public class MongoUtilTesting {
     @Order(12)
     public void testUpdateQuotesWithNullId(){
         quoteObject.setId(null);
-        assertFalse(mongoUtil.updateQuote(quoteObject));
+        assertFalse(quoteService.updateQuote(quoteObject));
     }
 }

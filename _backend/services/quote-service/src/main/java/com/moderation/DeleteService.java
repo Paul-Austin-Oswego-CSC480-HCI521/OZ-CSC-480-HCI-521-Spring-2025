@@ -7,6 +7,9 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.DeleteResult;
 import com.quotes.QuoteObject;
 import com.quotes.UserClient;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.client.*;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
@@ -16,15 +19,20 @@ import org.bson.types.ObjectId;
 
 import static com.mongodb.client.model.Filters.eq;
 
+@RequestScoped
 public class DeleteService {
 
-    public static MongoClient client;
-    public static MongoDatabase moderationDB;
-    public static MongoCollection<Document> deletedCollection;
-    public static MongoCollection<Document> reportsCollection;
+    @Inject
+    private MongoClient client;
 
-    public DeleteService() {
-        client = MongoClients.create(System.getenv("CONNECTION_STRING"));
+    private MongoDatabase moderationDB;
+    private MongoCollection<Document> deletedCollection;
+    private MongoCollection<Document> reportsCollection;
+
+    public DeleteService() {}
+
+    @PostConstruct
+    public void init() {
         moderationDB = client.getDatabase("Moderation");
         deletedCollection = moderationDB.getCollection("Deleted");
         reportsCollection = moderationDB.getCollection("Reports");

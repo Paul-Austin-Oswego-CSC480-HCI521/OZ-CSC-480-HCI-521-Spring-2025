@@ -33,10 +33,13 @@ import java.util.Map;
 public class QuoteDeleteResource {
 
     @Inject
-    MongoUtil mongo;
+    QuoteService quoteService;
 
     @Inject 
     private UserClient userClient;
+
+    @Inject
+    private DeleteService deleteService;
 
     @DELETE
     @Path("/{quoteId}")
@@ -83,7 +86,7 @@ public class QuoteDeleteResource {
             }
 
             ObjectId objectId = new ObjectId(quoteID);
-            String jsonQuote = mongo.getQuote(objectId);
+            String jsonQuote = quoteService.getQuote(objectId);
             QuoteObject quote;
             try {
                 ObjectMapper objectMapper = new ObjectMapper();
@@ -106,7 +109,6 @@ public class QuoteDeleteResource {
             }
 
             if (group.equals("admin")) {
-                DeleteService deleteService = new DeleteService();
                 Document deleteQuoteDoc = new Document("author", quote.getAuthor())
                         .append("quote", quote.getText())
                         .append("creator", quote.getCreator())
@@ -124,7 +126,7 @@ public class QuoteDeleteResource {
             if(!SanitizerClass.validObjectId(quoteID)) {
                 return Response.status(Response.Status.BAD_REQUEST).entity("Given ID is not valid ObjectId").build();
             }
-            boolean result = mongo.deleteQuote(objectId);
+            boolean result = quoteService.deleteQuote(objectId);
             if(result) {
                 Response findAccount = userClient.search(accountID);
             if (findAccount.getStatus() == Response.Status.OK.getStatusCode()) {
