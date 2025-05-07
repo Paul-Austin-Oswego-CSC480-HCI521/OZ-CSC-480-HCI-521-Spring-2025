@@ -58,46 +58,47 @@ const TopNavigation = () => {
         style={{ backgroundColor: "#fffcf4" }}
       >
         <Link className="navbar-brand pl-2" to="/">
-          <img src={logo} alt="Logo" style={{ height: "40px" }} /> 
+          <img src={logo} alt="Logo" style={{ height: "40px" }} aria-label="Home Button"/> 
         </Link>
         <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span className="navbar-toggler-icon"></span>
+          <span className="navbar-toggler-icon" aria-label="Navigation Collapse Button"></span>
         </button>
         <div className="collapse navbar-collapse pr-2" id="navbarNav">
           <ul className="navbar-nav ml-auto">
             <li className={`nav-item ${isActive("/") ? "active" : ""}`}>
-              <Link className="nav-link" to="/">Home</Link>
+              <Link className="nav-link" to="/" aria-label="Home page link">Home</Link>
             </li>
             <li className={`nav-item ${isActive("/add-quote") ? "active" : ""}`}>
               <span 
                 className="nav-link" 
                 style={{ cursor: "pointer" }} 
                 onClick={() => setIsModalOpen(true)}
+                aria-label="Add Quote Link"
               >
                 Add Quote
               </span>
             </li>
             { user ? (
               <li className={`nav-item ${isActive("/my-collection") ? "active" : ""}`}>
-                <Link className="nav-link" to="/my-collection">My Collection</Link> {/* Updated path */}
+                <Link className="nav-link" to="/my-collection" aria-label="My Collection Link">My Collection</Link> {/* Updated path */}
               </li>
             ) : (
               <></>
             )}
             {user && user.admin === 1 && (
               <li className={`nav-item ${isActive("/admin") ? "active" : ""}`}>
-                <Link className="nav-link" to="/admin">Admin Panel</Link>
+                <Link className="nav-link" to="/admin" aria-label="Admin Panel Link">Admin Panel</Link>
               </li>
             )}
             { !user ? (
               <li className="nav-item">
-                <button className="btn btn-dark" onClick={() => navigate("/login")}>Sign in</button>
+                <button className="btn btn-dark" onClick={() => navigate("/login")} aria-label="Sign In Link">Sign in</button>
               </li>
             ) : (
               <></>
 
             )}
-            <li className="nav-item ml-3 mr-3" style={{ position: 'relative' }} title={user?.Username || "Click sign in to sign in"}>
+            <li className="nav-item ml-3 mr-3" style={{ position: 'relative' }} title={user?.Username || "Click sign in to sign in"} aria-label="User Profile Link">
               <div style={{ cursor: "pointer" }} 
               onClick={() => { 
                 setIsNotificationOpen(!isNotificationOpen);
