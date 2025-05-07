@@ -2,17 +2,17 @@
 # of the database running on your machine using the follwing
 # commands in this directory
 #
-# `docker volume create --name quotes_db`
-# `docker compose up -d`
+# docker volume create --name quotes_db
+# docker compose up -d
 
 name: quotable
 
 services:
   # For GUI, comment this section out when building and run npm run dev in /frontend/src/main/frontend to debug changes.
   frontend:
-    build: ./frontend/src/main/frontend
-    ports:
-      - 9080:80
+   build: ./frontend/src/main/frontend
+   ports:
+     - 9080:80
 
   quotes-service:
     build: ./_backend/services/quote-service
@@ -20,7 +20,7 @@ services:
       - 9082:9082
     env_file: .env
     environment:
-      CONNECTION_STRING: "mongodb://user:password@quotes-database:27017/?directConnection=true"
+      CONNECTION_STRING: "mongodb+srv://admin:Eqicu2vhXtweVCEL@csc480cluster.ldmco.mongodb.net/?retryWrites=true&w=majority"
     depends_on:
       - quotes-database
 
@@ -33,7 +33,7 @@ services:
       - 9081:9081
     env_file: .env
     environment:
-      CONNECTION_STRING: "mongodb://user:password@quotes-database:27017/?directConnection=true"
+      CONNECTION_STRING: "mongodb+srv://admin:Eqicu2vhXtweVCEL@csc480cluster.ldmco.mongodb.net/?retryWrites=true&w=majority"
     depends_on:
       - quotes-database
 
